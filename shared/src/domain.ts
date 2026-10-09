@@ -82,13 +82,93 @@ export function staleReason(date: string | null, referenceDate: string): string 
   return days < 0 ? '미래 확인일 오류' : days > 90 ? '90일 초과·확인 필요' : null;
 }
 export function vulnerability(
-  h: Pick<Household, 'age' | 'mobility' | 'devices' | 'phoneKind' | 'cohabitant'>,
+  h: Pick<Household, 'age' | 'mobility' | 'devices' | 'phoneKind' | 'cohabitant'> &
+    Partial<Pick<Household, 'originalNote' | 'healthNotes'>> & {
+      noteExtraction?: import('./household-notes.ts').StructuredHouseholdNotes;
+    },
 ): number {
   let v = h.age >= 80 ? 2 : 1;
   if (h.mobility === '보조' || h.phoneKind === '없음' || h.devices.includes('휠체어'))
     v = Math.max(v, 3);
   if (h.mobility === '와상' || h.mobility === '불명' || h.devices.includes('산소')) v = 4;
   if (h.cohabitant === '독거' && v === 2) v = 3;
+  const healthPatterns = new Map([
+      ['dementia', /치매|\bdementia\b/giu],
+      ['dialysis', /투석|\bdialysis\b/giu],
+      ['insulin', /인슐린|\binsulin\b/giu],
+      ['visual_impairment', /시각\s*장애|시력\s*장애/giu],
+    ]),
+    facts = h.noteExtraction?.evidence?.vulnerability;
+  // Stored extraction grades can describe old mobility. Only current, positive health evidence
+  // contributes here; the human-edited mobility and equipment above remain authoritative.
+  if (
+    Array.isArray(facts) &&
+    facts.length <= 512 &&
+    facts.some((fact) => {
+      if (
+        !fact ||
+        typeof fact.value !== 'string' ||
+        !healthPatterns.has(fact.value) ||
+        typeof fact.quote !== 'string' ||
+        fact.quote.length === 0 ||
+        fact.quote.length > 10000 ||
+        !Number.isSafeInteger(fact.start) ||
+        !Number.isSafeInteger(fact.end) ||
+        fact.start < 0 ||
+        fact.end <= fact.start ||
+        fact.end - fact.start !== fact.quote.length
+      )
+        return false;
+      let source: string | undefined;
+      if (fact.source === 'note' && fact.index === null) source = h.originalNote;
+      else if (
+        fact.source === 'health' &&
+        Array.isArray(h.healthNotes) &&
+        h.healthNotes.length <= 50 &&
+        Number.isSafeInteger(fact.index) &&
+        fact.index !== null &&
+        fact.index >= 0 &&
+        fact.index < h.healthNotes.length
+      )
+        source = h.healthNotes[fact.index];
+      if (
+        typeof source !== 'string' ||
+        source.length > 10000 ||
+        fact.end > source.length ||
+        source.slice(fact.start, fact.end) !== fact.quote
+      )
+        return false;
+      const separators = /[,;。\n/.!?？]/gu,
+        before = [...source.slice(0, fact.start).matchAll(separators)],
+        clauseStart = before.length ? before.at(-1)!.index! + 1 : 0,
+        next = source.slice(fact.start).search(separators),
+        clauseEnd = next === -1 ? source.length : fact.start + next + 1,
+        clause = source.slice(clauseStart, clauseEnd);
+      if (
+        fact.end > clauseEnd ||
+        /[?？]|예정|계획|의심|추정|가능성|불확실|과거|예전|이력|중단|무시(?:하|해)|명령\s*[:：]|지시\s*[:：]|(?:실행|적용|변경|설정|판정|출력|응답|추정)(?:하라|해라|하세요|해\s*줘|하시오)|\b(?:ignore|system|assistant|prompt|execute|eval|no|not|without|denies|denied)\b/iu.test(
+          clause,
+        )
+      )
+        return false;
+      const pattern = healthPatterns.get(fact.value)!;
+      for (const match of fact.quote.matchAll(pattern)) {
+        const start = fact.start + match.index! - clauseStart,
+          left = clause.slice(0, start),
+          right = clause.slice(start + match[0].length);
+        if (
+          /(?:안|없는|아닌|미사용)\s*$/u.test(left) ||
+          /^\s*(?:(?:를|을|은|는|이|가|도)\s*)?(?:(?:필요|사용|보유|투여|복용|치료|진단받|진단을\s*받|진단|증상|여부|받)\s*)?(?:없|없이|아니|아닌|아님|아닙|아냐|미사용|불필요|불명|미확인|확인\s*필요|모름|모르|못|않|안\s*(?:함|사용)|(?:하지|지)\s*(?:않|못)|absent\b|negative\b|unknown\b)/iu.test(
+            right,
+          )
+        )
+          continue;
+        return true;
+      }
+      return false;
+    })
+  )
+    v = Math.max(v, 3);
   return v;
 }
 export function attentionDetail(s: HouseholdStatus): string {

@@ -1,3 +1,4 @@
+import type { StructuredHouseholdNotes } from './household-notes.ts';
 export type Status =
   | 'before'
   | 'queued'
@@ -31,6 +32,7 @@ export interface Household {
   priorityGrade: number;
   mobility: string;
   healthNotes: string[];
+  noteExtraction?: StructuredHouseholdNotes;
   zoneId: string;
   addressLabel: string;
   phoneKind: string;

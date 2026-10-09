@@ -18,6 +18,7 @@ import {
   type SourceState,
 } from './monitoring.ts';
 import { appendSourceAttempt, createReplaySourceRecord, createSourceRecord } from './sources.ts';
+import { parseHouseholdNotes } from './household-notes.ts';
 export type PlanItem = ReturnType<typeof orderedHouseholds>[number];
 export interface Plan {
   id: string;
@@ -808,6 +809,30 @@ export class Runtime {
         synthetic: true,
       });
       this.log('30초 모의 확인 저장·출처별 이력 보존', 'human', h.id);
+    } else if (action === 'notes-restructure') {
+      this.requireRevision(input.revision);
+      const h = this.household(String(input.id));
+      requireThat(
+        !this.state.trips.some((trip) => trip.householdId === h.id),
+        '현재 배차 임무의 지원 조건은 담당자 임무 검토 후 수정하세요.',
+      );
+      const result = parseHouseholdNotes({
+        note: h.originalNote,
+        health: h.healthNotes,
+        mobility: h.mobility,
+        age: h.age,
+      });
+      h.noteExtraction = result;
+      h.mobility = {
+        independent: '자력',
+        assisted: '보조',
+        bedridden: '와상',
+        unknown: '불명',
+      }[result.mobility];
+      h.devices = [...new Set([...h.devices, ...result.devices])];
+      h.priorityGrade = vulnerability(h);
+      this.reconcile();
+      this.log('담당자 원문 규칙 재구조화 적용(모의)·근거/불명 보존·확인일 유지', 'human', h.id);
     } else if (action === 'edit') {
       const h = this.household(String(input.id));
       this.requireRevision(input.revision);

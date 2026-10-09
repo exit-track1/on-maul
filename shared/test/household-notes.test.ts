@@ -175,6 +175,69 @@ test('questions, plans, suspicions and historical use do not establish current f
   assert.equal(parseHouseholdNotes({ note: '자력 확인 필요', age: 60 }).mobility, 'unknown');
 });
 
+test('complex health negation keeps independent grade one and unknown mobility grade four', () => {
+  for (const note of [
+    '치매 진단받지않음',
+    '치매 진단을 받지 않음',
+    '인슐린을 투여하지 않음',
+    '투석을 받지않음',
+    '시각장애는 아닙니다',
+    'no dementia',
+    'insulin not used',
+    'dialysis not required',
+  ]) {
+    for (const source of [{ note }, { health: [note] }]) {
+      const independent = assertQuoted({ ...source, mobility: '자력', age: 70 });
+      assert.equal(independent.mobility, 'independent', note);
+      assert.equal(independent.cognition, 'unknown', note);
+      assert.equal(independent.vulnerability, 1, note);
+      assert.equal(independent.evidence.vulnerability, undefined, note);
+      const unknown = assertQuoted({ ...source, age: 70 });
+      assert.equal(unknown.mobility, 'unknown', note);
+      assert.equal(unknown.vulnerability, 4, note);
+      assert.equal(unknown.estimated, true);
+    }
+  }
+});
+
+test('extended negation is local and retains separate positive health and device facts', () => {
+  for (const note of [
+    '치매 진단받지않음, 산소 씀',
+    '치매 진단받지않음 산소 씀',
+    'no dementia and oxygen',
+  ]) {
+    const parsed = assertQuoted({ note, mobility: '자력', age: 70 });
+    assert.deepEqual(parsed.devices, ['산소'], note);
+    assert.equal(parsed.cognition, 'unknown', note);
+    assert.equal(parsed.vulnerability, 4, note);
+    assert.ok(!parsed.evidence.vulnerability?.some((fact) => fact.value === 'dementia'));
+  }
+  const wheelchair = assertQuoted({
+    note: '인슐린 투여하지않음, 휠체어 사용',
+    mobility: '자력',
+    age: 70,
+  });
+  assert.deepEqual(wheelchair.devices, ['휠체어']);
+  assert.equal(wheelchair.vulnerability, 3);
+  assert.ok(!wheelchair.evidence.vulnerability?.some((fact) => fact.value === 'insulin'));
+  const dialysis = assertQuoted({
+    note: '산소 장비 사용하지않음, 투석 중',
+    mobility: '자력',
+    age: 70,
+  });
+  assert.deepEqual(dialysis.devices, []);
+  assert.equal(dialysis.vulnerability, 3);
+  assert.ok(dialysis.evidence.vulnerability?.some((fact) => fact.value === 'dialysis'));
+  const positive = assertQuoted({
+    note: '치매 진단받음, 산소 장비 사용',
+    mobility: '자력',
+    age: 70,
+  });
+  assert.deepEqual(positive.devices, ['산소']);
+  assert.equal(positive.cognition, 'dementia');
+  assert.equal(positive.vulnerability, 4);
+});
+
 test('conflicting mobility remains unknown and contradictory equipment retains the safer explicit need', () => {
   const parsed = assertQuoted({ note: '와상, 산소 씀, 장비 없음', mobility: '자력', age: 60 });
   assert.equal(parsed.mobility, 'unknown');

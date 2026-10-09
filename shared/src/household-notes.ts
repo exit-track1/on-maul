@@ -168,8 +168,10 @@ function observations<T extends string>(
           const before = text.slice(0, match.index);
           const after = text.slice(match.index + match[0].length);
           if (
-            /(?:안|없는|아닌|미사용)\s*$/u.test(before) ||
-            /^\s*(?:(?:장비|발생기|보조)?(?:를|을|은|는|이|가|도)?\s*)?(?:(?:필요|사용|보유|쓰|써)\s*)?(?:없|없이|아니|아닌|아님|미사용|불필요|불명|미확인|확인\s*필요|모름|모르|못|않|안\s*(?:함|씀|쓰|쓴|써|사용)|(?:하지|지)\s*(?:않|못))/u.test(
+            /(?:안|없는|아닌|미사용)\s*$|\b(?:no|not|without|denies|denied)(?:\s+(?:require|use|have|need|receive|signs|of|on)){0,3}\s*$/iu.test(
+              before,
+            ) ||
+            /^\s*(?:(?:장비|발생기|보조)?(?:를|을|은|는|이|가|도)?\s*)?(?:(?:필요|사용|보유|투여|복용|치료|진단받|진단을\s*받|진단|증상|여부|받|쓰|써)\s*)?(?:없|없이|아니|아닌|아님|아닙|아냐|미사용|불필요|불명|미확인|확인\s*필요|모름|모르|못|않|안\s*(?:함|씀|쓰|쓴|써|사용)|(?:하지|지)\s*(?:않|못)|absent\b|negative\b|unknown\b|not\b)/iu.test(
               after,
             )
           )
