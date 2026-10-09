@@ -130,6 +130,8 @@ API 계약은 [OpenAI Live WebSocket](https://developers.openai.com/api/docs/gui
 
 ### 2026-10-09 통화 분기 검증
 
-실제 OpenAI API를 사용하는 `node scripts/check-resident-classification.ts --run`은 가상 텍스트 6종에서 이동 가능·이동 불가·대피 거부·몸 상태만의 응답·목적지 질문을 분류합니다. `node scripts/check-phone-greeting.ts --run`은 무음 입력만으로 첫 질문 음성 생성과 지시 수락을 확인합니다. `node scripts/check-phone-opening.ts --run`은 실제 Live 음성 생성과 로컬 재생 브리지를 사용해 수신 이벤트 2초 후 첫 음성 패킷을 검증합니다. 세 검사는 OpenAI API 요금이 발생하며 Telnyx 실제 발신을 수행하지 않습니다. 국제전화 안내 종료 시점이나 실제 휴대전화 재생은 별도 검증 대상입니다.
+실제 OpenAI API를 사용하는 `node scripts/check-resident-classification.ts --run`은 가상 텍스트 8종에서 이동 가능·이동 불가·대피 거부·몸 상태만의 응답·목적지 질문을 분류합니다. `node scripts/check-phone-greeting.ts --run`은 무음 입력만으로 첫 질문 음성 생성과 지시 수락을 확인합니다. `node scripts/check-phone-opening.ts --run`은 실제 Live 음성 생성과 로컬 재생 브리지를 사용해 수신 이벤트 2초 후 첫 음성 패킷을 검증합니다. 세 검사는 OpenAI API 요금이 발생하며 Telnyx 실제 발신을 수행하지 않습니다. 국제전화 안내 종료 시점이나 실제 휴대전화 재생은 별도 검증 대상입니다.
 
 2026-10-09 지연 조정: 주민 응답 분류는 `reasoning.effort=low`를 명시합니다. 입력 전사 대기는 900ms에서 180ms로, 입력 음성 종료 감지는 무음 300ms에서 160ms로 줄였습니다. 모델 응답은 짧은 필드와 공통 원문 인용 하나로 받아 내부의 사실별 근거로 검증합니다. 첫 질문은 위치 대신 산불 대피소 이동 가능 여부입니다.
+
+2026-10-09 전사 분할 회귀 수정: 답변 분류가 끝날 때까지 원문 버퍼를 보존합니다. 추론 중 새 조각이 들어오면 이전 결과를 무효화하고 전체 답변으로 다시 분류하며, 동시에 분류를 여러 개 실행하지 않습니다. 미디어 stop·close는 최대 2초 동안 서명된 최종 종료를 기다립니다. 정상 종료가 확인되면 연결 오류를 남기지 않고, 확인되지 않으면 기존 오류·종료 요청과 발신 잠금을 유지합니다.

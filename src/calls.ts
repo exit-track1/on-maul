@@ -88,6 +88,7 @@ type Run = {
   dialPending: boolean;
   hangupSent: boolean;
   generation: number;
+  inputProcessing: boolean;
   buffer: string;
   bufferQuestion: string;
   questionLine: string;
@@ -113,6 +114,7 @@ type Run = {
   maxTimer?: NodeJS.Timeout;
   inputTimer?: NodeJS.Timeout;
   mediaTimer?: NodeJS.Timeout;
+  mediaStopTimer?: NodeJS.Timeout;
   farewellTimer?: NodeJS.Timeout;
   farewellDeadline?: NodeJS.Timeout;
   silenceTimer?: NodeJS.Timeout;
@@ -206,6 +208,7 @@ export class CallManager extends EventEmitter {
       dialPending: false,
       hangupSent: false,
       generation: 0,
+      inputProcessing: false,
       buffer: '',
       bufferQuestion: '',
       questionLine: residentQuestions.location,
@@ -562,8 +565,8 @@ export class CallManager extends EventEmitter {
         run.view.status,
         p.state === 'ringing' ? '통신사 벨소리 상태 확인' : '통신사 발신 시작 확인',
       );
-    } else if (data.event_type === 'streaming.failed' || data.event_type === 'streaming.stopped')
-      this.mediaFault(run, data.event_type);
+    } else if (data.event_type === 'streaming.stopped') this.mediaEnded(run, data.event_type);
+    else if (data.event_type === 'streaming.failed') this.mediaFault(run, data.event_type);
   }
   mediaAllowed(token: string) {
     const run = this.current;
@@ -640,11 +643,21 @@ export class CallManager extends EventEmitter {
         run.view.completion.playbackConfirmed = true;
         this.log(run, 'playback_confirmed', 'Telnyx 종료 안내 재생 확인');
         void this.stop('완료 안내 재생 확인').catch(() => {});
-      } else if (event.event === 'stop' || event.event === 'error')
-        this.mediaFault(run, 'media_stream_stopped');
+      } else if (event.event === 'stop') this.mediaEnded(run, 'media_stream_stopped');
+      else if (event.event === 'error') this.mediaFault(run, 'media_stream_error');
     });
     socket.on('error', () => this.mediaFault(run, 'media_socket_failed'));
-    socket.on('close', () => this.mediaFault(run, 'media_disconnected'));
+    socket.on('close', () => this.mediaEnded(run, 'media_disconnected'));
+  }
+  mediaEnded(run: Run, code: string) {
+    if (!this.valid(run) || run.mediaStopTimer) return;
+    // Telnyx can stop media before delivering the signed normal hangup webhook.
+    run.generation++;
+    clearTimeout(run.inputTimer);
+    run.bridge?.dispose();
+    run.view.mediaConnected = false;
+    this.log(run, 'media_ended', '음성 스트림 종료. 통신사 최종 종료 이벤트를 확인 중입니다.');
+    run.mediaStopTimer = this.after(run, 2000, () => this.mediaFault(run, code));
   }
   activate(run: Run) {
     if (!this.valid(run) || !run.view.answerObserved || !run.bridge || !run.live?.sessionId) return;
@@ -837,17 +850,20 @@ export class CallManager extends EventEmitter {
       run.view.completion.correction += text;
       this.publish(run);
     }
-    const generation = run.generation;
     const consume = () => {
-      if (run.bridge?.inputSpeaking) {
+      if (!this.valid(run) || run.bridge?.stopped || run.view.completion?.status === 'reported')
+        return;
+      if (run.bridge?.inputSpeaking || run.inputProcessing) {
         run.inputTimer = this.after(run, 40, consume);
         return;
       }
+      const generation = run.generation;
+      // Retain the entire unaccepted reply while inference runs. Late transcript fragments
+      // invalidate this snapshot, then the next request includes both the prefix and suffix.
       const utterance = run.buffer;
       const spokenQuestion = run.bufferQuestion;
-      run.buffer = '';
-      if (run.view.completion?.status === 'reported') return;
       if (greetingOnly(utterance)) {
+        run.buffer = '';
         this.log(run, 'greeting_received', '수신자 인사는 답변으로 분류하지 않습니다.');
         return;
       }
@@ -855,6 +871,7 @@ export class CallManager extends EventEmitter {
         this.valid(run) &&
         generation === run.generation &&
         run.view.completion?.status !== 'reported';
+      run.inputProcessing = true;
       const evacuation =
         !run.view.assessment || /도착|완료|대피했/.test(utterance)
           ? run.classify(
@@ -865,16 +882,21 @@ export class CallManager extends EventEmitter {
             )
           : Promise.resolve(null);
       void evacuation
-        .then((report) => {
+        .then(async (report) => {
           if (!valid()) return;
-          if (report && utterance.includes(report.evidence)) this.complete(run, report);
-          else void this.assessAnswer(run, utterance, spokenQuestion, valid);
+          if (report && utterance.includes(report.evidence)) {
+            run.buffer = '';
+            this.complete(run, report);
+          } else await this.assessAnswer(run, utterance, spokenQuestion, valid);
         })
-        .catch(() => {
+        .catch(async () => {
           if (valid()) {
             this.log(run, 'classification_failed', '대피 완료 판단 실패. 통화를 유지합니다.');
-            void this.assessAnswer(run, utterance, spokenQuestion, valid);
+            await this.assessAnswer(run, utterance, spokenQuestion, valid);
           }
+        })
+        .finally(() => {
+          run.inputProcessing = false;
         });
     };
     run.inputTimer = this.after(run, run.live?.controlled ? answerSettleMs : 1500, consume);
@@ -888,9 +910,13 @@ export class CallManager extends EventEmitter {
         structuredClone(run.view.assessment),
         question,
       );
-      if (valid()) this.advanceAssessment(run, text, answer, question);
+      if (valid()) {
+        run.buffer = '';
+        this.advanceAssessment(run, text, answer, question);
+      }
     } catch {
       if (valid()) {
+        run.buffer = '';
         this.log(
           run,
           'resident_classification_failed',

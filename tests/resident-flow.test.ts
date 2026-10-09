@@ -386,6 +386,78 @@ test('발화 전 짧은 답 문맥은 공백이며 낡은 비동기 분류·분�
     t.mock.timers.reset();
   }
 });
+test('지연된 전사 조각은 분류 중에도 앞 문장을 보존하고 한 번씩 분류해 구조 안내로 끝낸다', async (t) => {
+  const s = setup();
+  t.mock.timers.enable({ apis: ['setTimeout', 'Date'] });
+  try {
+    await s.manager.start(params);
+    media(s.manager);
+    hook(s.manager, 'call.answered');
+    t.mock.timers.tick(2000);
+    const classified: string[] = [];
+    let resolveFirst!: (answer: ResidentAnswer) => void;
+    s.manager.current.assess = async (_config, text) => {
+      classified.push(text);
+      if (classified.length === 1) return new Promise((resolve) => (resolveFirst = resolve));
+      return facts(text, { mobility: 'needs_help', condition: 'uncomfortable' });
+    };
+    user(s.sockets[0], '집에 있는데요, 다리가 너무 움직이지');
+    t.mock.timers.tick(180);
+    await flush();
+    user(s.sockets[0], ' 않아요');
+    t.mock.timers.tick(180);
+    await flush();
+    assert.equal(classified.length, 1, '기존 분류가 끝날 때까지 병렬 분류를 시작하지 않는다');
+    resolveFirst(unknownResidentAnswer());
+    await flush();
+    t.mock.timers.tick(40);
+    await flush();
+    assert.deepEqual(classified, [
+      '집에 있는데요, 다리가 너무 움직이지',
+      '집에 있는데요, 다리가 너무 움직이지 않아요',
+    ]);
+    assert.equal(s.manager.public().completion!.kind, 'rescue');
+    assert.equal(s.manager.public().completion!.closingText, rescueFarewell);
+    assert.equal(s.manager.public().assessment!.answers[0].text, classified[1]);
+    assert.equal(s.sockets[0].sent.filter((e) => e.content?.includes('현재 산불로')).length, 1);
+  } finally {
+    s.cleanup();
+    t.mock.timers.reset();
+  }
+});
+test('미디어 stop·close 직후 정상 최종 종료는 연결 오류가 아니며 종료 미확인은 잠금을 유지한다', async (t) => {
+  for (const confirmed of [true, false]) {
+    const s = setup();
+    t.mock.timers.enable({ apis: ['setTimeout', 'Date'] });
+    try {
+      await s.manager.start(params);
+      const socket = media(s.manager);
+      hook(s.manager, 'call.answered');
+      t.mock.timers.tick(2000);
+      socket.push({ event: 'stop' });
+      socket.close();
+      assert.equal(s.manager.public().error, null);
+      assert.equal(s.manager.public().blocked, true);
+      t.mock.timers.tick(300);
+      if (confirmed)
+        hook(s.manager, 'call.hangup', 'normal-end', { hangup_cause: 'normal_clearing' });
+      t.mock.timers.tick(1700);
+      await flush();
+      if (confirmed) {
+        assert.equal(s.manager.public().status, 'ended');
+        assert.equal(s.manager.public().error, null);
+        assert.equal(s.requests.length, 1);
+      } else {
+        assert.equal(s.manager.public().error!.code, 'media_stream_stopped');
+        assert.equal(s.manager.public().blocked, true);
+        assert.equal(s.requests.length, 2);
+      }
+    } finally {
+      s.cleanup();
+      t.mock.timers.reset();
+    }
+  }
+});
 test('무응답 45초는 구조 대신 재확인, 무음 delta가 mark를 연기하지 않고 60초에 종료', async (t) => {
   const s = setup();
   t.mock.timers.enable({ apis: ['setTimeout', 'Date'] });

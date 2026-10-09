@@ -14,6 +14,12 @@ const cases = [
   { name: 'healthy_can_move', text: '몸은 괜찮고 혼자 걸어서 갈 수 있어요', expected: 'moving' },
   { name: 'no_transport', text: '몸은 괜찮지만 이동 수단이 없어서 못 가요', expected: 'rescue' },
   { name: 'cannot_walk', text: '다리가 불편해서 움직일 수 없어요', expected: 'rescue' },
+  {
+    name: 'legs_cannot_move',
+    text: '집에 있는데요, 다리가 너무 움직이지 않아요',
+    expected: 'rescue',
+  },
+  { name: 'legs_correction', text: '다리가 너무 움직이지 않는다니까요', expected: 'rescue' },
   { name: 'refused', text: '집을 두고 떠날 수 없어요. 대피 안 할래요', expected: 'refused' },
   { name: 'direction_question', text: '어디로 가야 돼?', expected: 'review' },
 ];
