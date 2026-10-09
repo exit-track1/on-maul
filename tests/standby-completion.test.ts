@@ -5,10 +5,13 @@ import { defaults } from '../src/config.ts';
 import {
   classifyStandbyCompletion,
   standbyFarewell,
+  standbyQuestions,
   type StandbyCompletion,
 } from '../src/standby-completion.ts';
 import type { Transcript } from '../src/evacuation.ts';
-import { setup, media, hook, user, output, flush } from './helpers.ts';
+import type WebSocket from 'ws';
+import { setup, media, hook, user, output, flush, FakeSocket } from './helpers.ts';
+import { muLawRms } from '../src/media.ts';
 
 const context: Transcript[] = [
   { speaker: 'assistant', text: '가상의 구조 요청에 참여 가능하신가요?' },
@@ -26,12 +29,102 @@ const ready: StandbyCompletion = {
   evidence: latest,
   confidence: 1,
 };
+test('대기조 첫 질문 음성을 준비하지 못하면 실제 발신을 요청하지 않는다', async () => {
+  const s = setup();
+  try {
+    s.manager.factory = () => {
+      const socket = new FakeSocket();
+      socket.autoOpening = false;
+      queueMicrotask(() => socket.emit('open'));
+      return socket as unknown as WebSocket;
+    };
+    const view = await s.manager.start({ consent: true, scenario: 'standby' });
+    assert.equal(view.status, 'failed');
+    assert.equal(view.error?.code, 'opening_audio_timeout');
+    assert.equal(s.requests.length, 0);
+  } finally {
+    s.cleanup();
+  }
+});
 function response(result: StandbyCompletion) {
   return Response.json({
     status: 'completed',
     output: [{ content: [{ type: 'output_text', text: JSON.stringify(result) }] }],
   });
 }
+test('대기조도 발신 전에 음성을 준비하고 수신자 발화 없이 수신 2초 뒤 첫 질문을 한 번 재생한다', async (t) => {
+  for (const mediaBeforeAnswer of [true, false]) {
+    const s = setup();
+    t.mock.timers.enable({ apis: ['setTimeout', 'Date'] });
+    try {
+      await s.manager.start({ consent: true, scenario: 'standby' });
+      assert.equal(s.manager.current.openingReady, true);
+      assert.deepEqual(s.sockets[0].sent[0].session.delegation, { type: 'client' });
+      assert.equal(s.manager.public().transcript.length, 0);
+      let ms = mediaBeforeAnswer ? media(s.manager) : undefined;
+      hook(s.manager, 'call.answered');
+      t.mock.timers.tick(1999);
+      assert.equal(s.manager.current.bridge?.active ?? false, false);
+      assert.equal(ms?.sent.filter((e) => e.event === 'media').length ?? 0, 0);
+      t.mock.timers.tick(1);
+      if (!ms) ms = media(s.manager);
+      assert.equal(s.manager.public().transcript[0].text, standbyQuestions.participation);
+      assert.equal(s.manager.public().transcript.filter((t) => t.speaker === 'user').length, 0);
+      t.mock.timers.tick(120);
+      s.manager.current.bridge!.tick();
+      assert.ok(
+        ms.sent.some(
+          (e) => e.event === 'media' && muLawRms(Buffer.from(e.media.payload, 'base64')) > 100,
+        ),
+      );
+      hook(s.manager, 'call.answered', 'duplicate-answer');
+      assert.equal(
+        s.manager.public().events.filter((e) => e.type === 'opening_playback').length,
+        1,
+      );
+    } finally {
+      s.cleanup();
+      t.mock.timers.reset();
+    }
+  }
+});
+test('대기조 참여·차량·준비 시간 질문을 앱이 진행하고 준비 완료 뒤 종료 안내로 마친다', async (t) => {
+  const s = setup();
+  t.mock.timers.enable({ apis: ['setTimeout', 'Date'] });
+  try {
+    await s.manager.start({ consent: true, scenario: 'standby' });
+    media(s.manager);
+    hook(s.manager, 'call.answered');
+    t.mock.timers.tick(2000);
+    const replies = ['참여 가능합니다', '렉스턴 차량 이용할게요', latest];
+    s.manager.current.assessStandby = async (_config, text) => ({
+      state: text === latest ? 'ready' : 'pending',
+      participationEvidence: replies[0],
+      vehicleEvidence: text === replies[0] ? '' : replies[1],
+      readinessEvidence: text === latest ? latest : '',
+      evidence: text,
+      confidence: 1,
+    });
+    for (const [index, reply] of replies.entries()) {
+      user(s.sockets[0], reply);
+      t.mock.timers.tick(1500);
+      await flush();
+      if (index < 2) {
+        const question = index === 0 ? standbyQuestions.vehicle : standbyQuestions.readiness;
+        assert.equal(s.manager.current.questionLine, question);
+        assert.equal(s.manager.public().completion, undefined);
+        output(s.sockets[0], question);
+      }
+    }
+    assert.equal(s.manager.public().completion!.kind, 'standby');
+    for (const question of Object.values(standbyQuestions))
+      assert.equal(s.sockets[0].sent.filter((e) => e.content?.includes(question)).length, 1);
+    assert.ok(s.sockets[0].sent.some((e) => e.content?.includes(standbyFarewell)));
+  } finally {
+    s.cleanup();
+    t.mock.timers.reset();
+  }
+});
 test('캡처 대기조 종료 분류는 수신자 세 답변과 최신 근거를 검증하고 low로 요청한다', async () => {
   let payload: any;
   const result = await classifyStandbyCompletion(
@@ -107,6 +200,7 @@ test('대기조 마지막 준비 시간 응답 → 결과 저장 → 종료 안�
     await s.manager.start({ consent: true, scenario: 'standby' });
     const ms = media(s.manager);
     hook(s.manager, 'call.answered');
+    t.mock.timers.tick(2000);
     let residentCalls = 0;
     s.manager.current.classify = async () => {
       residentCalls++;
@@ -167,6 +261,7 @@ test('대기조 AI 확인 전사만 있거나 재생 clear 후의 mark는 자동
     await s.manager.start({ consent: true, scenario: 'standby' });
     const ms = media(s.manager);
     hook(s.manager, 'call.answered');
+    t.mock.timers.tick(2000);
     s.manager.current.assessStandby = async () => ready;
     user(s.sockets[0], latest);
     t.mock.timers.tick(1500);
@@ -197,6 +292,7 @@ test('낡은 대기조 종료 판단·API 실패는 끊지 않고 60초 제한�
     await s.manager.start({ consent: true, scenario: 'standby' });
     media(s.manager);
     hook(s.manager, 'call.answered');
+    t.mock.timers.tick(2000);
     let resolve!: (value: StandbyCompletion) => void;
     s.manager.current.assessStandby = async () =>
       new Promise((r) => {
@@ -216,7 +312,7 @@ test('낡은 대기조 종료 판단·API 실패는 끊지 않고 60초 제한�
     await flush();
     assert.equal(s.manager.public().completion, undefined);
     assert.equal(s.requests.length, 1);
-    t.mock.timers.tick(57000);
+    t.mock.timers.tick(55000);
     await flush();
     assert.equal(s.requests.length, 2);
     assert.equal(s.manager.public().completion, undefined);

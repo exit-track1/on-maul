@@ -7,7 +7,11 @@ import { apiCheckContext } from './api-check-context.ts';
 import { ConfigStore, writePrivate } from '../src/config.ts';
 import { CallManager } from '../src/calls.ts';
 import { muLawRms } from '../src/media.ts';
-import { classifyStandbyCompletion, standbyFarewell } from '../src/standby-completion.ts';
+import {
+  classifyStandbyCompletion,
+  standbyFarewell,
+  standbyQuestions,
+} from '../src/standby-completion.ts';
 import type { Transcript } from '../src/evacuation.ts';
 
 const { store, dataDir } = apiCheckContext();
@@ -94,14 +98,17 @@ async function checkVoiceClosing() {
     PUBLIC_BASE_URL: 'https://no-network.trycloudflare.com',
   });
   let speechAt = 0;
+  let firstSpeechAt = 0;
   let hangups = 0;
   class LocalPlayback extends EventEmitter {
     readyState = 1;
     bufferedAmount = 0;
     send(raw: string) {
       const event = JSON.parse(raw);
-      if (event.event === 'media' && muLawRms(Buffer.from(event.media.payload, 'base64')) > 100)
+      if (event.event === 'media' && muLawRms(Buffer.from(event.media.payload, 'base64')) > 100) {
         speechAt = Date.now();
+        firstSpeechAt ||= speechAt;
+      }
       if (event.event === 'mark') queueMicrotask(() => this.emit('message', Buffer.from(raw)));
     }
     close() {
@@ -150,7 +157,10 @@ async function checkVoiceClosing() {
     }
   }
   try {
+    const preparingAt = Date.now();
     await manager.start({ consent: true, scenario: 'standby' });
+    const preparationMs = Date.now() - preparingAt;
+    if (!manager.current.openingReady) throw new Error('Standby opening not prepared before dial');
     const media = new LocalPlayback();
     manager.attachMedia(media as unknown as WebSocket);
     media.emit(
@@ -166,6 +176,7 @@ async function checkVoiceClosing() {
         }),
       ),
     );
+    const answeredAt = Date.now();
     manager.webhook({
       data: {
         id: 'check-answer',
@@ -177,9 +188,33 @@ async function checkVoiceClosing() {
       },
     });
     await waitFor(() => speechAt > 0 && Date.now() - speechAt > 500, 15000);
-    // Reproduce the already answered questions as synthetic transcript input.
-    // The final classification and closing voice are real; ASR and Telnyx are not tested.
-    manager.current.view.transcript = structuredClone(context);
+    const firstPlaybackAfterAnswerMs = firstSpeechAt - answeredAt;
+    if (
+      firstPlaybackAfterAnswerMs < 2000 ||
+      firstPlaybackAfterAnswerMs > 3000 ||
+      manager.public().transcript.some((t) => t.speaker === 'user')
+    )
+      throw new Error('Opening before receiver reply unconfirmed');
+    // Supply each synthetic reply only after the real preceding question has played.
+    // Classification and all question/closing voice are real; ASR and Telnyx are not tested.
+    for (const [reply, question] of [
+      [context[1].text, standbyQuestions.vehicle],
+      [context[3].text, standbyQuestions.readiness],
+    ]) {
+      const sentAt = Date.now();
+      manager.liveEvent(manager.current, { type: 'session.input_transcript.delta', delta: reply });
+      await waitFor(
+        () => manager.current.questionLine === question && manager.current.questionSpoken,
+        15000,
+      );
+      await waitFor(
+        () =>
+          speechAt > sentAt &&
+          Date.now() - speechAt > 500 &&
+          manager.current.bridge!.output.length < 1600,
+        15000,
+      );
+    }
     const began = Date.now();
     manager.liveEvent(manager.current, { type: 'session.input_transcript.delta', delta: latest });
     await waitFor(() => manager.public().status === 'ended', 25000);
@@ -189,11 +224,15 @@ async function checkVoiceClosing() {
       .map((t) => t.text)
       .join('')
       .replace(/\s|[.!?,]/g, '');
+    const allQuestionsPlayedOnce = Object.values(standbyQuestions).every(
+      (question) => assistant.split(question.replace(/\s|[.!?,]/g, '')).length - 1 === 1,
+    );
     if (
       hangups !== 1 ||
       view.completion?.kind !== 'standby' ||
       !view.completion.playbackConfirmed ||
-      !assistant.includes(standbyFarewell.replace(/\s|[.!?,]/g, ''))
+      !assistant.includes(standbyFarewell.replace(/\s|[.!?,]/g, '')) ||
+      !allQuestionsPlayedOnce
     )
       throw new Error('Single hangup or closing playback unconfirmed');
     return {
@@ -202,6 +241,10 @@ async function checkVoiceClosing() {
       finalStatus: view.status,
       hangupRequests: hangups,
       replyToEndedMs: Date.now() - began,
+      preparationMs,
+      firstPlaybackAfterAnswerMs,
+      openingBeforeReceiverReply: true,
+      allQuestionsPlayedOnce,
       asrTested: false,
       telnyxUsed: false,
       handsetPlaybackTested: false,

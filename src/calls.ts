@@ -19,6 +19,7 @@ import { classifyEvacuation, type Transcript } from './evacuation.ts';
 import {
   classifyStandbyCompletion,
   standbyFarewell,
+  standbyQuestions,
   type StandbyClassifier,
 } from './standby-completion.ts';
 import { CallOutcomeStore, type Completion } from './call-outcomes.ts';
@@ -373,7 +374,10 @@ export class CallManager extends EventEmitter {
     this.current = run;
     run.link = options.link;
     run.shelterName = options.shelterName ?? run.shelterName;
-    run.questionLine = residentQuestion(residentAssessment(run.shelterName));
+    run.questionLine =
+      run.view.scenario === 'resident'
+        ? residentQuestion(residentAssessment(run.shelterName))
+        : standbyQuestions.participation;
     if (options.classifier) {
       run.classify = options.classifier;
       run.linkedClassifier = true;
@@ -389,7 +393,7 @@ export class CallManager extends EventEmitter {
         this.factory,
         options.context,
         undefined,
-        run.view.scenario === 'resident',
+        true,
       );
       run.live.on('fault', (error) => {
         if (!run.view.dialSent) run.openingReject?.(error);
@@ -431,7 +435,7 @@ export class CallManager extends EventEmitter {
         'session_started',
         `${config.LIVE_MODEL} 세션 시작 확인. 전화 응답은 별도입니다.`,
       );
-      if (run.view.scenario === 'resident') await this.prepareOpening(run);
+      await this.prepareOpening(run);
       await options.beforeDial?.();
       if (!this.valid(run)) {
         this.finish(run, '발신 전 취소');
@@ -676,8 +680,7 @@ export class CallManager extends EventEmitter {
   activate(run: Run) {
     if (!this.valid(run) || !run.view.answerObserved || !run.bridge || !run.live?.sessionId) return;
     if (run.bridge.active) return;
-    const remaining =
-      run.view.scenario === 'resident' ? run.view.answeredAt! + openingDelayMs - Date.now() : 0;
+    const remaining = run.view.answeredAt! + openingDelayMs - Date.now();
     if (remaining > 0) {
       if (!run.openingTimer)
         run.openingTimer = this.after(run, remaining, () => {
@@ -713,7 +716,7 @@ export class CallManager extends EventEmitter {
         ),
       ),
     );
-    run.live!.greet('resident', run.questionLine);
+    run.live!.greet(run.view.scenario, run.questionLine);
     try {
       await ready;
     } finally {
@@ -931,7 +934,11 @@ export class CallManager extends EventEmitter {
           }
         });
     };
-    run.inputTimer = this.after(run, run.live?.controlled ? answerSettleMs : 1500, consume);
+    run.inputTimer = this.after(
+      run,
+      run.view.scenario === 'resident' ? answerSettleMs : 1500,
+      consume,
+    );
   }
   async assessAnswer(run: Run, text: string, question: string, valid: () => boolean) {
     if (!valid() || !run.view.assessment || run.view.assessment.stage === 'done') return;
@@ -972,7 +979,19 @@ export class CallManager extends EventEmitter {
       );
       if (!valid()) return;
       run.buffer = '';
-      if (result)
+      if (result?.state === 'pending') {
+        const next = !result.vehicleEvidence
+          ? standbyQuestions.vehicle
+          : standbyQuestions.readiness;
+        if (next !== run.questionLine) {
+          run.bridge!.clear();
+          run.questionLine = next;
+          run.questionText = '';
+          run.questionSpoken = false;
+          run.live!.say(next);
+          this.log(run, 'standby_step', '대기조 다음 확인 질문을 진행합니다.');
+        }
+      } else if (result)
         this.complete(run, {
           location: '대기조 확인',
           evidence: result.evidence,

@@ -362,7 +362,10 @@ test('대기조 참여·이전 통화 이벤트·중복 전사는 주민 완료�
     s.sockets[0].push(event);
     t.mock.timers.tick(1500);
     assert.equal(classified, 0);
-    assert.equal(s.manager.public().transcript[0].text, event.delta);
+    assert.equal(
+      s.manager.public().transcript.filter((t) => t.speaker === 'user')[0].text,
+      event.delta,
+    );
     const oldState = s.manager.current.clientState;
     hook(s.manager, 'call.hangup');
     await s.manager.start(params);

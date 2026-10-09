@@ -20,7 +20,11 @@ export class FakeSocket extends EventEmitter {
     if (event.type === 'session.instructions.append')
       queueMicrotask(() => {
         this.push({ type: 'session.instructions.appended', client_event_id: event.event_id });
-        if (this.autoOpening && event.content.includes('현재 산불로 인하여 대피하셔야 합니다.')) {
+        if (
+          this.autoOpening &&
+          (event.content.includes('현재 산불로 인하여 대피하셔야 합니다.') ||
+            event.content.includes('가상의 구조 요청에 참여 가능하신가요?'))
+        ) {
           this.autoOpening = false;
           this.push({
             type: 'session.output_transcript.delta',

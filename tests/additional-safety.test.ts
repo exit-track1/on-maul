@@ -233,6 +233,7 @@ test('상황실 모의 재시도 한도·참여 거절·실제 대기조 전사�
     );
     media(s.manager);
     hook(s.manager, 'call.answered');
+    t.mock.timers.tick(2000);
     user(s.sockets[0], '참여 가능합니다');
     t.mock.timers.tick(1500);
     await flush();
