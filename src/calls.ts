@@ -628,6 +628,9 @@ export class CallManager extends EventEmitter {
             }
           },
         );
+        // The bridge now owns the continuous input stream, including the greeting delay.
+        clearInterval(run.silenceTimer);
+        run.silenceTimer = undefined;
         this.log(run, 'media_started', 'PCMU 8000Hz mono 음성 시작 확인');
         this.activate(run);
       } else if (event.event === 'media' && event.media?.track === 'inbound')
@@ -722,9 +725,11 @@ export class CallManager extends EventEmitter {
       run,
       new AppError(
         code,
-        /overflow|backpressure/.test(code)
-          ? '음성 버퍼 또는 송신 지연이 10초 제한을 초과했습니다.'
-          : '전화 음성 브리지 연결을 확인할 수 없습니다.',
+        code === 'media_input_overflow'
+          ? '수신 음성 버퍼가 허용량을 초과했습니다.'
+          : /overflow|backpressure/.test(code)
+            ? '음성 버퍼 또는 송신 지연이 10초 제한을 초과했습니다.'
+            : '전화 음성 브리지 연결을 확인할 수 없습니다.',
         502,
       ),
     );

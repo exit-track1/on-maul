@@ -54,6 +54,9 @@ const manager = new CallManager(isolated, dir, {
   },
 });
 let deadline: NodeJS.Timeout | undefined;
+let carrierInputTimer: NodeJS.Timeout | undefined;
+let carrierFrames = 0;
+let maxPendingPackets = 0;
 try {
   const began = Date.now();
   const view = await manager.start({ consent: true, scenario: 'resident' });
@@ -75,6 +78,26 @@ try {
       }),
     ),
   );
+  // Match the provider: inbound 20ms packets begin before the answer webhook,
+  // then continue throughout the two-second outbound greeting delay.
+  carrierInputTimer = setInterval(() => {
+    carrierFrames++;
+    media.emit(
+      'message',
+      Buffer.from(
+        JSON.stringify({
+          event: 'media',
+          media: {
+            track: 'inbound',
+            chunk: carrierFrames,
+            payload: Buffer.alloc(160, 255).toString('base64'),
+          },
+        }),
+      ),
+    );
+    maxPendingPackets = Math.max(maxPendingPackets, manager.current.bridge?.pending.size ?? 0);
+  }, 20);
+  await new Promise<void>((resolve) => setTimeout(resolve, 350));
   acceptedAt = Date.now();
   manager.webhook({
     data: {
@@ -98,12 +121,18 @@ try {
   ]);
   const latencyMs = firstSpeechAt - acceptedAt;
   if (latencyMs < 2000 || latencyMs > 3000) throw new Error('Opening delay outside expected range');
+  const forwardedInputSeconds = manager.current.bridge!.inputBytes / 8000;
+  if (carrierFrames <= 100 || forwardedInputSeconds < 2 || manager.public().error)
+    throw new Error('Continuous inbound audio was not drained through the greeting delay');
   const report = {
     checkedAt: Date.now(),
     liveModel: isolated.value.LIVE_MODEL,
     input: 'silence_only',
     preparationMs,
     firstPlaybackPacketAfterAnswerMs: latencyMs,
+    carrierFrames,
+    forwardedInputSeconds,
+    maxPendingPackets,
     telnyxUsed: false,
     transport: 'local_playback_stub',
     handsetPlaybackTested: false,
@@ -112,6 +141,7 @@ try {
   console.log(JSON.stringify(report));
 } finally {
   clearTimeout(deadline);
+  clearInterval(carrierInputTimer);
   manager.dispose();
   rmSync(dir, { recursive: true, force: true });
 }

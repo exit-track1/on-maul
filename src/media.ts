@@ -20,6 +20,7 @@ export function muLawRms(data: Buffer) {
 }
 const silence = Buffer.alloc(160, 255);
 export class AudioBridge {
+  // Gate outbound playback independently; inbound audio must keep draining.
   active = false;
   stopped = false;
   clears = 0;
@@ -133,7 +134,7 @@ export class AudioBridge {
     return this.speaking;
   }
   tick(now = Date.now()) {
-    if (this.stopped || !this.active || !this.live.sessionId) return;
+    if (this.stopped || !this.live.sessionId) return;
     if (this.next === null && this.pending.size && now - this.firstAt >= 40)
       this.next = Math.min(...this.pending.keys());
     if (this.next !== null) {
@@ -172,6 +173,10 @@ export class AudioBridge {
       this.loud = 0;
       if (++this.quiet >= 8) this.speaking = false;
     }
+    if (!this.active) {
+      this.updateStats(now);
+      return;
+    }
     if (
       !this.outputReady &&
       this.output.length &&
@@ -209,6 +214,9 @@ export class AudioBridge {
         this.sentMarks.add(name);
         if (!this.send({ event: 'mark', mark: { name } })) this.sentMarks.delete(name);
       }
+    this.updateStats(now);
+  }
+  private updateStats(now: number) {
     if (now - this.lastStats >= 1000) {
       this.lastStats = now;
       this.stats();

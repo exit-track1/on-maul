@@ -90,6 +90,38 @@ test('발신 접수·벨소리·수신·미디어를 구분하며 수신 전에 
     t.mock.timers.reset();
   }
 });
+test('수신 전과 첫 안내 2초 대기에도 실제 입력 패킷을 소비하고 입력 펌프는 하나만 실행한다', async (t) => {
+  const s = setup();
+  t.mock.timers.enable({ apis: ['setTimeout', 'setInterval', 'Date'] });
+  try {
+    await s.manager.start(params);
+    const socket = media(s.manager);
+    const input = Buffer.alloc(160, 254).toString('base64');
+    for (let i = 0; i < 125; i++) {
+      if (i === 25) hook(s.manager, 'call.answered');
+      socket.push({ event: 'media', media: { track: 'inbound', chunk: i + 1, payload: input } });
+      assert.equal(socket.sent.filter((e) => e.event === 'media').length, 0);
+      t.mock.timers.tick(20);
+      assert.equal(s.manager.public().blocked, true);
+      assert.equal(s.manager.public().error, null);
+    }
+    const frames = s.sockets[0].sent.filter((e) => e.type === 'session.input_audio.append');
+    assert.equal(frames.length, 125, '수신 전 무음 펌프와 미디어 펌프가 중복되지 않는다');
+    assert.ok(frames.some((e) => e.audio === input));
+    assert.equal(s.manager.current.bridge!.active, true);
+    assert.equal(s.manager.current.silenceTimer, undefined);
+    assert.equal(s.manager.public().events.filter((e) => e.type === 'opening_playback').length, 1);
+    t.mock.timers.tick(200);
+    assert.equal(s.manager.current.bridge!.pending.size, 0);
+    assert.equal(s.manager.current.bridge!.inputQueue.length, 0);
+    assert.equal(s.manager.current.bridge!.inputBytes, 125 * 160);
+    assert.ok(socket.sent.some((e) => e.event === 'media'));
+    assert.equal(s.requests.length, 1);
+  } finally {
+    s.cleanup();
+    t.mock.timers.reset();
+  }
+});
 test('완료 저장 → 오디오 큐 → 고유 mark → 1회 hangup → 서명된 최종 종료와 복원', async (t) => {
   const s = setup();
   t.mock.timers.enable({ apis: ['setTimeout', 'Date'] });
