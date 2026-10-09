@@ -5,7 +5,7 @@ import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { createApp } from '../src/app.ts';
 import { config, type TelnyxPort } from '../src/telephony.ts';
-import type { View } from '../../shared/src/runtime.ts';
+import { planReviewSignature, type View } from '../../shared/src/runtime.ts';
 import { createSourceRecord } from '../../shared/src/sources.ts';
 import { predictionEvidence, sourceReadings } from '../../shared/src/monitoring.ts';
 import { tripPosition } from '../../shared/src/dispatch.ts';
@@ -308,5 +308,246 @@ test('closed HTTP source export is byte-stable after failed writes and restorati
   assert.equal(status.replayStatus, 'replayed');
   assert.equal(status.actualLiveSucceeded, false);
   assert.ok(status.failedLiveRecordIds.includes(status.liveRecordId!));
+  await assertNoExternalCalls(f);
+});
+
+function pendingPlanGraph(view: View) {
+  const graph = view.graphRuns.findLast((run) => run.planId === view.plan?.id && run.waiting);
+  assert.ok(graph, 'A current pending plan needs a human review checkpoint.');
+  return graph;
+}
+
+async function assertCheckpointPlan(f: Fixture, view: View) {
+  const graph = pendingPlanGraph(view);
+  const checkpoint = await f
+    .current()
+    .agents.plan.getState({ configurable: { thread_id: graph.id } });
+  assert.equal(graph.planRevision, view.plan!.revision);
+  assert.equal(graph.planSignature, planReviewSignature(view.plan!));
+  assert.equal(checkpoint.values.revision, view.plan!.snapshotRevision);
+  assert.equal(checkpoint.values.approved, false);
+  assert.deepEqual(checkpoint.values.order, view.plan!.order);
+  assert.deepEqual(checkpoint.values.visit, view.plan!.visit);
+  assert.ok(checkpoint.next.includes('officer_review'));
+  return graph;
+}
+
+test('HTTP pending source changes retire old checkpoints, preserve manual order on unrelated collect, and approve only current evidence', async (t) => {
+  const f = await fixture(t);
+  await command(f, 'watch');
+  const proposal = await command(f, 'plan');
+  const firstGraph = await assertCheckpointPlan(f, proposal);
+  const manual = await command(f, 'reorder', {
+    revision: proposal.revision,
+    ids: proposal.plan!.order.map((item) => item.householdId).reverse(),
+  });
+  const manualGraph = await assertCheckpointPlan(f, manual);
+  assert.notEqual(manualGraph.id, firstGraph.id);
+  assert.equal(
+    manual.graphRuns.find((run) => run.id === firstGraph.id)!.supersededBy,
+    manualGraph.id,
+  );
+  for (const action of ['collect', 'source-fail', 'collect']) {
+    const unchanged = await command(f, action, action === 'source-fail' ? { id: 'SRC01' } : {});
+    assert.deepEqual(unchanged.plan, manual.plan);
+    assert.equal((await assertCheckpointPlan(f, unchanged)).id, manualGraph.id);
+    assert.equal(unchanged.graphRuns.length, manual.graphRuns.length);
+  }
+  const failed = await command(f, 'source-fail', { id: 'SRC05' });
+  const failedGraph = await assertCheckpointPlan(f, failed);
+  assert.notEqual(failedGraph.id, manualGraph.id);
+  assert.ok([...failed.plan!.order, ...failed.plan!.visit].every((item) => item.eta === null));
+  assert.ok(failed.plan!.order.every((item) => /도달 불명/u.test(item.reason)));
+  const restored = await command(f, 'collect');
+  const latestGraph = await assertCheckpointPlan(f, restored);
+  assert.notEqual(latestGraph.id, failedGraph.id);
+  assert.ok(restored.plan!.order.some((item) => item.eta !== null));
+  const resumed: string[] = [];
+  const originalConfirm = f.current().agents.confirm.bind(f.current().agents);
+  f.current().agents.confirm = async (id) => {
+    resumed.push(id);
+    return originalConfirm(id);
+  };
+  const stale = await f.post('confirm', { revision: failed.revision });
+  assert.equal(stale.statusCode, 409);
+  assert.equal(stale.json().code, 'stale_revision');
+  assert.equal(f.current().runtime.view().calls.length, 0);
+  assert.deepEqual(resumed, []);
+  const retired = await f.post('review-graph', { id: failedGraph.id });
+  assert.equal(retired.statusCode, 409);
+  assert.equal(retired.json().code, 'not_waiting');
+  const confirmed = await command(f, 'confirm', { revision: restored.revision });
+  assert.deepEqual(resumed, [latestGraph.id]);
+  assert.equal(confirmed.plan!.confirmed, true);
+  assert.ok(confirmed.calls.length > 0);
+  for (const old of [firstGraph, manualGraph, failedGraph]) {
+    const record = confirmed.graphRuns.find((run) => run.id === old.id)!;
+    assert.equal(record.waiting, false);
+    assert.match(record.reason, /superseded/u);
+    assert.ok(!record.nodes.includes('approved_proposal_no_external_effect'));
+    const checkpoint = await f
+      .current()
+      .agents.plan.getState({ configurable: { thread_id: old.id } });
+    assert.equal(checkpoint.values.approved, false);
+  }
+  const exportView = (await f.export()).json<View>();
+  const saved = JSON.parse(readFileSync(join(f.journal, 'snapshot.json'), 'utf8')) as View;
+  assert.deepEqual(exportView.graphRuns, saved.graphRuns);
+  assert.deepEqual(exportView.plan, saved.plan);
+  await assertNoExternalCalls(f);
+});
+
+test('journal restoration proposes the actual pending manual order and leaves prior checkpoints retired', async (t) => {
+  const f = await fixture(t);
+  await command(f, 'watch');
+  const proposal = await command(f, 'plan');
+  const manual = await command(f, 'reorder', {
+    revision: proposal.revision,
+    ids: proposal.plan!.order.map((item) => item.householdId).reverse(),
+  });
+  const previous = pendingPlanGraph(manual);
+  await f.restart();
+  const restored = f.current().runtime.view();
+  assert.deepEqual(restored.plan, manual.plan);
+  assert.equal(restored.networkDown, true);
+  const latest = await assertCheckpointPlan(f, restored);
+  assert.notEqual(latest.id, previous.id);
+  assert.equal(restored.graphRuns.find((run) => run.id === previous.id)!.waiting, false);
+  assert.match(
+    restored.graphRuns.find((run) => run.id === previous.id)!.reason,
+    /재시작 전 checkpoint/u,
+  );
+  const connected = await command(f, 'comms', { down: false });
+  assert.equal((await assertCheckpointPlan(f, connected)).id, latest.id);
+  const confirmed = await command(f, 'confirm', { revision: connected.revision });
+  assert.equal(confirmed.plan!.confirmed, true);
+  assert.deepEqual(confirmed.plan!.order, manual.plan!.order);
+  assert.equal(confirmed.graphRuns.find((run) => run.id === latest.id)!.waiting, false);
+  await assertNoExternalCalls(f);
+});
+
+test('a checkpoint with changed displayed evidence cannot resume; HTTP requires a newly reviewed checkpoint', async (t) => {
+  const f = await fixture(t);
+  await command(f, 'watch');
+  const proposal = await command(f, 'plan');
+  const old = await assertCheckpointPlan(f, proposal);
+  const corruptedOrder = structuredClone(proposal.plan!.order);
+  corruptedOrder[0]!.score++;
+  corruptedOrder[0]!.reason = 'checkpoint에 남은 오래된 근거';
+  await f
+    .current()
+    .agents.plan.updateState({ configurable: { thread_id: old.id } }, { order: corruptedOrder });
+  const resumed: string[] = [];
+  const originalConfirm = f.current().agents.confirm.bind(f.current().agents);
+  f.current().agents.confirm = async (id) => {
+    resumed.push(id);
+    return originalConfirm(id);
+  };
+  const rejected = await f.post('confirm', { revision: proposal.revision });
+  assert.equal(rejected.statusCode, 409);
+  assert.equal(rejected.json().code, 'plan_revalidation_required');
+  assert.deepEqual(resumed, []);
+  const current = f.current().runtime.view();
+  assert.deepEqual(current.plan, proposal.plan);
+  assert.equal(current.calls.length, 0);
+  const replacement = await assertCheckpointPlan(f, current);
+  assert.notEqual(replacement.id, old.id);
+  const oldCheckpoint = await f
+    .current()
+    .agents.plan.getState({ configurable: { thread_id: old.id } });
+  assert.equal(oldCheckpoint.values.approved, false);
+  const confirmed = await command(f, 'confirm', { revision: current.revision });
+  assert.deepEqual(resumed, [replacement.id]);
+  assert.equal(confirmed.plan!.confirmed, true);
+  await assertNoExternalCalls(f);
+});
+
+test('failed LangGraph resume leaves the proposal unconfirmed, creates no queue, and persists the retired audit record', async (t) => {
+  const f = await fixture(t);
+  await command(f, 'watch');
+  const proposal = await command(f, 'plan');
+  const old = pendingPlanGraph(proposal);
+  const originalConfirm = f.current().agents.confirm.bind(f.current().agents);
+  f.current().agents.confirm = async () => {
+    throw new Error('Synthetic checkpoint failure');
+  };
+  const rejected = await f.post('confirm', { revision: proposal.revision });
+  assert.equal(rejected.statusCode, 409);
+  assert.equal(rejected.json().code, 'plan_checkpoint_failed');
+  const failed = (await f.export()).json<View>();
+  assert.deepEqual(failed.plan, proposal.plan);
+  assert.equal(failed.plan!.confirmed, false);
+  assert.equal(failed.calls.length, 0);
+  assert.equal(failed.graphRuns.find((run) => run.id === old.id)!.waiting, false);
+  assert.match(failed.graphRuns.find((run) => run.id === old.id)!.reason, /checkpoint 재개 실패/u);
+  const saved = JSON.parse(readFileSync(join(f.journal, 'snapshot.json'), 'utf8')) as View;
+  assert.deepEqual(saved.plan, failed.plan);
+  assert.deepEqual(saved.calls, []);
+  assert.deepEqual(saved.graphRuns, failed.graphRuns);
+  f.current().agents.confirm = originalConfirm;
+  const newReview = await f.post('confirm', { revision: failed.revision });
+  assert.equal(newReview.statusCode, 409);
+  assert.equal(newReview.json().code, 'plan_revalidation_required');
+  const current = f.current().runtime.view();
+  const latest = await assertCheckpointPlan(f, current);
+  assert.notEqual(latest.id, old.id);
+  const confirmed = await command(f, 'confirm', { revision: current.revision });
+  assert.equal(confirmed.plan!.confirmed, true);
+  await assertNoExternalCalls(f);
+});
+
+test('source drift during graph resume retires its approval without confirming or queuing the obsolete plan', async (t) => {
+  const f = await fixture(t);
+  await command(f, 'watch');
+  const proposal = await command(f, 'plan');
+  const old = pendingPlanGraph(proposal);
+  const originalConfirm = f.current().agents.confirm.bind(f.current().agents);
+  f.current().agents.confirm = async (id) => {
+    const run = await originalConfirm(id);
+    // Simulate a source callback arriving during the awaited checkpoint operation.
+    f.current().runtime.command('source-fail', { id: 'SRC05' });
+    return run;
+  };
+  const rejected = await f.post('confirm', { revision: proposal.revision });
+  assert.equal(rejected.statusCode, 409);
+  assert.equal(rejected.json().code, 'stale_revision');
+  const failed = (await f.export()).json<View>();
+  assert.equal(failed.plan!.confirmed, false);
+  assert.equal(failed.calls.length, 0);
+  assert.ok([...failed.plan!.order, ...failed.plan!.visit].every((item) => item.eta === null));
+  const retired = failed.graphRuns.find((run) => run.id === old.id)!;
+  assert.equal(retired.waiting, false);
+  assert.match(retired.reason, /승인 중 조건 변경.*확정 실행 없음/u);
+  assert.ok(retired.nodes.includes('approved_proposal_no_external_effect'));
+  f.current().agents.confirm = originalConfirm;
+  const latest = await command(f, 'collect');
+  assert.notEqual((await assertCheckpointPlan(f, latest)).id, old.id);
+  const confirmed = await command(f, 'confirm', { revision: latest.revision });
+  assert.equal(confirmed.plan!.confirmed, true);
+  await assertNoExternalCalls(f);
+});
+
+test('successful graph completion with mismatched checkpoint evidence still produces no runtime approval', async (t) => {
+  const f = await fixture(t);
+  await command(f, 'watch');
+  const proposal = await command(f, 'plan');
+  const old = pendingPlanGraph(proposal);
+  const originalConfirm = f.current().agents.confirm.bind(f.current().agents);
+  f.current().agents.confirm = async (id) => {
+    const run = await originalConfirm(id);
+    const visit = structuredClone(proposal.plan!.visit);
+    visit[0]!.reason = '승인 도중 변경된 방문 근거';
+    await f.current().agents.plan.updateState({ configurable: { thread_id: id } }, { visit });
+    return run;
+  };
+  const rejected = await f.post('confirm', { revision: proposal.revision });
+  assert.equal(rejected.statusCode, 409);
+  assert.equal(rejected.json().code, 'plan_revalidation_required');
+  const failed = (await f.export()).json<View>();
+  assert.deepEqual(failed.plan, proposal.plan);
+  assert.equal(failed.plan!.confirmed, false);
+  assert.equal(failed.calls.length, 0);
+  assert.equal(failed.graphRuns.find((run) => run.id === old.id)!.waiting, false);
+  assert.match(failed.graphRuns.find((run) => run.id === old.id)!.reason, /확정 실행 없음/u);
   await assertNoExternalCalls(f);
 });

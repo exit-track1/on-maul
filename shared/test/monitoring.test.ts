@@ -361,3 +361,209 @@ test('closed source export and JSON snapshot preserve evidence across reads, rej
   memoryRestored.restore(closed);
   assert.deepEqual(memoryRestored.view(), closed);
 });
+
+test('unrelated collection and auxiliary source failure preserve the reviewed manual order', () => {
+  const runtime = new Runtime();
+  runtime.command('watch');
+  const proposal = runtime.command('plan');
+  const reordered = runtime.command('reorder', {
+    revision: proposal.revision,
+    ids: proposal.plan!.order.map((item) => item.householdId).reverse(),
+  });
+  const collected = runtime.command('collect');
+  assert.deepEqual(collected.plan, reordered.plan);
+  assert.notEqual(collected.revision, reordered.revision);
+  const failed = runtime.command('source-fail', { id: 'SRC01' });
+  assert.deepEqual(failed.plan, reordered.plan);
+  const fallback = runtime.command('collect');
+  assert.deepEqual(fallback.plan, reordered.plan);
+  assert.equal(fallback.calls.length, 0);
+  assert.equal(fallback.sourceState.actualModelCalls, 0);
+});
+
+test('pending wind failure immediately recalculates ETA and rank; fallback requires reviewing the restored proposal', () => {
+  const runtime = new Runtime();
+  runtime.command('watch');
+  const proposal = runtime.command('plan');
+  assert.ok(proposal.plan!.order.some((item) => item.eta !== null));
+  const failed = runtime.command('source-fail', { id: 'SRC05' });
+  assert.equal(failed.plan!.confirmed, false);
+  assert.equal(failed.plan!.revision, proposal.plan!.revision + 1);
+  assert.equal(failed.plan!.snapshotRevision, failed.revision);
+  assert.deepEqual(failed.plan!.order, runtime.planItems().order);
+  assert.deepEqual(failed.plan!.visit, runtime.planItems().visit);
+  assert.ok([...failed.plan!.order, ...failed.plan!.visit].every((item) => item.eta === null));
+  assert.ok(failed.plan!.order.every((item) => /도달 불명/u.test(item.reason)));
+  assert.ok(failed.records.some((record) => /미확정 계획 갱신.*재검토/u.test(record.label)));
+  assert.equal(failed.calls.length, 0);
+  assert.throws(
+    () => runtime.command('confirm', { revision: proposal.revision }),
+    (error: unknown) => error instanceof DomainError && error.code === 'stale_revision',
+  );
+  const collected = runtime.command('collect');
+  assert.equal(collected.plan!.revision, failed.plan!.revision + 1);
+  assert.equal(collected.plan!.snapshotRevision, collected.revision);
+  assert.deepEqual(collected.plan!.order, proposal.plan!.order);
+  assert.deepEqual(collected.plan!.visit, proposal.plan!.visit);
+  assert.equal(collected.plan!.confirmed, false);
+  assert.equal(collected.calls.length, 0);
+  assert.throws(() => runtime.command('confirm', { revision: failed.revision }), /최신 화면/u);
+  assert.equal(runtime.view().calls.length, 0);
+  const confirmed = runtime.command('confirm', { revision: collected.revision });
+  assert.equal(confirmed.plan!.confirmed, true);
+  assert.ok(confirmed.calls.length > 0);
+  assert.equal(confirmed.sourceState.actualModelCalls, 0);
+});
+
+test('restored pending plans revalidate stale and outside-jurisdiction evidence before any confirmation', () => {
+  for (const change of ['stale', 'jurisdiction', 'historical'] as const) {
+    const runtime = new Runtime();
+    runtime.command('watch');
+    const snapshot = runtime.command('plan');
+    const originalPlanRevision = snapshot.plan!.revision;
+    if (change === 'stale') snapshot.scenario.displayTime = '2026-10-09T11:35:00+09:00';
+    if (change === 'jurisdiction')
+      snapshot.sourceState.policies.SRC05!.jurisdiction = {
+        id: 'DEMO-OTHER',
+        revision: 2,
+        areas: ['DEMO-OTHER'],
+      };
+    if (change === 'historical')
+      snapshot.sourceState.records.push(
+        createSourceRecord({
+          ...windRecord(snapshot),
+          recordId: 'historical-pending-plan',
+          scenarioId: 'past-own-scenario',
+          datasetId: 'past-own-dataset',
+          referenceDate: '2025-03-01',
+          origin: 'reconstructed',
+          observedAt: '2025-03-01T11:00:00+09:00',
+          fetchedAt: { wall: snapshot.sourceState.wallNow, replay: '2025-03-01T11:02:00+09:00' },
+        }),
+      );
+    runtime.restore(snapshot);
+    const view = runtime.view();
+    assert.equal(view.plan!.revision, originalPlanRevision + 1, change);
+    assert.equal(view.plan!.snapshotRevision, view.revision, change);
+    assert.ok(
+      [...view.plan!.order, ...view.plan!.visit].every((item) => item.eta === null),
+      change,
+    );
+    assert.deepEqual(view.plan!.order, runtime.planItems().order, change);
+    assert.equal(view.calls.length, 0, change);
+    assert.equal(view.plan!.confirmed, false, change);
+  }
+});
+
+test('changed observation evidence renews pending review while preserving an otherwise current manual order', () => {
+  const runtime = new Runtime();
+  runtime.command('watch');
+  const proposal = runtime.command('plan');
+  const snapshot = runtime.command('reorder', {
+    revision: proposal.revision,
+    ids: proposal.plan!.order.map((item) => item.householdId).reverse(),
+  });
+  snapshot.sourceState.records.push(
+    createSourceRecord({
+      ...windRecord(snapshot),
+      recordId: 'changed-observation-same-wind',
+      observedAt: '2026-10-09T10:59:00+09:00',
+    }),
+  );
+  runtime.restore(snapshot);
+  const view = runtime.view();
+  assert.equal(predictionEvidence(view).usable, true);
+  assert.equal(view.plan!.revision, snapshot.plan!.revision + 1);
+  assert.notEqual(view.plan!.sourceSignature, snapshot.plan!.sourceSignature);
+  assert.deepEqual(view.plan!.order, snapshot.plan!.order);
+  assert.equal(view.calls.length, 0);
+});
+
+class DriftingRuntime extends Runtime {
+  changeWithoutCommand(change: (view: View) => void) {
+    change(this.state);
+  }
+}
+
+test('confirmation compares every displayed condition and target group without mutating a rejected proposal', () => {
+  const changes: ((view: View) => void)[] = [
+    (view) => {
+      view.plan!.order[0]!.eta = -1;
+    },
+    (view) => {
+      view.plan!.order[0]!.score++;
+    },
+    (view) => {
+      view.plan!.order[0]!.vulnerability++;
+    },
+    (view) => {
+      view.plan!.order[0]!.reason = '오래된 근거';
+    },
+    (view) => {
+      view.plan!.order[0]!.rank = 2;
+    },
+    (view) => {
+      view.plan!.order[1]!.householdId = view.plan!.order[0]!.householdId;
+    },
+    (view) => {
+      view.plan!.visit[0]!.reason = '오래된 방문 근거';
+    },
+    (view) => {
+      view.plan!.excluded.push(view.plan!.order[0]!.householdId);
+    },
+    (view) => {
+      view.sourceState.policies.SRC05!.jurisdiction.revision = 2;
+    },
+  ];
+  for (const change of changes) {
+    const runtime = new DriftingRuntime();
+    runtime.command('watch');
+    runtime.command('plan');
+    runtime.changeWithoutCommand(change);
+    const before = runtime.view();
+    assert.throws(
+      () => runtime.command('confirm', { revision: before.revision }),
+      (error: unknown) =>
+        error instanceof DomainError && error.code === 'plan_revalidation_required',
+    );
+    assert.deepEqual(runtime.view(), before);
+    assert.equal(runtime.view().calls.length, 0);
+  }
+});
+
+test('confirmation refuses new source failure arriving outside the command path; confirmed plans remain unchanged', () => {
+  const runtime = new DriftingRuntime();
+  runtime.command('watch');
+  runtime.command('plan');
+  runtime.changeWithoutCommand((view) => {
+    view.sourceState.records.push(
+      createSourceRecord({
+        ...windRecord(view),
+        recordId: 'callback-failed-wind',
+        mode: 'live',
+        origin: 'simulated-live-failure',
+        sampleId: null,
+        observedAt: null,
+        fetchedAt: { wall: view.sourceState.wallNow, replay: null },
+        payload: null,
+        ok: false,
+        error: '합성 수신 실패',
+      }),
+    );
+  });
+  const before = runtime.view();
+  assert.throws(
+    () => runtime.command('confirm', { revision: before.revision }),
+    (error: unknown) => error instanceof DomainError && error.code === 'plan_revalidation_required',
+  );
+  assert.deepEqual(runtime.view(), before);
+  const refreshed = runtime.command('collect');
+  const confirmed = runtime.command('confirm', { revision: refreshed.revision });
+  const confirmedPlan = structuredClone(confirmed.plan);
+  runtime.command('source-fail', { id: 'SRC05' });
+  assert.deepEqual(runtime.view().plan, confirmedPlan);
+  assertUnknownEta(runtime.view(), 'H012');
+  runtime.command('collect');
+  assert.deepEqual(runtime.view().plan, confirmedPlan);
+  assert.equal(runtime.view().sourceState.actualModelCalls, 0);
+});

@@ -85,17 +85,80 @@ test('same counts across all six tabs and 48 keyboard-accessible map markers', a
     await expect(page.locator('.situation')).toContainText('안전 3/45');
   }
 });
-test('source failure remains 7/8 after collect', async ({ page }) => {
+test('source failure keeps missing observations unknown and preserves failure after replay fallback', async ({
+  page,
+}) => {
   await page.goto(demo);
   await page.getByRole('button', { name: '감시 시작', exact: true }).click();
   await page.getByRole('tab', { name: '데이터 소스', exact: true }).click();
-  await page
+  const wind = page.getByRole('region', {
+      name: 'SRC05 바람 관측',
+      exact: true,
+    }),
+    observation = wind
+      .locator('dt')
+      .filter({ hasText: /^관측$/ })
+      .locator('xpath=following-sibling::dd[1]'),
+    evidence = wind
+      .locator('dt')
+      .filter({ hasText: /^근거 ID$/ })
+      .locator('xpath=following-sibling::dd[1]');
+  await expect(observation).toHaveText('2026-10-09T11:00:00+09:00');
+  await wind
     .getByRole('button', { name: '수신 실패 시연', exact: true })
-    .first()
     .click();
+  await expect(observation).toHaveText('없음 · 관측 불명');
+  await expect(evidence).toContainText('SOURCE-FAIL-');
+  const failureId = await evidence.innerText();
   await expect(page.locator('.rule-line')).toContainText('7/8');
   await page.getByRole('button', { name: '지금 모의 수집' }).click();
+  await expect(observation).toHaveText('2026-10-09T11:00:00+09:00');
+  await expect(evidence).not.toHaveText(failureId);
+  await expect(wind).toContainText('수신 실패 시연');
+  await wind.getByText('합성 원문 JSON · SRC05', { exact: true }).click();
+  await expect(wind.locator('pre')).toContainText(failureId);
+  await expect(wind.locator('pre')).toContainText('"observedAt": null');
   await expect(page.locator('.rule-line')).toContainText('7/8');
+});
+test('unconfirmed plan follows failed wind evidence and reviewed replay recovery', async ({
+  page,
+}) => {
+  await page.goto(demo);
+  await page.getByRole('button', { name: '감시 시작', exact: true }).click();
+  await page
+    .getByRole('button', { name: '발령 절차 시작', exact: true })
+    .click();
+  await expect(page.locator('.priority-preview')).toContainText('데모 ETA');
+  await page.getByRole('tab', { name: '데이터 소스', exact: true }).click();
+  await page
+    .getByRole('region', { name: 'SRC05 바람 관측', exact: true })
+    .getByRole('button', { name: '수신 실패 시연', exact: true })
+    .click();
+  await expect(page.locator('.priority-preview')).toContainText('도달 불명');
+  await expect(page.locator('.priority-preview')).not.toContainText('데모 ETA');
+  await page
+    .getByRole('button', { name: '순서 검토·발령 확정', exact: true })
+    .click();
+  await expect(
+    page.getByRole('dialog').locator('tbody tr td:nth-child(3)'),
+  ).toContainText(Array(45).fill('도달 불명'));
+  await page.keyboard.press('Escape');
+  await expect(page.locator('.situation')).toContainText('확정 대기');
+  await page.getByRole('tab', { name: '통화', exact: true }).click();
+  await expect(
+    page.locator('.toolbar').filter({ hasText: '공용 채널' }),
+  ).toContainText('공용 채널 0/8');
+  await page.getByRole('tab', { name: '데이터 소스', exact: true }).click();
+  await page.getByRole('button', { name: '지금 모의 수집' }).click();
+  await expect(page.locator('.priority-preview')).toContainText('데모 ETA');
+  await page
+    .getByRole('button', { name: '순서 검토·발령 확정', exact: true })
+    .click();
+  await expect(page.getByRole('dialog')).not.toContainText('도달 불명');
+  await page
+    .getByRole('button', { name: '확정하고 모의 발신 시작', exact: true })
+    .click();
+  await expect(page.locator('.situation')).toContainText('안전 0/45');
 });
 test('officer note structure applies a reviewed rule result and retains the previous check date', async ({
   page,

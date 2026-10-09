@@ -843,7 +843,11 @@ export function Sources({ view, run }: PanelProps) {
                   <dt>데이터셋</dt>
                   <dd>{status?.datasetId ?? s.demoPayload.schema}</dd>
                   <dt>관측</dt>
-                  <dd>{status?.observedAt || s.demoPayload.observedAt}</dd>
+                  <dd>
+                    {status
+                      ? status.observedAt || '없음 · 관측 불명'
+                      : '아직 수집하지 않음'}
+                  </dd>
                   <dt>모의 수집</dt>
                   <dd>{status?.fetchedAt.replay ?? '아직 수집하지 않음'}</dd>
                   <dt>수집 벽시계</dt>
@@ -870,7 +874,7 @@ export function Sources({ view, run }: PanelProps) {
                       : '불명/낡음'}
                   </p>
                 )}
-                <p>{s.demoPayload.summary}</p>
+                <p>{status?.summary || '아직 수집하지 않음'}</p>
                 <p>
                   규칙 필터:{' '}
                   {evaluation?.eligibleForModel

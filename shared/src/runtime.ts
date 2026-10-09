@@ -17,7 +17,12 @@ import {
   sourceReadings,
   type SourceState,
 } from './monitoring.ts';
-import { appendSourceAttempt, createReplaySourceRecord, createSourceRecord } from './sources.ts';
+import {
+  appendSourceAttempt,
+  canonicalJson,
+  createReplaySourceRecord,
+  createSourceRecord,
+} from './sources.ts';
 import { parseHouseholdNotes } from './household-notes.ts';
 export type PlanItem = ReturnType<typeof orderedHouseholds>[number];
 export interface Plan {
@@ -29,6 +34,19 @@ export interface Plan {
   excluded: string[];
   confirmed: boolean;
   confirmedAt: string | null;
+  /** Material wind evidence; collection IDs and fetch times do not change a reviewed proposal. */
+  sourceSignature?: string;
+}
+export function planReviewSignature(plan: Plan): string {
+  return canonicalJson({
+    id: plan.id,
+    revision: plan.revision,
+    snapshotRevision: plan.snapshotRevision,
+    order: plan.order,
+    visit: plan.visit,
+    excluded: plan.excluded,
+    sourceSignature: plan.sourceSignature ?? null,
+  });
 }
 export interface Call {
   id: string;
@@ -98,6 +116,10 @@ export interface GraphRun {
   householdId?: string;
   waiting: boolean;
   reason: string;
+  planId?: string;
+  planRevision?: number;
+  planSignature?: string;
+  supersededBy?: string;
 }
 export interface View {
   data: Fixtures;
@@ -272,6 +294,7 @@ export class Runtime {
         g.waiting = false;
         g.reason += ' · 재시작 전 checkpoint 보관 기록·새 검토 필요';
       }
+    this.refreshUnconfirmedPlan();
     this.state.revision++;
     if (!this.state.frozen) this.log('서버 스냅샷 복구·기존 통화 불명 유지·통신 재조정 대기');
   }
@@ -422,6 +445,105 @@ export class Runtime {
       excluded: h.filter((x) => s.get(x.id)?.temporaryExclusion).map((x) => x.id),
     };
   }
+  private planSourceSignature() {
+    const wind = this.state.sourceState.records.findLast((r) => r.sourceId === 'SRC05');
+    const evidence = predictionEvidence(this.state),
+      policy = this.state.sourceState.policies.SRC05;
+    return canonicalJson({
+      scenarioId: this.state.scenario.id,
+      datasetId: DEMO_DATASET,
+      referenceDate: this.state.data.metadata.referenceDate,
+      usable: evidence.usable,
+      reasons: [...evidence.reasons].sort(),
+      policy: policy
+        ? {
+            pollSeconds: policy.pollSeconds,
+            freshnessMaxAgeSeconds: policy.freshnessMaxAgeSeconds ?? null,
+            jurisdiction: {
+              ...policy.jurisdiction,
+              areas: [...policy.jurisdiction.areas],
+            },
+            disasterKeywords: [...(policy.disasterKeywords ?? [])],
+            thresholds: {
+              windSpeedMps: policy.thresholds?.windSpeedMps ?? null,
+              extinguishmentDropPercentPoints:
+                policy.thresholds?.extinguishmentDropPercentPoints ?? null,
+            },
+          }
+        : null,
+      record: wind
+        ? {
+            sourceId: wind.sourceId,
+            scenarioId: wind.scenarioId,
+            datasetId: wind.datasetId,
+            referenceDate: wind.referenceDate,
+            mode: wind.mode,
+            origin: wind.origin,
+            sampleId: wind.sampleId,
+            observedAt: wind.observedAt,
+            jurisdictions: [...wind.jurisdictions],
+            payloadHash: wind.payloadHash,
+            payload: wind.payload,
+            ok: wind.ok,
+            error: wind.error,
+          }
+        : null,
+    });
+  }
+  private planConditionsMatch(plan: Plan, current = this.planItems()) {
+    const matches = (proposed: PlanItem[], expected: PlanItem[]) => {
+      const indexed = new Map(expected.map((item) => [item.householdId, item]));
+      return (
+        proposed.length === expected.length &&
+        new Set(proposed.map((item) => item.householdId)).size === proposed.length &&
+        proposed.every((item, index) => {
+          const latest = indexed.get(item.householdId);
+          return (
+            latest &&
+            item.rank === index + 1 &&
+            item.eta === latest.eta &&
+            item.score === latest.score &&
+            item.vulnerability === latest.vulnerability &&
+            item.reason === latest.reason
+          );
+        })
+      );
+    };
+    return (
+      matches(plan.order, current.order) &&
+      matches(plan.visit, current.visit) &&
+      plan.excluded.length === current.excluded.length &&
+      new Set(plan.excluded).size === plan.excluded.length &&
+      plan.excluded.every((id) => current.excluded.includes(id))
+    );
+  }
+  private refreshUnconfirmedPlan() {
+    const plan = this.state.plan;
+    if (!plan || plan.confirmed || this.state.frozen) return;
+    const current = this.planItems(),
+      sourceSignature = this.planSourceSignature(),
+      sameConditions = this.planConditionsMatch(plan, current);
+    if (sameConditions && plan.sourceSignature === sourceSignature) return;
+    // Keep the officer's ordering when the displayed target conditions still agree.
+    if (!sameConditions) Object.assign(plan, current);
+    plan.sourceSignature = sourceSignature;
+    plan.revision++;
+    plan.snapshotRevision = this.state.revision + 1;
+    this.log('소스·대상 조건 변경·미확정 계획 갱신·담당자 재검토 필요');
+  }
+  validatePlanConfirmation(revision: unknown) {
+    this.open();
+    const plan = this.state.plan;
+    requireThat(plan, '발령 제안이 없습니다.');
+    if (plan.confirmed) return;
+    this.requireRevision(revision);
+    requireThat(!this.state.networkDown, '통신 복구 후 확정하세요.');
+    requireThat(
+      this.planConditionsMatch(plan) && plan.sourceSignature === this.planSourceSignature(),
+      '소스·대상 조건이 변경되었습니다. 최신 계획을 갱신하고 다시 검토하세요.',
+      'plan_revalidation_required',
+    );
+  }
   private makePlan() {
     this.state.plan = {
       id: `PLAN-${this.state.revision}`,
@@ -430,6 +552,7 @@ export class Runtime {
       ...this.planItems(),
       confirmed: false,
       confirmedAt: null,
+      sourceSignature: this.planSourceSignature(),
     };
     this.state.scenario.mode = 'event';
     this.log('발령 제안·담당자 확정 대기 (모의)', 'human');
@@ -693,13 +816,7 @@ export class Runtime {
       const p = this.state.plan;
       requireThat(p, '발령 제안이 없습니다.');
       if (p.confirmed) return this.view();
-      this.requireRevision(input.revision);
-      requireThat(!this.state.networkDown, '통신 복구 후 확정하세요.');
-      const ids = this.planItems().order.map((x) => x.householdId);
-      requireThat(
-        ids.length === p.order.length && p.order.every((x) => ids.includes(x.householdId)),
-        '변경된 대상 재검토가 필요합니다.',
-      );
+      this.validatePlanConfirmation(input.revision);
       p.confirmed = true;
       p.confirmedAt = this.state.scenario.displayTime;
       p.snapshotRevision = this.state.revision + 1;
@@ -1190,6 +1307,7 @@ export class Runtime {
       this.assistant(String(input.text ?? ''), input.revision);
       return this.view();
     } else throw new DomainError('unknown_command', '지원하지 않는 명령입니다.', 400);
+    this.refreshUnconfirmedPlan();
     this.bump();
     this.summarizeFirstPass();
     return this.view();
@@ -1210,11 +1328,7 @@ export class Runtime {
         s.callbackAtSim = null;
         s.recheckOverdue = false;
       }
-    if (this.state.plan && !this.state.plan.confirmed) {
-      Object.assign(this.state.plan, this.planItems());
-      this.state.plan.revision++;
-      this.state.plan.snapshotRevision = this.state.revision + 1;
-    }
+    this.refreshUnconfirmedPlan();
     if (this.state.plan?.confirmed) {
       for (const h of this.state.data.households) {
         const s = this.status(h.id);

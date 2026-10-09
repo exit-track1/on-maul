@@ -12,7 +12,14 @@ import {
 import { fileURLToPath } from 'node:url';
 import { randomUUID } from 'node:crypto';
 import { z } from 'zod';
-import { Runtime, DomainError } from '../../shared/src/runtime.ts';
+import {
+  Runtime,
+  DomainError,
+  planReviewSignature,
+  type GraphRun,
+  type Plan,
+} from '../../shared/src/runtime.ts';
+import { canonicalJson } from '../../shared/src/sources.ts';
 import { AgentGraphs } from './agents.ts';
 import {
   Telephony,
@@ -39,7 +46,8 @@ export async function createApp(
     runtime = new Runtime(),
     agents = new AgentGraphs();
   const app = Fastify({ logger: false, bodyLimit: 65536 });
-  let planThread: string | null = null;
+  let planThread: { id: string; planId: string; planRevision: number; signature: string } | null =
+    null;
   let queue = Promise.resolve();
   const serialized = <T>(fn: () => Promise<T>): Promise<T> => {
     const work = queue.then(fn);
@@ -48,6 +56,73 @@ export async function createApp(
       () => {},
     );
     return work;
+  };
+  const retirePlanCheckpoint = (reason: string, supersededBy?: string, resumed?: GraphRun) => {
+    if (!planThread) return;
+    const old = runtime.view().graphRuns.find((run) => run.id === planThread!.id);
+    if (old)
+      runtime.addGraph({
+        ...old,
+        ...(resumed ?? {}),
+        waiting: false,
+        reason: `superseded · ${reason} · 실행 승인에 사용하지 않음`,
+        ...(supersededBy ? { supersededBy } : {}),
+      });
+    planThread = null;
+  };
+  const planCheckpointDataMatches = async (plan: Plan, id: string, approved: boolean) => {
+    try {
+      const checkpoint = await agents.plan.getState({ configurable: { thread_id: id } });
+      return (
+        (approved ? checkpoint.next.length === 0 : checkpoint.next.includes('officer_review')) &&
+        checkpoint.values.revision === plan.snapshotRevision &&
+        checkpoint.values.approved === approved &&
+        canonicalJson({ order: checkpoint.values.order, visit: checkpoint.values.visit }) ===
+          canonicalJson({ order: plan.order, visit: plan.visit })
+      );
+    } catch {
+      return false;
+    }
+  };
+  const planCheckpointMatches = async (plan: Plan): Promise<boolean> => {
+    const binding = planThread;
+    if (
+      !binding ||
+      binding.planId !== plan.id ||
+      binding.planRevision !== plan.revision ||
+      binding.signature !== planReviewSignature(plan)
+    )
+      return false;
+    const run = runtime.view().graphRuns.find((run) => run.id === binding.id);
+    if (!run?.waiting || run.planSignature !== binding.signature) return false;
+    return planCheckpointDataMatches(plan, binding.id, false);
+  };
+  const ensurePlanCheckpoint = async () => {
+    const view = runtime.view(),
+      plan = view.plan;
+    if (view.frozen) {
+      planThread = null;
+      return;
+    }
+    if (!plan || plan.confirmed) {
+      retirePlanCheckpoint('미확정 계획 종료');
+      return;
+    }
+    if (await planCheckpointMatches(plan)) return;
+    const id = `PLAN-GRAPH-${plan.id}-${plan.revision}-${randomUUID()}`,
+      signature = planReviewSignature(plan),
+      run = await agents.propose(id, plan.snapshotRevision, {
+        order: plan.order,
+        visit: plan.visit,
+      });
+    retirePlanCheckpoint('계획·소스 근거 변경 또는 checkpoint 불일치·새 검토 필요', id);
+    runtime.addGraph({
+      ...run,
+      planId: plan.id,
+      planRevision: plan.revision,
+      planSignature: signature,
+    });
+    planThread = { id, planId: plan.id, planRevision: plan.revision, signature };
   };
   const delivered = new Set<string>();
   if (options.journal && existsSync(`${options.journal}/webhooks.json`)) {
@@ -60,11 +135,7 @@ export async function createApp(
   const timers = new Map<string, NodeJS.Timeout>();
   if (options.journal && existsSync(`${options.journal}/snapshot.json`)) {
     runtime.restore(JSON.parse(readFileSync(`${options.journal}/snapshot.json`, 'utf8')));
-    const restored = runtime.view();
-    if (restored.plan && !restored.plan.confirmed && !restored.frozen) {
-      planThread = `PLAN-RESTORED-${restored.revision}-${randomUUID()}`;
-      runtime.addGraph(await agents.propose(planThread, restored.revision, runtime.planItems()));
-    }
+    await ensurePlanCheckpoint();
   }
   app.removeContentTypeParser('application/json');
   app.addContentTypeParser('application/json', { parseAs: 'string' }, (_req, body, done) =>
@@ -142,15 +213,69 @@ export async function createApp(
         const before = runtime.view();
         if (before.scenario.mode !== 'watch')
           throw new DomainError('mode', '감시 단계에서 시작하세요.');
-        planThread = `PLAN-GRAPH-${before.revision}-${randomUUID()}`;
-        const run = await agents.propose(planThread, before.revision, runtime.planItems());
         runtime.command(action, input);
-        runtime.addGraph(run);
       } else if (action === 'confirm') {
         const before = runtime.view();
-        runtime.command(action, input);
-        if (planThread && !before.plan?.confirmed)
-          runtime.addGraph(await agents.confirm(planThread));
+        if (before.plan?.confirmed) runtime.command(action, input);
+        else {
+          runtime.validatePlanConfirmation(input.revision);
+          if (!(await planCheckpointMatches(before.plan!))) {
+            await ensurePlanCheckpoint();
+            journal();
+            throw new DomainError(
+              'plan_revalidation_required',
+              '검토 checkpoint가 변경되었습니다. 최신 계획을 다시 검토하고 확정하세요.',
+            );
+          }
+          const binding = planThread!;
+          const validateReviewedPlan = () => {
+            runtime.validatePlanConfirmation(input.revision);
+            const plan = runtime.view().plan;
+            if (!plan || planReviewSignature(plan) !== binding.signature)
+              throw new DomainError(
+                'plan_revalidation_required',
+                '검토 중 계획이 변경되었습니다. 최신 계획을 다시 검토하세요.',
+              );
+          };
+          validateReviewedPlan();
+          let run: GraphRun;
+          try {
+            // The graph has no external effects. Only a successful, current review can queue calls.
+            run = await agents.confirm(binding.id);
+          } catch {
+            retirePlanCheckpoint('checkpoint 재개 실패·담당자 재검토 필요');
+            journal();
+            throw new DomainError('plan_checkpoint_failed', '계획 검토 재개 실패·다시 검토하세요.');
+          }
+          try {
+            if (
+              run.id !== binding.id ||
+              run.waiting ||
+              !(await planCheckpointDataMatches(before.plan!, binding.id, true))
+            )
+              throw new DomainError(
+                'plan_revalidation_required',
+                '승인 checkpoint 근거가 계획과 다릅니다. 최신 계획을 다시 검토하세요.',
+              );
+            validateReviewedPlan();
+            runtime.command(action, input);
+          } catch (error) {
+            retirePlanCheckpoint(
+              '승인 중 조건 변경·확정 실행 없음·담당자 재검토 필요',
+              undefined,
+              run,
+            );
+            journal();
+            throw error;
+          }
+          runtime.addGraph({
+            ...run,
+            planId: binding.planId,
+            planRevision: binding.planRevision,
+            planSignature: binding.signature,
+          });
+          planThread = null;
+        }
       } else if (action === 'transcript') {
         const before = runtime.view();
         if (!before.plan?.confirmed)
@@ -200,6 +325,7 @@ export async function createApp(
             ),
           );
       } else runtime.command(action, input);
+      await ensurePlanCheckpoint();
       // Automatic member failures publish the same human review checkpoints as manual proposals.
       for (const proposal of runtime.view().reassignments.filter((p) => p.status === 'pending')) {
         const runId = `REASSIGN-GRAPH-${proposal.id}`;
