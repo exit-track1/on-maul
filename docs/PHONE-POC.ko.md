@@ -29,7 +29,7 @@ npm start
 
 ## 필요한 계정과 공개 연결
 
-- OpenAI API 키, 사용 가능한 `gpt-live-1`, `gpt-6-luna`, `gpt-6.1-sol` 모델 접근권한과 결제 설정.
+- OpenAI API 키, 사용 가능한 `gpt-live-1`, `gpt-6.1-sol` 모델 접근권한과 결제 설정.
 - Telnyx 유효 API 키, 활성 Voice API 앱 ID, 연결된 활성 Outbound Voice Profile, `KR` 목적지 허용, 사용할 수 있는 발신번호, Ed25519 웹훅 공개키.
 - 수신에 동의한 한국 `010` 휴대전화 한 대. 발신번호와 수신번호는 달라야 합니다.
 - 콜백 포트 8788에 연결되는 공개 HTTPS/WSS 주소. Cloudflare Quick Tunnel, ngrok 또는 인프라에서 준비한 공개 도메인을 사용합니다.
@@ -61,16 +61,16 @@ ON_PHONE_ENV=deployment ON_ENV_FILE=/etc/onmaul/phone.runtime.env npm start
 
 우선순위는 비어 있지 않은 환경변수, 로컬 저장 설정, 기본값 순입니다. 프로세스 환경변수가 선택한 환경 파일보다 우선합니다. 환경 파일 변경은 재시작 후 반영합니다. 화면에서 API 키 입력을 비워 저장하면 기존 키를 유지하며, **저장된 비밀값 삭제**로 명시적으로 삭제합니다. 환경변수에서 제공한 키는 화면에서 삭제할 수 없습니다.
 
-기본 모델은 Live `gpt-live-1`, 완료 분류·브라우저 Responses 위임 `gpt-6-luna`, 계획 모델 접근 확인 `gpt-6.1-sol`, 음성 `marin`입니다. 주민 전화의 짧은 시나리오는 앱이 client delegation으로 직접 진행합니다. 세 질문을 진행할 때 Responses 위임을 기다리지 않으며, 현재 대피 완료 신고 검증은 별도 분류를 유지합니다. 실제 요청에는 저장된 모델 ID를 사용하고 대체 모델로 우회하지 않습니다. 가상 상황실의 우선순위 제안은 규칙 기반입니다.
+기본 모델은 Live `gpt-live-1`, 주민 응답·완료 분류와 브라우저 Responses 위임 `gpt-6.1-sol`, 계획 모델 접근 확인 `gpt-6.1-sol`, 음성 `marin`입니다. 주민 전화는 앱이 client delegation으로 발화 순서를 관리하고, 각 응답의 위치·이동·몸 상태·대피 거부를 `gpt-6.1-sol` Responses의 strict JSON Schema로 분류합니다. 사실별 최신 원문 근거와 0.9 이상의 신뢰도를 확인합니다. 분류 실패는 구조 필요로 추정하지 않습니다. 실제 요청에는 저장된 모델 ID를 사용하고 대체 모델로 우회하지 않습니다. 가상 상황실의 우선순위 제안은 규칙 기반입니다.
 
 1. 설정을 저장하고 모델 접근, 공개 연결, 음성·Telnyx 연결을 확인합니다. 연결 확인은 짧은 Live 세션을 열 수 있어 요금이 발생할 수 있습니다. **공개 콜백만 재검사**는 OpenAI·Telnyx API를 호출하지 않습니다. 화면에서 공개 콜백·음성/Telnyx·저장 여부·동의·활성 통화 중 어떤 조건이 발신을 막는지 표시합니다.
 2. 주민 또는 대기조를 선택하고 수신 동의를 체크한 뒤 **실제 테스트 발신**을 직접 누릅니다.
 3. OpenAI 준비 확인 후 Telnyx 발신을 한 번 보냅니다. 수신 전에는 20ms PCMU 무음을 공급합니다.
 4. 서명된 수신 응답과 검증된 미디어 시작을 모두 확인한 뒤 “지금 어디십니까?”로 시작합니다. 테스트 안내·안내 이해 확인은 음성에서 생략하고 수신 동의와 가상 시나리오 설명은 화면에 유지합니다.
-5. “현재 산불로 인하여 피신하셔야 합니다. 이동 가능하세요?” → “몸이 불편하신가요?” 순으로 진행합니다. “어디로 가야 돼?”는 이동 미확인, “괜찮아”는 몸 상태 응답이며 안전·대피 완료로 해석하지 않습니다. 이동이 불명확하거나 지원이 필요하면 구조 확인 요청과 원문을 먼저 저장하고 “구조대를 보내드리겠습니다.”로 마칩니다. 명확한 이동 가능·몸 상태 응답은 대피 안내 요청으로 기록합니다. 현재 대피 완료 자기 신고가 별도 검증되면 기존 완료 기록을 사용합니다. 종료 안내의 실제 오디오 뒤에 보낸 고유 mark를 확인한 후 hangup을 한 번 요청합니다.
+5. 첫 질문 “지금 어디십니까?”의 음성과 전사를 발신 전에 준비하고, 서명된 수신 응답 2초 후 검증된 미디어 연결로 재생합니다. 준비 실패 시 발신하지 않습니다. “여보세요”는 위치 답변으로 받지 않습니다. 이후 “현재 산불로 인하여 대피하셔야 합니다. [등록 대피소]로 이동 가능하십니까?”와 필요한 몸 상태 확인을 진행합니다. 연결 가구는 배정된 열린 대피소를, 단독 전화는 등록된 열린 학교 대피소를 우선 사용합니다. 몸 상태만 답하면 이동 가능 여부를 다시 확인합니다. 건강·이동 가능은 “지금 즉시 대피해주십시오.”, 이동 수단 없음·신체 사유로 이동 불가는 “구조대를 보내드리겠습니다.”, 집을 떠날 수 없음·대피 거부는 “이장님께서 전화하실 겁니다.”로 마칩니다. 모호함은 담당자 재확인으로 남깁니다. 결과와 근거를 먼저 저장하고 종료 안내의 실제 오디오 뒤 고유 mark를 확인한 후 hangup을 한 번 요청합니다. 현재 대피 완료 자기 신고는 별도 검증을 유지합니다.
 6. hangup 요청 성공 후에도 서명된 최종 종료 이벤트를 기다립니다. 결과가 불명확하면 `unknown` 잠금을 유지합니다. Telnyx에서 실제 종료를 확인한 뒤 화면에 종료 확인을 기록합니다.
 
-대피 완료 신고 정정은 기록을 `needs_review`로 보존하고 자동 재생 확인을 취소합니다. 주민 전화는 서명된 수신 응답부터 45초에 미완료 응답을 구조 확인 요청으로 저장하고 마무리를 시작합니다. 60초에 종료를 요청하며 실제 통신사 종료는 별도로 확인합니다. 통신사·준비 단계의 안전 제한은 요청 시작부터 기본 240초, 설정 범위 30~600초입니다. 이것은 대화를 4분 동안 진행하라는 설정이 아닙니다. 서버 재시작은 활성 통화를 자동 복구하거나 재발신하지 않습니다.
+대피 완료 신고 정정은 기록을 `needs_review`로 보존하고 자동 재생 확인을 취소합니다. 주민 전화는 서명된 수신 응답부터 45초에 미완료 응답을 담당자 재확인 요청으로 저장하고 마무리를 시작합니다. 60초에 종료를 요청하며 실제 통신사 종료는 별도로 확인합니다. 통신사·준비 단계의 안전 제한은 요청 시작부터 기본 240초, 설정 범위 30~600초입니다. 이것은 대화를 4분 동안 진행하라는 설정이 아닙니다. 서버 재시작은 활성 통화를 자동 복구하거나 재발신하지 않습니다.
 
 출력 음성은 120ms 버퍼 후 최대 60ms PCMU 패킷으로 Telnyx 재생 큐에 보냅니다. 20ms 프레임보다 짧은 조각은 모아서 보내며 중간에 무음을 삽입하지 않습니다. 입력은 20ms PCMU를 유지합니다. 회선 잡음·에코의 RMS만으로 출력 큐를 지우지 않고 인증된 사용자 전사를 받아 발화 중단을 처리합니다. Live의 무음 출력은 종료 안내의 mark 대기 시간을 재설정하지 않습니다. 화면에 버퍼·고갈 횟수를 표시합니다.
 
@@ -80,7 +80,7 @@ ON_PHONE_ENV=deployment ON_ENV_FILE=/etc/onmaul/phone.runtime.env npm start
 
 상황실에서 준비한 `callId`는 서버가 대상·동의·연결 상태를 검증합니다. 실제 주민 전화는 독립 완료 판단을 중복 실행하지 않습니다. LangGraph가 인증된 전사와 근거를 확인하고 등록된 열린 대피소·정원·긴급 상태를 검증해 가구의 `safe`를 저장한 뒤 전화 종료 절차를 시작합니다. `safe`는 현장 확인이 아닌 수신자 자기 신고입니다. 분류가 모호하면 담당자 재확인 대상으로 기록합니다.
 
-구조·대피 안내 요청은 최종 통화 종료 후 상황실 `followUps`에 통화 ID별 1회 생성합니다. 연결한 가구는 `help` 또는 `moving`으로 기록하고, 단독 전화는 가구를 임의 선택하지 않고 담당자 배정 대기로 남깁니다. 서버 재시작 때 저장된 종료 결과를 재처리해 누락을 복원하며 중복 요청을 만들지 않습니다. 실제 출동은 수행하지 않고 기존 모의 배차 절차로 이어집니다.
+구조·즉시 대피 안내·이장 연락·재확인 요청은 최종 통화 종료 후 상황실 `followUps`에 통화 ID별 1회 생성합니다. 연결한 가구는 각각 `help`, `moving`, `refused`, `unknown`으로 기록하고, 단독 전화는 가구를 임의 선택하지 않고 담당자 배정 대기로 남깁니다. 서버 재시작 때 저장된 종료 결과를 재처리해 누락을 복원하며 중복 요청을 만들지 않습니다. 실제 출동은 수행하지 않고 기존 모의 배차 절차로 이어집니다.
 
 브라우저 `/voice`는 WebRTC SDP로 실제 Live 세션을 만들고 서버의 인증된 sideband 전사만 판단에 사용합니다. 브라우저가 임의 POST한 전사는 전송 시험 자료로 반환하며 안전 판단에 쓰지 않습니다. 브라우저 음성에 주민 전화의 자동 hangup을 적용하지 않습니다. 실제 전화와 브라우저 음성은 합쳐 한 건만 허용합니다.
 
@@ -88,7 +88,7 @@ ON_PHONE_ENV=deployment ON_ENV_FILE=/etc/onmaul/phone.runtime.env npm start
 
 ## 파일과 API
 
-주요 모듈은 `src/server.ts`(경로·서비스), `src/calls.ts`(통화 상태·완료·종료), `src/media.ts`(PCMU·jitter·큐·clear·mark), `src/live.ts`(Live·응답 재개), `src/evacuation.ts`(strict JSON 분류), `src/call-outcomes.ts`(완료 저장), `src/disaster.ts`(상황실·LangGraph), `src/voice-demo.ts`(WebRTC sideband)입니다. 설정·환경·프로세스 잠금·HTTP 보호·터널·서명 검증은 각각 별도 모듈로 나눴습니다. 화면은 `public/`, 비용 없는 검사는 `tests/`에 있습니다.
+주요 모듈은 `src/server.ts`(경로·서비스), `src/calls.ts`(통화 상태·완료·종료), `src/media.ts`(PCMU·jitter·큐·clear·mark), `src/live.ts`(Live·응답 재개), `src/resident-classifier.ts`(응답 분류), `src/resident-flow.ts`(질문과 종료 분기), `src/evacuation.ts`(완료 신고 분류), `src/call-outcomes.ts`(완료 저장), `src/disaster.ts`(상황실·LangGraph), `src/voice-demo.ts`(WebRTC sideband)입니다. 설정·환경·프로세스 잠금·HTTP 보호·터널·서명 검증은 각각 별도 모듈로 나눴습니다. 화면은 `public/`, 비용 없는 검사는 `tests/`에 있습니다.
 
 | 경로                                                                         | 동작                                        |
 | ---------------------------------------------------------------------------- | ------------------------------------------- |
@@ -127,3 +127,7 @@ API 검사 결과에는 설정 모델, 합성/마이크 녹음 구분, 실제 Te
 2026-10-09 환경 분리 후 실제 연결 검사에서 Telnyx 활성 앱·연결 프로필·KR 목적지 허용, Live `session.started`, 로컬 임시 URL의 현재 콜백 확인 응답 HTTP 200을 확인했습니다. 공개 URL의 관리·설정 경로가 HTTP 404인 것도 확인했습니다. 에이전트가 실제 전화 발신 버튼을 누르지는 않았습니다. 이후 사용자가 수행한 통화의 로컬 기록에서 수신 응답 후 약 75초에 `Responses handoff incomplete` 오류와 종료를 확인했습니다. 이 기록에 따라 주민 전화는 client delegation과 앱 진행 단계로 변경했고, 출력 버퍼·무음 mark 회귀 테스트를 추가했습니다. 변경 후 휴대전화 음질·실제 대화·통신사 mark는 아직 재검증하지 않았습니다. 실제 전화 검증은 운영자의 동의 발신 버튼으로 수행해야 합니다.
 
 API 계약은 [OpenAI Live WebSocket](https://developers.openai.com/api/docs/guides/voice-websockets?api=live), [WebRTC](https://developers.openai.com/api/docs/guides/voice-webrtc?api=live), [서버 sideband](https://developers.openai.com/api/docs/guides/voice-server-controls?api=live), [Telnyx media streaming](https://developers.telnyx.com/docs/voice/programmable-voice/media-streaming), [Outbound Voice Profile 조회](https://developers.telnyx.com/api-reference/outbound-voice-profiles/retrieve-an-outbound-voice-profile)를 확인했습니다. Live에는 audio-done 이벤트를 가정하지 않고 Telnyx 큐와 mark를 사용합니다.
+
+### 2026-10-09 통화 분기 검증
+
+실제 OpenAI API를 사용하는 `node scripts/check-resident-classification.ts --run`은 가상 텍스트 6종에서 이동 가능·이동 불가·대피 거부·몸 상태만의 응답·목적지 질문을 분류합니다. `node scripts/check-phone-greeting.ts --run`은 무음 입력만으로 첫 질문 음성 생성과 지시 수락을 확인합니다. `node scripts/check-phone-opening.ts --run`은 실제 Live 음성 생성과 로컬 재생 브리지를 사용해 수신 이벤트 2초 후 첫 음성 패킷을 검증합니다. 세 검사는 OpenAI API 요금이 발생하며 Telnyx 실제 발신을 수행하지 않습니다. 국제전화 안내 종료 시점이나 실제 휴대전화 재생은 별도 검증 대상입니다.

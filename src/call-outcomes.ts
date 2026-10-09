@@ -16,14 +16,16 @@ export const outcomeSchema = z.object({
     correction: z.string().optional(),
     targetId: z.string().optional(),
     scenarioCallId: z.string().optional(),
-    kind: z.enum(['evacuation', 'rescue', 'moving']).optional(),
+    kind: z.enum(['evacuation', 'rescue', 'moving', 'refused', 'review']).optional(),
     closingText: z.string().optional(),
     assessment: z
       .object({
         stage: z.enum(['location', 'mobility', 'condition', 'done']),
         location: z.string(),
+        shelterName: z.string().default('온빛 배움학교'),
         mobility: z.enum(['possible', 'needs_help', 'unknown']),
         condition: z.enum(['comfortable', 'uncomfortable', 'unknown']),
+        refusal: z.enum(['refused', 'willing', 'unknown']).default('unknown'),
         emergency: z.boolean(),
         answers: z.array(z.object({ question: z.string(), text: z.string() })),
         reason: z.string(),

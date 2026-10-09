@@ -245,6 +245,8 @@ export function createApplication(
           const linked = input.callId ? engine.linked(String(input.callId), 'telnyx') : null;
           const params = { ...input, scenario: linked?.scenario ?? input.scenario };
           calls.validateStart(params);
+          const shelterName =
+            params.scenario === 'resident' ? engine.phoneShelter(linked?.targetId) : undefined;
           reservation = true;
           preparingCall = true;
           cancelPreflight = false;
@@ -256,6 +258,7 @@ export function createApplication(
               params,
               linked
                 ? {
+                    shelterName,
                     link: { targetId: linked.targetId, scenarioCallId: linked.id },
                     context: `가상 대상 ${linked.targetId}. 등록 대피소: ${engine.state.shelters
                       .filter((s) => s.open)
@@ -268,7 +271,7 @@ export function createApplication(
                     classifier: async (_config, text, context, valid) =>
                       engine.classify(linked.id, text, context, valid),
                   }
-                : {},
+                : { shelterName },
             );
             if (linked && !call.blocked) engine.end(linked.id);
             return json(res, 200, { call });

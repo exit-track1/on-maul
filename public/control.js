@@ -31,13 +31,13 @@ async function refresh() {
         row.append(
           node(
             'strong',
-            `${f.kind === 'rescue' ? '구조 확인 요청' : '대피 안내 요청'} · ${f.targetId ?? '단독 수신 체험'}`,
+            `${{ rescue: '구조 확인 요청', moving: '즉시 대피 안내', refused: '이장 연락 요청', review: '담당자 재확인 요청' }[f.kind]} · ${f.targetId ?? '단독 수신 체험'}`,
           ),
           node('p', `${f.location} · ${f.reason}`),
           node('blockquote', f.evidence),
           node(
             'p',
-            `${f.status === 'needs_assignment' ? '담당자 배정 대기' : '대피 안내 대기'} · 종료 안내 재생 ${f.playbackConfirmed ? '확인' : '미확인'} · ${time(f.createdAt)}`,
+            `${{ needs_assignment: '담당자 배정 대기', guidance_requested: '대피 안내 기록', elder_contact_requested: '이장 연락 대기', review_requested: '담당자 재확인 대기' }[f.status]} · 종료 안내 재생 ${f.playbackConfirmed ? '확인' : '미확인'} · ${time(f.createdAt)}`,
             'small',
           ),
         );

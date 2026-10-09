@@ -165,7 +165,7 @@ test('다른 통화 ID·잘못된 미디어 형식은 첫 안내를 재생하지
       });
       await flush();
       assert.equal(s.manager.public().error?.code, 'media_identity_invalid');
-      assert.ok(!s.sockets[0].sent.some((e) => e.type === 'session.instructions.append'));
+      assert.equal(ms.sent.filter((e) => e.event === 'media').length, 0);
       assert.equal(s.requests.length, 2);
     } finally {
       s.cleanup();
@@ -180,6 +180,7 @@ test('mark 뒤 늦은 오디오는 이전 mark를 무효화하고 마지막 오�
     await s.manager.start(params);
     const ms = media(s.manager);
     hook(s.manager, 'call.answered');
+    t.mock.timers.tick(2000);
     s.manager.complete(s.manager.current, { location: '학교', evidence: '학교 도착' });
     output(s.sockets[0], farewell, 160);
     t.mock.timers.tick(1500);

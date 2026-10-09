@@ -18,14 +18,23 @@ import { AudioBridge, muLawRms } from './media.ts';
 import { classifyEvacuation, type Transcript } from './evacuation.ts';
 import { CallOutcomeStore, type Completion } from './call-outcomes.ts';
 import {
-  advanceResident,
+  applyResidentAnswer,
   finishResident,
   residentAssessment,
   residentQuestions,
+  residentQuestion,
+  greetingOnly,
+  openingDelayMs,
   scenarioWrapSeconds,
   scenarioLimitSeconds,
   type ResidentAssessment,
 } from './resident-flow.ts';
+import {
+  classifyResident,
+  unknownResidentAnswer,
+  type ResidentAnswer,
+  type ResidentClassifier,
+} from './resident-classifier.ts';
 export type Report = {
   location: string;
   evidence: string;
@@ -79,6 +88,22 @@ type Run = {
   hangupSent: boolean;
   generation: number;
   buffer: string;
+  bufferQuestion: string;
+  questionLine: string;
+  questionText: string;
+  questionSpoken: boolean;
+  shelterName: string;
+  assess: ResidentClassifier;
+  openingAudio: Buffer[];
+  openingBytes: number;
+  openingText: string;
+  openingSpeech: boolean;
+  openingLastSpeechAt: number;
+  openingAccepted: boolean;
+  openingReady: boolean;
+  openingResolve?: () => void;
+  openingReject?: (error: Error) => void;
+  openingTimer?: NodeJS.Timeout;
   farewellText: string;
   farewellAudio: boolean;
   farewellClears: number;
@@ -181,6 +206,20 @@ export class CallManager extends EventEmitter {
       hangupSent: false,
       generation: 0,
       buffer: '',
+      bufferQuestion: '',
+      questionLine: residentQuestions.location,
+      questionText: '',
+      questionSpoken: false,
+      shelterName: '온빛 배움학교',
+      assess: (c, text, assessment, question) =>
+        classifyResident(c, text, assessment, question, this.fetcher),
+      openingAudio: [],
+      openingBytes: 0,
+      openingText: '',
+      openingSpeech: false,
+      openingLastSpeechAt: 0,
+      openingAccepted: false,
+      openingReady: false,
       farewellText: '',
       farewellAudio: false,
       farewellClears: 0,
@@ -299,6 +338,7 @@ export class CallManager extends EventEmitter {
       beforeDial?: () => Promise<void>;
       classifier?: CallClassifier;
       link?: { targetId: string; scenarioCallId: string };
+      shelterName?: string;
     } = {},
   ) {
     this.validateStart(input);
@@ -317,6 +357,7 @@ export class CallManager extends EventEmitter {
     );
     this.current = run;
     run.link = options.link;
+    run.shelterName = options.shelterName ?? run.shelterName;
     if (options.classifier) {
       run.classify = options.classifier;
       run.linkedClassifier = true;
@@ -335,6 +376,7 @@ export class CallManager extends EventEmitter {
         run.view.scenario === 'resident',
       );
       run.live.on('fault', (error) => {
+        if (!run.view.dialSent) run.openingReject?.(error);
         if (this.valid(run) && run.view.dialSent) {
           this.error(run, error);
           void this.stop('음성 오류').catch(() => {});
@@ -348,6 +390,15 @@ export class CallManager extends EventEmitter {
       run.live.on('delegation-handled', () => {
         if (this.valid(run))
           this.log(run, 'delegation_handled', '앱에서 짧은 통화 시나리오를 계속 진행합니다.');
+      });
+      run.live.on('instruction-accepted', () => {
+        if (!run.openingReady) {
+          run.openingAccepted = true;
+          this.checkOpening(run);
+        }
+      });
+      run.live.on('instruction-unconfirmed', () => {
+        if (this.valid(run)) this.log(run, 'instruction_unconfirmed', 'AI 발화 지시 수락 미확인');
       });
       run.view.sessionId = await run.live.waitReady(this.requestTimeoutMs);
       run.view.sessionCreated = true;
@@ -364,6 +415,7 @@ export class CallManager extends EventEmitter {
         'session_started',
         `${config.LIVE_MODEL} 세션 시작 확인. 전화 응답은 별도입니다.`,
       );
+      if (run.view.scenario === 'resident') await this.prepareOpening(run);
       await options.beforeDial?.();
       if (!this.valid(run)) {
         this.finish(run, '발신 전 취소');
@@ -481,7 +533,7 @@ export class CallManager extends EventEmitter {
       run.view.answeredAt = Date.now();
       run.view.status = 'answered';
       if (run.view.scenario === 'resident') {
-        run.view.assessment = residentAssessment();
+        run.view.assessment = residentAssessment(run.shelterName);
         run.scenarioTimer = this.after(run, scenarioWrapSeconds * 1000, () =>
           this.finishAssessment(run, true),
         );
@@ -594,10 +646,63 @@ export class CallManager extends EventEmitter {
   }
   activate(run: Run) {
     if (!this.valid(run) || !run.view.answerObserved || !run.bridge || !run.live?.sessionId) return;
+    if (run.bridge.active) return;
+    const remaining =
+      run.view.scenario === 'resident' ? run.view.answeredAt! + openingDelayMs - Date.now() : 0;
+    if (remaining > 0) {
+      if (!run.openingTimer)
+        run.openingTimer = this.after(run, remaining, () => {
+          run.openingTimer = undefined;
+          this.activate(run);
+        });
+      return;
+    }
     clearInterval(run.silenceTimer);
     run.silenceTimer = undefined;
     run.bridge.active = true;
-    run.live.greet(run.view.scenario);
+    if (run.openingReady) {
+      run.questionText = run.openingText;
+      run.questionSpoken = true;
+      run.view.transcript.push({ speaker: 'assistant', text: run.openingText });
+      for (const audio of run.openingAudio) run.bridge.appendOutput(audio.toString('base64'));
+      run.openingAudio = [];
+      run.openingBytes = 0;
+      this.log(run, 'opening_playback', '수신 응답 2초 후 준비한 첫 질문을 재생합니다.');
+    } else run.live.greet(run.view.scenario);
+  }
+  async prepareOpening(run: Run) {
+    const ready = new Promise<void>((resolve, reject) => {
+      run.openingResolve = resolve;
+      run.openingReject = reject;
+    });
+    const deadline = this.after(run, this.requestTimeoutMs, () =>
+      run.openingReject?.(
+        new AppError(
+          'opening_audio_timeout',
+          '첫 질문 음성 준비 실패. 전화는 걸지 않았습니다.',
+          504,
+        ),
+      ),
+    );
+    run.live!.greet('resident');
+    try {
+      await ready;
+    } finally {
+      clearTimeout(deadline);
+      run.openingResolve = undefined;
+      run.openingReject = undefined;
+    }
+    this.log(run, 'opening_prepared', '첫 질문 음성을 발신 전에 준비했습니다.');
+  }
+  checkOpening(run: Run) {
+    if (run.openingReady || !run.openingSpeech || !run.openingAccepted) return;
+    if (
+      run.openingText.replace(/\s|[.!?,]/g, '') !==
+      residentQuestions.location.replace(/\s|[.!?,]/g, '')
+    )
+      return;
+    run.openingReady = true;
+    run.openingResolve?.();
   }
   mediaFault(run: Run, code: string) {
     if (!this.valid(run)) return;
@@ -616,6 +721,23 @@ export class CallManager extends EventEmitter {
   liveEvent(run: Run, event: any) {
     if (run !== this.current || this.disposed) return;
     if (event.type === 'session.output_audio.delta' && this.valid(run)) {
+      if (run.live?.controlled && !run.bridge?.active && run.live.greetingSent) {
+        const audio = Buffer.from(event.delta, 'base64');
+        const speech = muLawRms(audio) > 100;
+        run.openingSpeech ||= speech;
+        if (speech) run.openingLastSpeechAt = Date.now();
+        // Preserve the opening clip, but don't collect ring-time silence indefinitely.
+        if (
+          run.openingBytes < 80000 &&
+          run.openingSpeech &&
+          Date.now() - run.openingLastSpeechAt <= 300
+        ) {
+          run.openingAudio.push(audio);
+          run.openingBytes += audio.length;
+        }
+        this.checkOpening(run);
+        return;
+      }
       if (run.bridge?.appendOutput(event.delta) && run.view.completion?.status === 'reported') {
         const speech = muLawRms(Buffer.from(event.delta, 'base64')) > 100;
         run.farewellAudio ||= speech;
@@ -629,6 +751,11 @@ export class CallManager extends EventEmitter {
     ) {
       const speaker = event.type === 'session.input_transcript.delta' ? 'user' : 'assistant';
       const text = redact(event.delta, this.store.secrets());
+      if (speaker === 'assistant' && run.live?.controlled && !run.bridge?.active) {
+        run.openingText += text;
+        this.checkOpening(run);
+        return;
+      }
       const last = run.view.transcript.at(-1);
       if (last?.speaker === speaker) last.text = (last.text + text).slice(-8000);
       else run.view.transcript.push({ speaker, text });
@@ -637,6 +764,7 @@ export class CallManager extends EventEmitter {
         if (
           !run.buffer &&
           run.bridge?.active &&
+          !run.live?.controlled &&
           !['rescue', 'moving'].includes(run.view.completion?.kind ?? '')
         )
           run.bridge.clear();
@@ -644,6 +772,14 @@ export class CallManager extends EventEmitter {
       } else if (run.view.completion?.status === 'reported') {
         run.farewellText += text;
         this.scheduleFarewell(run);
+      } else {
+        run.questionText += text;
+        if (
+          run.questionText
+            .replace(/\s|[.!?,]/g, '')
+            .includes(run.questionLine.replace(/\s|[.!?,]/g, ''))
+        )
+          run.questionSpoken = true;
       }
       this.emit('trusted-transcript', {
         id: run.view.id,
@@ -672,12 +808,13 @@ export class CallManager extends EventEmitter {
       !run.bridge?.active
     )
       return;
+    if (!run.buffer) run.bufferQuestion = run.questionSpoken ? run.questionLine : '';
     run.buffer = (run.buffer + text).slice(-4000);
     run.generation++;
     clearTimeout(run.inputTimer);
     if (
       run.view.completion?.status === 'reported' &&
-      !['rescue', 'moving'].includes(run.view.completion.kind ?? '') &&
+      !['rescue', 'moving', 'refused', 'review'].includes(run.view.completion.kind ?? '') &&
       completionBlocked(run.buffer)
     ) {
       clearTimeout(run.farewellDeadline);
@@ -708,29 +845,63 @@ export class CallManager extends EventEmitter {
         return;
       }
       const utterance = run.buffer;
+      const spokenQuestion = run.bufferQuestion;
       run.buffer = '';
       if (run.view.completion?.status === 'reported') return;
+      if (greetingOnly(utterance)) {
+        this.log(run, 'greeting_received', '수신자 인사는 답변으로 분류하지 않습니다.');
+        return;
+      }
       const valid = () =>
         this.valid(run) &&
         generation === run.generation &&
         run.view.completion?.status !== 'reported';
-      void run
-        .classify(run.config, utterance, structuredClone(run.view.transcript).slice(-8), valid)
+      const evacuation =
+        !run.view.assessment || /도착|완료|대피했/.test(utterance)
+          ? run.classify(
+              run.config,
+              utterance,
+              structuredClone(run.view.transcript).slice(-8),
+              valid,
+            )
+          : Promise.resolve(null);
+      void evacuation
         .then((report) => {
           if (!valid()) return;
           if (report && utterance.includes(report.evidence)) this.complete(run, report);
-          else this.advanceAssessment(run, utterance);
+          else void this.assessAnswer(run, utterance, spokenQuestion, valid);
         })
         .catch(() => {
           if (valid()) {
             this.log(run, 'classification_failed', '대피 완료 판단 실패. 통화를 유지합니다.');
-            this.advanceAssessment(run, utterance);
+            void this.assessAnswer(run, utterance, spokenQuestion, valid);
           }
         });
     };
     run.inputTimer = this.after(run, run.live?.controlled ? 900 : 1500, consume);
   }
-  advanceAssessment(run: Run, text: string) {
+  async assessAnswer(run: Run, text: string, question: string, valid: () => boolean) {
+    if (!valid() || !run.view.assessment || run.view.assessment.stage === 'done') return;
+    try {
+      const answer = await run.assess(
+        run.config,
+        text,
+        structuredClone(run.view.assessment),
+        question,
+      );
+      if (valid()) this.advanceAssessment(run, text, answer, question);
+    } catch {
+      if (valid()) {
+        this.log(
+          run,
+          'resident_classification_failed',
+          '응답 분류 미확인. 구조로 추정하지 않고 다시 묻습니다.',
+        );
+        this.advanceAssessment(run, text, unknownResidentAnswer(), question);
+      }
+    }
+  }
+  advanceAssessment(run: Run, text: string, answer: ResidentAnswer, question = '') {
     const assessment = run.view.assessment;
     if (
       !this.valid(run) ||
@@ -739,15 +910,19 @@ export class CallManager extends EventEmitter {
       run.view.completion?.status === 'reported'
     )
       return;
-    advanceResident(assessment, text);
+    applyResidentAnswer(assessment, text, answer, question);
     if (run.view.assessment!.stage === 'done') this.finishAssessment(run);
     else {
       this.log(
         run,
         'scenario_step',
-        `${assessment.stage === 'mobility' ? '이동 가능 여부' : '몸 상태'} 확인`,
+        `${assessment.stage === 'location' ? '현재 위치' : assessment.stage === 'mobility' ? '이동 가능 여부' : '몸 상태'} 확인 · ${run.config.BACKEND_MODEL}`,
       );
-      run.live!.say(residentQuestions[assessment.stage]);
+      run.bridge!.clear();
+      run.questionLine = residentQuestion(assessment);
+      run.questionText = '';
+      run.questionSpoken = false;
+      run.live!.say(run.questionLine);
     }
   }
   finishAssessment(run: Run, timedOut = false) {
@@ -846,6 +1021,7 @@ export class CallManager extends EventEmitter {
     clearTimeout(run.farewellTimer);
   }
   clean(run: Run) {
+    run.openingReject?.(new AppError('opening_cancelled', '첫 질문 준비 취소', 409));
     for (const t of run.timers) clearTimeout(t);
     run.timers.clear();
     clearInterval(run.silenceTimer);

@@ -13,7 +13,7 @@ export const defaults = {
   CALLER_NUMBER: '',
   TEST_PHONE: '',
   LIVE_MODEL: 'gpt-live-1',
-  BACKEND_MODEL: 'gpt-6-luna',
+  BACKEND_MODEL: 'gpt-6.1-sol',
   PLANNING_MODEL: 'gpt-6.1-sol',
   VOICE: 'marin',
   MAX_CALL_SECONDS: 240,

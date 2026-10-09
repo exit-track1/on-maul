@@ -60,12 +60,13 @@ type ControlState = {
   followUps: {
     callId: string;
     targetId: string | null;
-    kind: 'rescue' | 'moving';
+    kind: 'rescue' | 'moving' | 'refused' | 'review';
     location: string;
     evidence: string;
     reason: string;
     emergency: boolean;
-    status: 'needs_assignment' | 'guidance_requested';
+    status:
+      'needs_assignment' | 'guidance_requested' | 'elder_contact_requested' | 'review_requested';
     createdAt: number;
     playbackConfirmed: boolean;
   }[];
@@ -337,7 +338,7 @@ export class DisasterEngine {
       outcome.callStatus !== 'ended' ||
       !outcome.endedAt ||
       c.status !== 'reported' ||
-      (c.kind !== 'rescue' && c.kind !== 'moving') ||
+      (c.kind !== 'rescue' && c.kind !== 'moving' && c.kind !== 'refused' && c.kind !== 'review') ||
       this.state.followUps.some((f) => f.callId === outcome.callId)
     )
       return;
@@ -349,7 +350,12 @@ export class DisasterEngine {
       const targetId = linked?.targetId ?? null;
       const household = this.state.households.find((h) => h.id === targetId);
       if (household) {
-        household.status = c.kind === 'rescue' ? 'help' : 'moving';
+        household.status = {
+          rescue: 'help',
+          moving: 'moving',
+          refused: 'refused',
+          review: 'unknown',
+        }[c.kind];
         household.location = c.location;
         household.emergency = c.assessment?.emergency ?? false;
       }
@@ -361,18 +367,41 @@ export class DisasterEngine {
         evidence: c.evidence,
         reason: c.assessment?.reason ?? '통화 결과 확인',
         emergency: c.assessment?.emergency ?? false,
-        status: c.kind === 'rescue' ? 'needs_assignment' : 'guidance_requested',
+        status: {
+          rescue: 'needs_assignment',
+          moving: 'guidance_requested',
+          refused: 'elder_contact_requested',
+          review: 'review_requested',
+        }[c.kind] as ControlState['followUps'][number]['status'],
         createdAt: Date.now(),
         playbackConfirmed: c.playbackConfirmed,
       });
       this.audit(
         'call_follow_up',
-        `${targetId ?? '단독 수신 체험'}: ${c.kind === 'rescue' ? '모의 구조 요청·담당자 배정 대기' : '모의 대피 안내 요청'}. 통화 최종 종료 확인 후 기록.`,
+        `${targetId ?? '단독 수신 체험'}: ${{ rescue: '모의 구조 요청·담당자 배정 대기', moving: '모의 대피 안내 기록', refused: '모의 이장 연락 요청', review: '담당자 재확인 요청' }[c.kind]}. 통화 최종 종료 확인 후 기록.`,
       );
     } catch (error) {
       this.state = previous;
       throw error;
     }
+  }
+  phoneShelter(targetId?: string) {
+    const household = targetId ? this.state.households.find((h) => h.id === targetId) : undefined;
+    const available = (s: ControlState['shelters'][number]) =>
+      s.open &&
+      this.state.households.filter((h) => h.shelterId === s.id && h.status === 'safe').length <
+        s.capacity;
+    const shelter = household
+      ? this.state.shelters.find((s) => s.id === household.shelterId && available(s))
+      : (this.state.shelters.find((s) => /학교/.test(s.name) && available(s)) ??
+        this.state.shelters.find(available));
+    if (!shelter)
+      throw new AppError(
+        'shelter_unavailable',
+        '안내할 열린 대피소가 없습니다. 대피소를 확인하세요.',
+        409,
+      );
+    return shelter.name;
   }
   async classify(
     id: string,

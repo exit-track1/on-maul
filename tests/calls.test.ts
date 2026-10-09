@@ -60,7 +60,8 @@ test('발신 접수·벨소리·수신·미디어를 구분하며 수신 전에 
       s.sockets[0].sent.filter((e) => e.type === 'session.input_audio.append').length,
       2,
     );
-    assert.ok(!s.sockets[0].sent.some((e) => e.type === 'session.instructions.append'));
+    assert.equal(s.manager.current.openingReady, true);
+    assert.equal(s.manager.public().transcript.length, 0);
     const ms = media(s.manager);
     t.mock.timers.tick(20000);
     assert.equal(s.manager.public().blocked, true);
@@ -68,7 +69,9 @@ test('발신 접수·벨소리·수신·미디어를 구분하며 수신 전에 
     hook(s.manager, 'call.initiated', 'ring', { state: 'ringing' });
     assert.equal(s.manager.public().status, 'ringing');
     hook(s.manager, 'call.answered');
+    t.mock.timers.tick(2000);
     hook(s.manager, 'call.answered');
+    t.mock.timers.tick(2000);
     assert.equal(s.manager.current.bridge?.active, true);
     assert.equal(
       s.sockets[0].sent.filter((e) => e.type === 'session.instructions.append').length,
@@ -81,7 +84,7 @@ test('발신 접수·벨소리·수신·미디어를 구분하며 수신 전에 
     hook(s.manager, 'call.initiated', 'late');
     assert.equal(s.manager.public().status, 'answered');
     assert.equal(s.manager.current.silenceTimer, undefined);
-    assert.equal(ms.sent.filter((e) => e.event === 'media').length, 0);
+    assert.ok(ms.sent.some((e) => e.event === 'media'));
   } finally {
     s.cleanup();
     t.mock.timers.reset();
@@ -94,6 +97,7 @@ test('완료 저장 → 오디오 큐 → 고유 mark → 1회 hangup → 서명
     await s.manager.start(params);
     const ms = media(s.manager);
     hook(s.manager, 'call.answered');
+    t.mock.timers.tick(2000);
     s.manager.current.classify = async (_c, text) => ({ location: '학교', evidence: text });
     user(s.sockets[0], '학교에 도착했어요');
     t.mock.timers.tick(1500);
@@ -140,6 +144,7 @@ test('전사만 있고 실제 출력 오디오가 없으면 mark 확인으로 �
     await s.manager.start(params);
     const ms = media(s.manager);
     hook(s.manager, 'call.answered');
+    t.mock.timers.tick(2000);
     s.manager.complete(s.manager.current, { location: '학교', evidence: '신고' });
     s.sockets[0].push({ type: 'session.output_transcript.delta', delta: farewell });
     t.mock.timers.tick(1500);
@@ -159,6 +164,7 @@ test('clear로 돌아온 mark와 정정 발화는 재생 성공이 아니며 nee
     await s.manager.start(params);
     const ms = media(s.manager);
     hook(s.manager, 'call.answered');
+    t.mock.timers.tick(2000);
     s.manager.complete(s.manager.current, { location: '학교', evidence: '학교에 도착' });
     output(s.sockets[0], farewell, 160);
     t.mock.timers.tick(1500);
@@ -188,6 +194,7 @@ test('낡은 비동기 분류 결과·분류 실패·저장 실패는 자동 종
     await s.manager.start(params);
     media(s.manager);
     hook(s.manager, 'call.answered');
+    t.mock.timers.tick(2000);
     let resolve!: (v: any) => void;
     s.manager.current.classify = async () => new Promise((r) => (resolve = r));
     user(s.sockets[0], '학교에 도착했어요');
@@ -221,6 +228,7 @@ test('안내 재생 30초 누락 종료는 미확인으로 기록, 최종 이벤
     await s.manager.start(params);
     media(s.manager);
     hook(s.manager, 'call.answered');
+    t.mock.timers.tick(2000);
     s.manager.complete(s.manager.current, { location: '학교', evidence: '학교에 도착' });
     t.mock.timers.tick(30000);
     await flush();
@@ -307,6 +315,7 @@ test('대기조 참여·이전 통화 이벤트·중복 전사는 주민 완료�
     await s.manager.start({ ...params, scenario: 'standby' });
     media(s.manager);
     hook(s.manager, 'call.answered');
+    t.mock.timers.tick(2000);
     let classified = 0;
     s.manager.current.classify = async () => {
       classified++;

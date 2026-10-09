@@ -1,95 +1,105 @@
+import type { ResidentAnswer } from './resident-classifier.ts';
+
 export const residentQuestions = {
   location: '지금 어디십니까?',
-  mobility: '현재 산불로 인하여 피신하셔야 합니다. 이동 가능하세요?',
+  mobility: '현재 산불로 인하여 대피하셔야 합니다.',
   condition: '몸이 불편하신가요?',
 };
 export const rescueFarewell = '구조대를 보내드리겠습니다.';
-export const movingFarewell =
-  '이동 가능 여부를 확인했습니다. 담당자에게 대피 안내를 요청하겠습니다.';
+export const movingFarewell = '지금 즉시 대피해주십시오.';
+export const refusalFarewell = '이장님께서 전화하실 겁니다.';
+export const reviewFarewell = '담당자가 다시 확인하도록 하겠습니다.';
+export const openingDelayMs = 2000;
 export const scenarioWrapSeconds = 45;
 export const scenarioLimitSeconds = 60;
 export type ResidentAssessment = {
   stage: 'location' | 'mobility' | 'condition' | 'done';
   location: string;
+  shelterName: string;
   mobility: 'possible' | 'needs_help' | 'unknown';
   condition: 'comfortable' | 'uncomfortable' | 'unknown';
+  refusal: 'refused' | 'willing' | 'unknown';
   emergency: boolean;
   answers: { question: string; text: string }[];
   reason: string;
 };
-export function residentAssessment(): ResidentAssessment {
+export function residentAssessment(shelterName = '온빛 배움학교'): ResidentAssessment {
   return {
     stage: 'location',
     location: '위치 미확인',
+    shelterName,
     mobility: 'unknown',
     condition: 'unknown',
+    refusal: 'unknown',
     emergency: false,
     answers: [],
     reason: '',
   };
 }
-export function advanceResident(assessment: ResidentAssessment, raw: string) {
-  const text = raw.trim();
-  if (!text || assessment.stage === 'done') return;
-  const stage = assessment.stage;
-  assessment.answers.push({ question: residentQuestions[stage], text });
-  if (stage === 'location') {
-    if (/집|자택/.test(text) && !/가야|갈\s*예정|가고|가는|어디|집.*(?:아니|않)/.test(text))
-      assessment.location = '집';
-    else if (
-      !/^(네|예|응|어|몰라|모르|어디|뭐|잠깐)/.test(text) ||
-      /(?:학교|회관|대피소|병원|회사|길|공원)/.test(text)
-    )
-      assessment.location = text.slice(0, 200);
-    assessment.stage = 'mobility';
-  } else if (stage === 'mobility') {
-    // Questions and vague replies never count as a promise to evacuate independently.
-    if (
-      /못|불가능|불편|도움|차.*없|안\s*(?:돼|움직|걸|가)|어렵|힘들|(?:이동|가능|걷|가).*(?:않|없)/.test(
-        text,
-      )
-    )
-      assessment.mobility = 'needs_help';
-    else if (
-      !/[?？]|어디|어떻게|어디로|모르|글쎄/.test(text) &&
-      (/이동.*가능|혼자.*(?:갈|가|이동)|갈\s*수|걸어.*(?:갈|가)|가능/.test(text) ||
-        /^(네|예|응)[.!\s]*$/.test(text))
-    )
-      assessment.mobility = 'possible';
-    assessment.stage = 'condition';
-  } else {
-    if (/괜찮.*않|안\s*괜찮/.test(text)) assessment.condition = 'uncomfortable';
-    else if (/괜찮|불편.*(?:없|않)|안\s*불편|안\s*아파|아프지\s*않|건강|정상/.test(text))
-      assessment.condition = 'comfortable';
-    else if (/불편|아파|통증|못|숨|가슴/.test(text) || /^(네|예|응)[.!\s]*$/.test(text))
-      assessment.condition = 'uncomfortable';
-    assessment.emergency = /숨.*(?:힘|차|못)|가슴.*(?:아파|통증)/.test(text);
-    assessment.stage = 'done';
-  }
+export function residentQuestion(a: ResidentAssessment) {
+  if (a.stage === 'mobility')
+    return `${residentQuestions.mobility} ${a.shelterName}로 이동 가능하십니까?`;
+  return a.stage === 'condition' ? residentQuestions.condition : residentQuestions.location;
 }
-export function finishResident(assessment: ResidentAssessment, timedOut = false) {
-  assessment.stage = 'done';
-  const needsRescue =
-    timedOut ||
-    assessment.emergency ||
-    assessment.mobility !== 'possible' ||
-    assessment.condition !== 'comfortable';
-  assessment.reason = timedOut
-    ? '45초 내 확인 미완료'
-    : assessment.emergency
-      ? '긴급 증상 자기 신고·담당자 확인 필요'
-      : assessment.mobility === 'needs_help'
-        ? '이동 지원 필요'
-        : assessment.mobility === 'unknown'
-          ? '이동 가능 여부 미확인'
-          : assessment.condition !== 'comfortable'
-            ? '몸 상태 확인·지원 필요'
-            : '이동 가능 자기 신고';
+export function greetingOnly(text: string) {
+  return /^(?:어[,.\s]*)?(?:여보세요|안녕하세요|네[,.\s]*여보세요)[.!?\s]*$/.test(text.trim());
+}
+// Reply count never advances the stage: location, transport, health and refusal are independent.
+export function applyResidentAnswer(
+  a: ResidentAssessment,
+  text: string,
+  answer: ResidentAnswer,
+  question = '',
+) {
+  if (a.stage === 'done' || !text.trim() || greetingOnly(text)) return;
+  a.answers.push({ question: question || '질문 발화 전·자발적 응답', text });
+  const supported = (key: keyof ResidentAnswer['evidence']) =>
+    answer.confidence >= 0.9 &&
+    !!answer.evidence[key].trim() &&
+    text.includes(answer.evidence[key]);
+  if (answer.location && supported('location')) a.location = answer.location;
+  if (answer.mobility !== 'unknown' && supported('mobility')) a.mobility = answer.mobility;
+  if (answer.condition !== 'unknown' && supported('condition')) a.condition = answer.condition;
+  if (answer.refusal !== 'unknown' && supported('refusal')) a.refusal = answer.refusal;
+  if (supported('emergency')) a.emergency = answer.emergency;
+  if (a.refusal === 'refused' || a.mobility === 'needs_help' || a.emergency) a.stage = 'done';
+  else if (a.location === '위치 미확인') a.stage = 'location';
+  else if (a.mobility === 'unknown') a.stage = 'mobility';
+  else if (a.condition === 'unknown') a.stage = 'condition';
+  else a.stage = 'done';
+}
+export function finishResident(a: ResidentAssessment, timedOut = false) {
+  a.stage = 'done';
+  const kind: 'refused' | 'rescue' | 'moving' | 'review' =
+    a.refusal === 'refused'
+      ? 'refused'
+      : a.mobility === 'needs_help' || a.emergency
+        ? 'rescue'
+        : a.mobility === 'possible' && a.condition === 'comfortable'
+          ? 'moving'
+          : 'review';
+  a.reason =
+    kind === 'refused'
+      ? '대피 거부·이장 연락 필요'
+      : kind === 'rescue'
+        ? a.emergency
+          ? '긴급 증상 자기 신고·담당자 확인 필요'
+          : '이동 수단 없음 또는 신체 사유로 이동 불가'
+        : kind === 'moving'
+          ? '몸 상태 괜찮음·스스로 이동 가능 자기 신고'
+          : timedOut
+            ? '45초 내 확인 미완료·담당자 재확인'
+            : '이동 가능 여부 또는 몸 상태 미확인·담당자 재확인';
   return {
-    kind: needsRescue ? ('rescue' as const) : ('moving' as const),
-    location: assessment.location,
-    evidence: assessment.answers.map((a) => a.text).join(' / ') || '응답 미확인',
-    closingText: needsRescue ? rescueFarewell : movingFarewell,
-    assessment: structuredClone(assessment),
+    kind,
+    location: a.location,
+    evidence: a.answers.map((v) => v.text).join(' / ') || '응답 미확인',
+    closingText: {
+      refused: refusalFarewell,
+      rescue: rescueFarewell,
+      moving: movingFarewell,
+      review: reviewFarewell,
+    }[kind],
+    assessment: structuredClone(a),
   };
 }

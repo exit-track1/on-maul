@@ -97,7 +97,7 @@ function render(value) {
   $('audio-stats').textContent =
     `수신 ${value.audioInSeconds.toFixed(1)}초 · 송신 ${value.audioOutSeconds.toFixed(1)}초 · 재생 중단 ${value.audioClears}회 · 재생 버퍼 ${Math.round(value.audioBufferedMs ?? 0)}ms · 버퍼 고갈 ${value.audioUnderruns ?? 0}회`;
   $('scenario-state').textContent = value.assessment
-    ? `위치 ${value.assessment.location} · 이동 ${{ possible: '가능', needs_help: '도움 필요', unknown: '미확인' }[value.assessment.mobility]} · 몸 상태 ${{ comfortable: '괜찮음', uncomfortable: '불편함', unknown: '미확인' }[value.assessment.condition]}${value.assessment.reason ? ' · ' + value.assessment.reason : ''}`
+    ? `위치 ${value.assessment.location} · 대피소 ${value.assessment.shelterName ?? '미확인'} · 이동 ${{ possible: '가능', needs_help: '도움 필요', unknown: '미확인' }[value.assessment.mobility]} · 몸 상태 ${{ comfortable: '괜찮음', uncomfortable: '불편함', unknown: '미확인' }[value.assessment.condition]}${value.assessment.refusal === 'refused' ? ' · 대피 거부' : ''}${value.assessment.reason ? ' · ' + value.assessment.reason : ''}`
     : '주민 통화는 위치 → 이동 가능 여부 → 몸 상태를 확인하고 60초 안에 마칩니다.';
   for (const [id, done] of Object.entries({
     'm-created': !!value.callControlId,
@@ -139,7 +139,7 @@ async function outcomes() {
       node('strong', c.location),
       node(
         'p',
-        `${c.status === 'needs_review' ? '정정 · 재확인 필요' : c.kind === 'rescue' ? '구조 확인 요청' : c.kind === 'moving' ? '이동 가능 자기 신고' : '대피 완료 자기 신고'} · ${time(c.recordedAt)}`,
+        `${c.status === 'needs_review' ? '정정 · 재확인 필요' : ({ rescue: '구조 확인 요청', moving: '즉시 대피 안내', refused: '대피 거부 · 이장 연락 요청', review: '담당자 재확인 요청' }[c.kind] ?? '대피 완료 자기 신고')} · ${time(c.recordedAt)}`,
         'small',
       ),
       node('blockquote', c.evidence),
@@ -151,7 +151,7 @@ async function outcomes() {
     );
     if (c.correction) row.append(node('p', '정정 발화: ' + c.correction));
     if (c.assessment) row.append(node('p', c.assessment.reason, 'small'));
-    if (c.kind === 'rescue' || c.kind === 'moving')
+    if (['rescue', 'moving', 'refused', 'review'].includes(c.kind))
       row.append(
         node(
           'p',

@@ -20,7 +20,7 @@ export function sessionConfig(
   const prompt =
     instructions(scenario, context) +
     (controlled
-      ? ' 대화 진행은 앱이 관리한다. 앱에서 지정한 한 문장만 한국어로 말하고 다음 지시까지 듣고 기다린다. 임의로 다음 질문·안내·상황 정리를 시작하지 않는다. 짧은 답변에도 앱의 다음 지시를 기다린다.'
+      ? '\nBackchannel policy: Do not add acknowledgments or listening sounds.\nInterruption policy: Listen when interrupted.\nDelegation policy: The app manages the workflow. When an app instruction arrives, immediately speak its specified Korean sentence, even if the caller has not spoken. After that sentence, listen until the next app instruction. Do not choose questions or conclusions yourself.'
       : '');
   return {
     model: config.LIVE_MODEL,
@@ -51,6 +51,7 @@ export class LiveConnection extends EventEmitter {
   private replyTimer?: NodeJS.Timeout;
   private deadline?: NodeJS.Timeout;
   private seen = new Set<string>();
+  private pendingInstructions = new Map<string, NodeJS.Timeout>();
   controlled: boolean;
   currentLine = '';
   constructor(
@@ -110,6 +111,14 @@ export class LiveConnection extends EventEmitter {
             502,
           ),
         );
+      if (event.type === 'session.instructions.appended') {
+        const id = event.client_event_id;
+        if (typeof id === 'string' && this.pendingInstructions.has(id)) {
+          clearTimeout(this.pendingInstructions.get(id));
+          this.pendingInstructions.delete(id);
+          this.emit('instruction-accepted', id);
+        }
+      }
       if (event.type === 'session.closed') {
         this.finalized = true;
         this.cancelReply();
@@ -146,6 +155,7 @@ export class LiveConnection extends EventEmitter {
     );
     this.socket.on('close', () => {
       this.cancelReply();
+      this.clearInstructions();
       clearTimeout(this.deadline);
       if (!this.closing && !this.finalized)
         this.emit(
@@ -197,12 +207,20 @@ export class LiveConnection extends EventEmitter {
     });
   }
   steer(content: string) {
+    const id = randomUUID();
+    const timer = setTimeout(() => {
+      this.pendingInstructions.delete(id);
+      if (!this.closing && !this.finalized) this.emit('instruction-unconfirmed', id);
+    }, 5000);
+    timer.unref();
+    this.pendingInstructions.set(id, timer);
     this.send({
       type: 'session.instructions.append',
-      event_id: randomUUID(),
+      event_id: id,
       delegation_id: null,
       content,
     });
+    return id;
   }
   greet(scenario: Scenario) {
     if (this.greetingSent || !this.sessionId || this.closing) return;
@@ -217,7 +235,7 @@ export class LiveConnection extends EventEmitter {
     this.currentLine = line;
     this.cancelReply();
     this.steer(
-      `지금 한국어로 정확히 "${line}"만 말합니다. 서두, 감사, 응답 확인, 상황 정리, 추가 질문은 붙이지 않습니다. 끝까지 말한 뒤 다음 앱 지시까지 듣고 기다립니다.`,
+      `Begin speaking immediately in Korean, without waiting for the caller to speak. Say exactly this sentence in full: "${line}". Do not combine it with previous questions or add any other words. Then pause and listen until the next app instruction.`,
     );
   }
   waitReply() {
@@ -239,9 +257,7 @@ export class LiveConnection extends EventEmitter {
   conclude(line = farewell) {
     this.concluding = true;
     this.cancelReply();
-    this.steer(
-      `애플리케이션이 통화 결과를 저장했습니다. 질문을 멈추고 지금 "${line}"를 정확히 말한 뒤 조용히 기다립니다.`,
-    );
+    this.say(line);
   }
   resume() {
     this.concluding = false;
@@ -253,6 +269,7 @@ export class LiveConnection extends EventEmitter {
     if (this.closing) return;
     this.closing = true;
     this.cancelReply();
+    this.clearInstructions();
     if (this.sessionId) this.send({ type: 'session.close' });
     else this.socket.terminate();
     this.deadline = setTimeout(() => this.socket.terminate(), 5000);
@@ -261,7 +278,12 @@ export class LiveConnection extends EventEmitter {
   dispose() {
     this.closing = true;
     this.cancelReply();
+    this.clearInstructions();
     clearTimeout(this.deadline);
     this.socket.terminate();
+  }
+  private clearInstructions() {
+    for (const timer of this.pendingInstructions.values()) clearTimeout(timer);
+    this.pendingInstructions.clear();
   }
 }

@@ -10,12 +10,28 @@ export class FakeSocket extends EventEmitter {
   bufferedAmount = 0;
   sent: any[] = [];
   autoStart = true;
+  autoOpening = true;
   send(raw: string) {
     const event = JSON.parse(raw);
     this.sent.push(event);
     if (event.type === 'session.start' && this.autoStart)
       queueMicrotask(() => this.push({ type: 'session.started', session: { id: 'live_test' } }));
     if (event.type === 'session.close') queueMicrotask(() => this.push({ type: 'session.closed' }));
+    if (event.type === 'session.instructions.append')
+      queueMicrotask(() => {
+        this.push({ type: 'session.instructions.appended', client_event_id: event.event_id });
+        if (
+          this.autoOpening &&
+          event.content.includes('Say exactly this sentence in full: "지금 어디십니까?"')
+        ) {
+          this.autoOpening = false;
+          this.push({ type: 'session.output_transcript.delta', delta: '지금 어디십니까?' });
+          this.push({
+            type: 'session.output_audio.delta',
+            delta: Buffer.alloc(640, 0).toString('base64'),
+          });
+        }
+      });
   }
   push(event: unknown) {
     this.emit('message', Buffer.from(JSON.stringify(event)));
@@ -49,6 +65,7 @@ export function setup(fetcher?: typeof fetch) {
     fetcher:
       fetcher ??
       (async (url, options) => {
+        if (String(url).includes('api.openai.com')) return Response.json({ status: 'incomplete' });
         requests.push({
           url: String(url),
           body: options?.body ? JSON.parse(String(options.body)) : null,
