@@ -6,6 +6,7 @@ import {
   finishResident,
   residentAssessment,
   residentQuestion,
+  residentQuestions,
 } from '../src/resident-flow.ts';
 import { writePrivate } from '../src/config.ts';
 const { store, dataDir } = apiCheckContext();
@@ -20,6 +21,23 @@ const cases = [
     expected: 'rescue',
   },
   { name: 'legs_correction', text: '다리가 너무 움직이지 않는다니까요', expected: 'rescue' },
+  {
+    name: 'vehicle_request',
+    text: '어 나 지금 못 움직여요. 차 보내주실 수 있나요',
+    expected: 'rescue',
+  },
+  {
+    name: 'asr_vehicle_request',
+    text: '어 나 지금 모둠지겨요. 차 보내주실 수 있나요',
+    expected: 'rescue',
+  },
+  { name: 'support_yes', text: '네', question: residentQuestions.assistance, expected: 'rescue' },
+  {
+    name: 'support_no',
+    text: '아니요',
+    question: residentQuestions.assistance,
+    expected: 'review',
+  },
   { name: 'refused', text: '집을 두고 떠날 수 없어요. 대피 안 할래요', expected: 'refused' },
   { name: 'direction_question', text: '어디로 가야 돼?', expected: 'review' },
 ];
@@ -30,14 +48,17 @@ const results = await Promise.all(
     a.stage = 'mobility';
     const began = Date.now();
     try {
-      const answer = await classifyResident(store.value, item.text, a, residentQuestion(a));
-      applyResidentAnswer(a, item.text, answer, residentQuestion(a));
+      const question = item.question ?? residentQuestion(a);
+      const answer = await classifyResident(store.value, item.text, a, question);
+      applyResidentAnswer(a, item.text, answer, question);
       const result = finishResident(a);
       return {
         name: item.name,
         expected: item.expected,
         actual: result.kind,
         passed: result.kind === item.expected,
+        mobility: answer.mobility,
+        confidence: answer.confidence,
         latencyMs: Date.now() - began,
       };
     } catch {

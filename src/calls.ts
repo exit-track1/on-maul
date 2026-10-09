@@ -23,6 +23,7 @@ import {
   residentAssessment,
   residentQuestions,
   residentQuestion,
+  residentClarification,
   greetingOnly,
   openingDelayMs,
   answerSettleMs,
@@ -101,6 +102,7 @@ type Run = {
   openingText: string;
   openingSpeech: boolean;
   openingLastSpeechAt: number;
+  outputLastSpeechAt: number;
   openingAccepted: boolean;
   openingReady: boolean;
   openingResolve?: () => void;
@@ -222,6 +224,7 @@ export class CallManager extends EventEmitter {
       openingText: '',
       openingSpeech: false,
       openingLastSpeechAt: 0,
+      outputLastSpeechAt: 0,
       openingAccepted: false,
       openingReady: false,
       farewellText: '',
@@ -755,8 +758,14 @@ export class CallManager extends EventEmitter {
         this.checkOpening(run);
         return;
       }
+      const speech = muLawRms(Buffer.from(event.delta, 'base64')) > 100;
+      if (run.live?.controlled) {
+        if (speech) run.outputLastSpeechAt = Date.now();
+        // Retain short pauses and sentence tails, but don't queue idle Live silence
+        // behind the cached opening or between questions.
+        else if (Date.now() - run.outputLastSpeechAt > 300) return;
+      }
       if (run.bridge?.appendOutput(event.delta) && run.view.completion?.status === 'reported') {
-        const speech = muLawRms(Buffer.from(event.delta, 'base64')) > 100;
         run.farewellAudio ||= speech;
         // Live also streams silence. Silence must not indefinitely postpone the final mark.
         if (speech) this.scheduleFarewell(run);
@@ -925,6 +934,11 @@ export class CallManager extends EventEmitter {
       );
       if (valid()) {
         run.buffer = '';
+        this.log(
+          run,
+          'resident_answer_classified',
+          `응답 분류 · 이동 ${answer.mobility} · 몸 ${answer.condition} · 거부 ${answer.refusal} · 신뢰도 ${answer.confidence} · 원문 ${text.length}자`,
+        );
         this.advanceAssessment(run, text, answer, question);
       }
     } catch {
@@ -948,16 +962,34 @@ export class CallManager extends EventEmitter {
       run.view.completion?.status === 'reported'
     )
       return;
+    const stage = assessment.stage;
     applyResidentAnswer(assessment, text, answer, question);
     if (run.view.assessment!.stage === 'done') this.finishAssessment(run);
     else {
+      if (stage === assessment.stage && (!run.questionSpoken || question !== run.questionLine)) {
+        this.log(run, 'question_pending', '미확인 답변. 진행 중인 질문을 다시 시작하지 않습니다.');
+        return;
+      }
+      const line =
+        stage === assessment.stage
+          ? residentClarification(assessment)
+          : residentQuestion(assessment);
+      if (assessment.answers.some((item) => item.question === line)) {
+        this.log(
+          run,
+          'clarification_exhausted',
+          '같은 확인 질문을 반복하지 않고 담당자 재확인으로 마칩니다.',
+        );
+        this.finishAssessment(run);
+        return;
+      }
       this.log(
         run,
         'scenario_step',
         `${assessment.stage === 'location' ? '현재 위치' : assessment.stage === 'mobility' ? '이동 가능 여부' : '몸 상태'} 확인 · ${run.config.BACKEND_MODEL}`,
       );
       run.bridge!.clear();
-      run.questionLine = residentQuestion(assessment);
+      run.questionLine = line;
       run.questionText = '';
       run.questionSpoken = false;
       run.live!.say(run.questionLine);

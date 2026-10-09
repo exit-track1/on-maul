@@ -4,6 +4,8 @@ export const residentQuestions = {
   location: '지금 어디십니까?',
   mobility: '현재 산불로 인하여 대피하셔야 합니다.',
   condition: '몸이 불편하신가요?',
+  assistance: '이동에 차량 지원이 필요하신가요?',
+  independentMobility: '대피소까지 혼자 이동 가능하십니까?',
 };
 export const rescueFarewell = '구조대를 보내드리겠습니다.';
 export const movingFarewell = '지금 즉시 대피해주십시오.';
@@ -41,6 +43,13 @@ export function residentQuestion(a: ResidentAssessment) {
   if (a.stage === 'mobility')
     return `${residentQuestions.mobility} ${a.shelterName}로 이동 가능하십니까?`;
   return a.stage === 'condition' ? residentQuestions.condition : residentQuestions.location;
+}
+export function residentClarification(a: ResidentAssessment) {
+  if (a.stage !== 'mobility') return residentQuestion(a);
+  return a.condition === 'comfortable' ||
+    a.answers.at(-1)?.question === residentQuestions.assistance
+    ? residentQuestions.independentMobility
+    : residentQuestions.assistance;
 }
 export function greetingOnly(text: string) {
   return /^(?:어[,.\s]*)?(?:여보세요|안녕하세요|네[,.\s]*여보세요)[.!?\s]*$/.test(text.trim());

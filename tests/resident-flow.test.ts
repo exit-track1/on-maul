@@ -425,6 +425,166 @@ test('지연된 전사 조각은 분류 중에도 앞 문장을 보존하고 한
     t.mock.timers.reset();
   }
 });
+test('대화 대기 중 Live 무음은 첫 질문 음성 뒤에 누적되지 않는다', async (t) => {
+  const s = setup();
+  t.mock.timers.enable({ apis: ['setTimeout', 'Date'] });
+  try {
+    await s.manager.start(params);
+    media(s.manager);
+    hook(s.manager, 'call.answered');
+    t.mock.timers.tick(2000);
+    const before = s.manager.current.bridge!.output.length;
+    for (let i = 0; i < 100; i++) {
+      s.sockets[0].push({
+        type: 'session.output_audio.delta',
+        delta: Buffer.alloc(160, 255).toString('base64'),
+      });
+      t.mock.timers.tick(20);
+    }
+    assert.equal(s.manager.current.bridge!.output.length, before);
+    s.sockets[0].push({
+      type: 'session.output_audio.delta',
+      delta: Buffer.alloc(160, 0).toString('base64'),
+    });
+    for (let i = 0; i < 30; i++) {
+      t.mock.timers.tick(20);
+      s.sockets[0].push({
+        type: 'session.output_audio.delta',
+        delta: Buffer.alloc(160, 255).toString('base64'),
+      });
+    }
+    assert.equal(
+      s.manager.current.bridge!.output.length,
+      before + 160 + 15 * 160,
+      '발화 후 300ms의 자연스러운 무음만 보존한다',
+    );
+  } finally {
+    s.cleanup();
+    t.mock.timers.reset();
+  }
+});
+test('180ms·900ms 비교: 같은 전체 전사와 낮은 신뢰도에서는 첫 안내 대신 차량 지원을 한 번 확인한다', async (t) => {
+  const results: { delay: number; classified: string; openingCount: number }[] = [];
+  for (const delay of [180, 900]) {
+    const s = setup();
+    t.mock.timers.enable({ apis: ['setTimeout', 'Date'] });
+    try {
+      await s.manager.start(params);
+      media(s.manager);
+      hook(s.manager, 'call.answered');
+      t.mock.timers.tick(2000);
+      const after = s.manager.after.bind(s.manager);
+      t.mock.method(
+        s.manager,
+        'after',
+        (run: Parameters<CallManager['after']>[0], ms: number, callback: () => void) =>
+          after(run, ms === 180 ? delay : ms, callback),
+      );
+      const text = '어 나 지금 모둠지겨요. 차 보내주실 수 있나요';
+      let classified = '';
+      s.manager.current.assess = async (_config, value) => {
+        classified = value;
+        return facts(value, { mobility: 'needs_help', confidence: 0.8 });
+      };
+      user(s.sockets[0], text);
+      t.mock.timers.tick(delay - 1);
+      await flush();
+      assert.equal(classified, '');
+      t.mock.timers.tick(1);
+      await flush();
+      assert.equal(classified, text);
+      assert.equal(s.manager.public().assessment!.mobility, 'unknown');
+      const openingCount = s.sockets[0].sent.filter((e) =>
+        e.content?.includes('현재 산불로'),
+      ).length;
+      results.push({ delay, classified, openingCount });
+      assert.equal(openingCount, 1);
+      assert.equal(s.manager.current.questionLine, residentQuestions.assistance);
+      assert.equal(s.manager.public().completion, undefined);
+    } finally {
+      s.cleanup();
+      t.mock.restoreAll();
+      t.mock.timers.reset();
+    }
+  }
+  assert.equal(results[0].classified, results[1].classified);
+  console.log(JSON.stringify({ experiment: 'same_transcript_and_model_result', results }));
+});
+test('차량 지원 확인 중 응답하세요 전사 조각은 질문을 다시 시작하지 않으며 네는 구조로 마친다', async (t) => {
+  const s = setup();
+  t.mock.timers.enable({ apis: ['setTimeout', 'Date'] });
+  try {
+    await s.manager.start(params);
+    media(s.manager);
+    hook(s.manager, 'call.answered');
+    t.mock.timers.tick(2000);
+    s.manager.current.assess = async (_config, text) =>
+      facts(text, { mobility: 'needs_help', confidence: 0.8 });
+    user(s.sockets[0], '모둠지겨요. 차 보내주실 수 있나요');
+    t.mock.timers.tick(180);
+    await flush();
+    assert.equal(s.manager.current.questionLine, residentQuestions.assistance);
+    const count = s.sockets[0].sent.filter((e) => e.type === 'session.instructions.append').length;
+    s.manager.current.assess = async () => unknownResidentAnswer();
+    for (const fragment of ['응답', '하세요']) {
+      user(s.sockets[0], fragment);
+      t.mock.timers.tick(180);
+      await flush();
+      assert.equal(
+        s.sockets[0].sent.filter((e) => e.type === 'session.instructions.append').length,
+        count,
+      );
+    }
+    output(s.sockets[0], residentQuestions.assistance);
+    s.manager.current.assess = async (_config, text, _assessment, question) => {
+      assert.equal(question, residentQuestions.assistance);
+      return facts(text, { mobility: 'needs_help' });
+    };
+    user(s.sockets[0], '네');
+    t.mock.timers.tick(180);
+    await flush();
+    assert.equal(s.manager.public().completion!.kind, 'rescue');
+    assert.equal(s.sockets[0].sent.filter((e) => e.content?.includes('현재 산불로')).length, 1);
+    assert.equal(
+      s.sockets[0].sent.filter((e) => e.content?.includes(residentQuestions.assistance)).length,
+      1,
+    );
+  } finally {
+    s.cleanup();
+    t.mock.timers.reset();
+  }
+});
+test('확인 질문에도 계속 불명확하면 첫 안내나 이전 질문을 반복하지 않고 담당자 재확인으로 끝낸다', async (t) => {
+  const s = setup();
+  t.mock.timers.enable({ apis: ['setTimeout', 'Date'] });
+  try {
+    await s.manager.start(params);
+    media(s.manager);
+    hook(s.manager, 'call.answered');
+    t.mock.timers.tick(2000);
+    s.manager.current.assess = async () => unknownResidentAnswer();
+    for (const text of ['어디인지 잘 모르겠어요', '잘 모르겠는데요', '무슨 말인지 모르겠어요']) {
+      output(s.sockets[0], s.manager.current.questionLine);
+      user(s.sockets[0], text);
+      t.mock.timers.tick(180);
+      await flush();
+    }
+    assert.equal(s.manager.public().completion!.kind, 'review');
+    assert.equal(s.sockets[0].sent.filter((e) => e.content?.includes('현재 산불로')).length, 1);
+    assert.equal(
+      s.sockets[0].sent.filter((e) => e.content?.includes(residentQuestions.assistance)).length,
+      1,
+    );
+    assert.equal(
+      s.sockets[0].sent.filter((e) => e.content?.includes(residentQuestions.independentMobility))
+        .length,
+      1,
+    );
+  } finally {
+    s.cleanup();
+    t.mock.timers.reset();
+  }
+});
 test('수신자가 다시 말하기 시작하면 이전 분류를 반영하지 않고 전사 도착 후 루프를 이어간다', async (t) => {
   const s = setup();
   t.mock.timers.enable({ apis: ['setTimeout', 'Date'] });
