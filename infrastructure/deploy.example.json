@@ -1,0 +1,13 @@
+{
+  "profile": "YOUR_LOCAL_AWS_PROFILE",
+  "region": "ap-northeast-2",
+  "account_id": "YOUR_AWS_ACCOUNT_ID",
+  "stack_name": "onmaul-hackathon",
+  "domain": "onmaul.nariacloud.com",
+  "outputs": {
+    "InstanceId": "YOUR_INSTANCE_ID",
+    "PublicIp": "YOUR_ELASTIC_IP",
+    "ArtifactsBucket": "YOUR_PRIVATE_BUCKET",
+    "RuntimeSecretArn": "YOUR_SECRET_ARN"
+  }
+}

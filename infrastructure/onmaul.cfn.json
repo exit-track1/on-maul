@@ -1,0 +1,396 @@
+{
+  "AWSTemplateFormatVersion": "2010-09-09",
+  "Description": "Onmaul hackathon EC2, Elastic IP, private S3 artifacts, and runtime secret. Manual deployment only.",
+  "Parameters": {
+    "VpcId": {
+      "Type": "AWS::EC2::VPC::Id"
+    },
+    "SubnetId": {
+      "Type": "AWS::EC2::Subnet::Id"
+    },
+    "InstanceType": {
+      "Type": "String",
+      "Default": "t3.small",
+      "AllowedValues": [
+        "t3.small",
+        "t3.medium"
+      ]
+    },
+    "LatestAmi": {
+      "Type": "AWS::SSM::Parameter::Value<AWS::EC2::Image::Id>",
+      "Default": "/aws/service/ami-amazon-linux-latest/al2023-ami-kernel-default-x86_64"
+    }
+  },
+  "Resources": {
+    "ArtifactsBucket": {
+      "Type": "AWS::S3::Bucket",
+      "DeletionPolicy": "Retain",
+      "UpdateReplacePolicy": "Retain",
+      "Properties": {
+        "BucketEncryption": {
+          "ServerSideEncryptionConfiguration": [
+            {
+              "ServerSideEncryptionByDefault": {
+                "SSEAlgorithm": "AES256"
+              }
+            }
+          ]
+        },
+        "PublicAccessBlockConfiguration": {
+          "BlockPublicAcls": true,
+          "BlockPublicPolicy": true,
+          "IgnorePublicAcls": true,
+          "RestrictPublicBuckets": true
+        },
+        "OwnershipControls": {
+          "Rules": [
+            {
+              "ObjectOwnership": "BucketOwnerEnforced"
+            }
+          ]
+        },
+        "VersioningConfiguration": {
+          "Status": "Enabled"
+        },
+        "LifecycleConfiguration": {
+          "Rules": [
+            {
+              "Id": "PruneOldVersions",
+              "Status": "Enabled",
+              "NoncurrentVersionExpiration": {
+                "NoncurrentDays": 30
+              },
+              "AbortIncompleteMultipartUpload": {
+                "DaysAfterInitiation": 1
+              }
+            }
+          ]
+        },
+        "Tags": [
+          {
+            "Key": "Project",
+            "Value": "onmaul"
+          },
+          {
+            "Key": "Environment",
+            "Value": "hackathon"
+          }
+        ]
+      }
+    },
+    "ArtifactsBucketPolicy": {
+      "Type": "AWS::S3::BucketPolicy",
+      "Properties": {
+        "Bucket": {
+          "Ref": "ArtifactsBucket"
+        },
+        "PolicyDocument": {
+          "Version": "2012-10-17",
+          "Statement": [
+            {
+              "Sid": "RequireTLS",
+              "Effect": "Deny",
+              "Principal": "*",
+              "Action": "s3:*",
+              "Resource": [
+                {
+                  "Fn::GetAtt": [
+                    "ArtifactsBucket",
+                    "Arn"
+                  ]
+                },
+                {
+                  "Fn::Sub": "${ArtifactsBucket.Arn}/*"
+                }
+              ],
+              "Condition": {
+                "Bool": {
+                  "aws:SecureTransport": "false"
+                }
+              }
+            }
+          ]
+        }
+      }
+    },
+    "RuntimeSecret": {
+      "Type": "AWS::SecretsManager::Secret",
+      "DeletionPolicy": "Retain",
+      "UpdateReplacePolicy": "Retain",
+      "Properties": {
+        "Name": "onmaul/prod/runtime-env",
+        "Description": "Onmaul runtime dotenv. Populated separately; never put values in CloudFormation or Git.",
+        "Tags": [
+          {
+            "Key": "Project",
+            "Value": "onmaul"
+          },
+          {
+            "Key": "Environment",
+            "Value": "hackathon"
+          }
+        ]
+      }
+    },
+    "InstanceRole": {
+      "Type": "AWS::IAM::Role",
+      "Properties": {
+        "AssumeRolePolicyDocument": {
+          "Version": "2012-10-17",
+          "Statement": [
+            {
+              "Effect": "Allow",
+              "Principal": {
+                "Service": "ec2.amazonaws.com"
+              },
+              "Action": "sts:AssumeRole"
+            }
+          ]
+        },
+        "ManagedPolicyArns": [
+          {
+            "Fn::Sub": "arn:${AWS::Partition}:iam::aws:policy/AmazonSSMManagedInstanceCore"
+          }
+        ],
+        "Policies": [
+          {
+            "PolicyName": "OnmaulRuntimeReadOnly",
+            "PolicyDocument": {
+              "Version": "2012-10-17",
+              "Statement": [
+                {
+                  "Effect": "Allow",
+                  "Action": [
+                    "s3:GetObject"
+                  ],
+                  "Resource": {
+                    "Fn::Sub": "${ArtifactsBucket.Arn}/releases/*"
+                  }
+                },
+                {
+                  "Effect": "Allow",
+                  "Action": [
+                    "secretsmanager:GetSecretValue"
+                  ],
+                  "Resource": {
+                    "Ref": "RuntimeSecret"
+                  }
+                }
+              ]
+            }
+          }
+        ],
+        "Tags": [
+          {
+            "Key": "Project",
+            "Value": "onmaul"
+          },
+          {
+            "Key": "Environment",
+            "Value": "hackathon"
+          }
+        ]
+      }
+    },
+    "InstanceProfile": {
+      "Type": "AWS::IAM::InstanceProfile",
+      "Properties": {
+        "Roles": [
+          {
+            "Ref": "InstanceRole"
+          }
+        ]
+      }
+    },
+    "WebSecurityGroup": {
+      "Type": "AWS::EC2::SecurityGroup",
+      "Properties": {
+        "GroupDescription": "Onmaul HTTP and HTTPS only; management via SSM",
+        "VpcId": {
+          "Ref": "VpcId"
+        },
+        "SecurityGroupIngress": [
+          {
+            "IpProtocol": "tcp",
+            "FromPort": 80,
+            "ToPort": 80,
+            "CidrIp": "0.0.0.0/0"
+          },
+          {
+            "IpProtocol": "tcp",
+            "FromPort": 443,
+            "ToPort": 443,
+            "CidrIp": "0.0.0.0/0"
+          }
+        ],
+        "Tags": [
+          {
+            "Key": "Project",
+            "Value": "onmaul"
+          },
+          {
+            "Key": "Environment",
+            "Value": "hackathon"
+          }
+        ]
+      }
+    },
+    "Instance": {
+      "Type": "AWS::EC2::Instance",
+      "Properties": {
+        "ImageId": {
+          "Ref": "LatestAmi"
+        },
+        "InstanceType": {
+          "Ref": "InstanceType"
+        },
+        "SubnetId": {
+          "Ref": "SubnetId"
+        },
+        "SecurityGroupIds": [
+          {
+            "Ref": "WebSecurityGroup"
+          }
+        ],
+        "IamInstanceProfile": {
+          "Ref": "InstanceProfile"
+        },
+        "MetadataOptions": {
+          "HttpEndpoint": "enabled",
+          "HttpTokens": "required",
+          "HttpPutResponseHopLimit": 1
+        },
+        "CreditSpecification": {
+          "CPUCredits": "standard"
+        },
+        "BlockDeviceMappings": [
+          {
+            "DeviceName": "/dev/xvda",
+            "Ebs": {
+              "VolumeSize": 20,
+              "VolumeType": "gp3",
+              "Encrypted": true,
+              "DeleteOnTermination": true
+            }
+          }
+        ],
+        "UserData": {
+          "Fn::Base64": {
+            "Fn::Join": [
+              "\n",
+              [
+                "#!/bin/bash",
+                "set -euo pipefail",
+                "umask 077",
+                "dnf install -y nginx",
+                "systemctl enable --now amazon-ssm-agent",
+                "id onmaul >/dev/null 2>&1 || useradd --system --create-home --home-dir /var/lib/onmaul --shell /sbin/nologin onmaul",
+                "install -d -m 0750 -o onmaul -g onmaul /opt/onmaul /var/lib/onmaul /etc/onmaul",
+                "cat > /etc/nginx/nginx.conf <<'NGINX'",
+                "user nginx;",
+                "worker_processes auto;",
+                "error_log /var/log/nginx/error.log warn;",
+                "pid /run/nginx.pid;",
+                "include /usr/share/nginx/modules/*.conf;",
+                "events { worker_connections 1024; }",
+                "http {",
+                "  include /etc/nginx/mime.types;",
+                "  default_type application/octet-stream;",
+                "  server {",
+                "    listen 80 default_server;",
+                "    server_name _;",
+                "    location = /infra-health { default_type text/plain; return 200 'onmaul infrastructure ready\\n'; }",
+                "    location / { default_type text/plain; return 503 'Application deployment pending\\n'; }",
+                "  }",
+                "}",
+                "NGINX",
+                "nginx -t",
+                "systemctl enable --now nginx",
+                "touch /var/lib/onmaul/infrastructure-ready"
+              ]
+            ]
+          }
+        },
+        "Tags": [
+          {
+            "Key": "Project",
+            "Value": "onmaul"
+          },
+          {
+            "Key": "Environment",
+            "Value": "hackathon"
+          },
+          {
+            "Key": "Name",
+            "Value": "onmaul-hackathon"
+          }
+        ]
+      }
+    },
+    "ElasticIp": {
+      "Type": "AWS::EC2::EIP",
+      "Properties": {
+        "Domain": "vpc",
+        "Tags": [
+          {
+            "Key": "Project",
+            "Value": "onmaul"
+          },
+          {
+            "Key": "Environment",
+            "Value": "hackathon"
+          }
+        ]
+      }
+    },
+    "ElasticIpAssociation": {
+      "Type": "AWS::EC2::EIPAssociation",
+      "Properties": {
+        "AllocationId": {
+          "Fn::GetAtt": [
+            "ElasticIp",
+            "AllocationId"
+          ]
+        },
+        "InstanceId": {
+          "Ref": "Instance"
+        }
+      }
+    }
+  },
+  "Outputs": {
+    "InstanceId": {
+      "Value": {
+        "Ref": "Instance"
+      }
+    },
+    "PublicIp": {
+      "Value": {
+        "Ref": "ElasticIp"
+      }
+    },
+    "ArtifactsBucket": {
+      "Value": {
+        "Ref": "ArtifactsBucket"
+      }
+    },
+    "RuntimeSecretArn": {
+      "Value": {
+        "Ref": "RuntimeSecret"
+      }
+    },
+    "SecurityGroupId": {
+      "Value": {
+        "Ref": "WebSecurityGroup"
+      }
+    },
+    "InstanceRoleArn": {
+      "Value": {
+        "Fn::GetAtt": [
+          "InstanceRole",
+          "Arn"
+        ]
+      }
+    }
+  }
+}
