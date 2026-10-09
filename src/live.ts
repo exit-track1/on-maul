@@ -3,7 +3,7 @@ import { randomUUID } from 'node:crypto';
 import WebSocket from 'ws';
 import type { Config } from './config.ts';
 import { AppError, farewell, instructions, type Scenario } from './domain.ts';
-import { residentQuestions } from './resident-flow.ts';
+import { residentAssessment, residentQuestion } from './resident-flow.ts';
 export type SocketFactory = (url: string, key: string) => WebSocket;
 export const socketFactory: SocketFactory = (url, key) =>
   new WebSocket(url, {
@@ -222,14 +222,10 @@ export class LiveConnection extends EventEmitter {
     });
     return id;
   }
-  greet(scenario: Scenario) {
+  greet(scenario: Scenario, line = residentQuestion(residentAssessment())) {
     if (this.greetingSent || !this.sessionId || this.closing) return;
     this.greetingSent = true;
-    this.say(
-      scenario === 'resident'
-        ? residentQuestions.location
-        : '가상의 구조 요청에 참여 가능하신가요?',
-    );
+    this.say(scenario === 'resident' ? line : '가상의 구조 요청에 참여 가능하신가요?');
   }
   say(line: string) {
     this.currentLine = line;

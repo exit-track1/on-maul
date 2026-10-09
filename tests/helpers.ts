@@ -20,12 +20,12 @@ export class FakeSocket extends EventEmitter {
     if (event.type === 'session.instructions.append')
       queueMicrotask(() => {
         this.push({ type: 'session.instructions.appended', client_event_id: event.event_id });
-        if (
-          this.autoOpening &&
-          event.content.includes('Say exactly this sentence in full: "지금 어디십니까?"')
-        ) {
+        if (this.autoOpening && event.content.includes('현재 산불로 인하여 대피하셔야 합니다.')) {
           this.autoOpening = false;
-          this.push({ type: 'session.output_transcript.delta', delta: '지금 어디십니까?' });
+          this.push({
+            type: 'session.output_transcript.delta',
+            delta: event.content.match(/Say exactly this sentence in full: "([^"]+)"/)[1],
+          });
           this.push({
             type: 'session.output_audio.delta',
             delta: Buffer.alloc(640, 0).toString('base64'),

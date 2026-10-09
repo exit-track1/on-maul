@@ -170,7 +170,7 @@ export class AudioBridge {
       }
     } else {
       this.loud = 0;
-      if (++this.quiet >= 15) this.speaking = false;
+      if (++this.quiet >= 8) this.speaking = false;
     }
     if (
       !this.outputReady &&

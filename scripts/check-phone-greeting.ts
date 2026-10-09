@@ -1,5 +1,6 @@
 import { join } from 'node:path';
 import { apiCheckContext } from './api-check-context.ts';
+import { residentAssessment, residentQuestion } from '../src/resident-flow.ts';
 import { LiveConnection } from '../src/live.ts';
 import { muLawRms } from '../src/media.ts';
 import { writePrivate } from '../src/config.ts';
@@ -19,7 +20,12 @@ try {
       if (e.type === 'session.output_transcript.delta') text += e.delta;
       if (e.type === 'session.output_audio.delta')
         speech ||= muLawRms(Buffer.from(e.delta, 'base64')) > 100;
-      if (accepted && speech && text.replace(/\s/g, '').includes('지금어디십니까')) resolve();
+      if (
+        accepted &&
+        speech &&
+        text.replace(/\s/g, '').includes(residentQuestion(residentAssessment()).replace(/\s/g, ''))
+      )
+        resolve();
     });
     deadline = setTimeout(() => reject(new Error('20초 내 첫 질문 음성 미확인')), 20000);
   });

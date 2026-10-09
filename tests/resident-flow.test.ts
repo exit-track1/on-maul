@@ -39,7 +39,7 @@ test('캡처 회귀: 여보세요는 위치가 아니며 몸이 괜찮다는 답
   const a = residentAssessment();
   apply(a, '여보세요', { location: '여보세요' });
   assert.equal(a.location, '위치 미확인');
-  assert.equal(a.stage, 'location');
+  assert.equal(a.stage, 'mobility');
   assert.equal(a.answers.length, 0);
   apply(a, '어 지금 집이에요', { location: '집' });
   assert.equal(a.stage, 'mobility');
@@ -83,6 +83,46 @@ test('근거 없는 사실·낮은 신뢰도·부정 정정은 잘못된 이동 
   apply(a, '아니, 차가 없어서 못 가요', { mobility: 'needs_help' });
   assert.equal(finishResident(a).kind, 'rescue');
 });
+test('첫 대피 질문의 답을 180ms 뒤 분류하고 위치 질문 없이 몸 상태 확인 후 종료한다', async (t) => {
+  const s = setup();
+  t.mock.timers.enable({ apis: ['setTimeout', 'Date'] });
+  try {
+    await s.manager.start(params);
+    media(s.manager);
+    hook(s.manager, 'call.answered');
+    t.mock.timers.tick(2000);
+    let classified = 0;
+    s.manager.current.assess = async (_config, text, _assessment, question) => {
+      classified++;
+      assert.equal(question, residentQuestion(residentAssessment()));
+      return facts(text, { mobility: 'possible' });
+    };
+    user(s.sockets[0], '네 이동 가능해요');
+    t.mock.timers.tick(179);
+    await flush();
+    assert.equal(classified, 0);
+    t.mock.timers.tick(1);
+    await flush();
+    assert.equal(classified, 1);
+    assert.equal(s.manager.public().assessment!.stage, 'condition');
+    assert.equal(s.manager.current.questionLine, '몸이 불편하신가요?');
+    output(s.sockets[0], s.manager.current.questionLine);
+    s.manager.current.assess = async (_config, text, _assessment, question) => {
+      assert.equal(question, '몸이 불편하신가요?');
+      return facts(text, { condition: 'comfortable' });
+    };
+    user(s.sockets[0], '아니요 몸은 괜찮아요');
+    t.mock.timers.tick(180);
+    await flush();
+    assert.equal(s.manager.public().completion!.kind, 'moving');
+    assert.equal(s.manager.public().completion!.closingText, movingFarewell);
+    assert.equal(s.manager.public().assessment!.location, '위치 미확인');
+    assert.ok(!s.sockets[0].sent.some((e) => e.content?.includes('지금 어디십니까?')));
+  } finally {
+    s.cleanup();
+    t.mock.timers.reset();
+  }
+});
 test('gpt-6.1-sol 실제 Responses payload·질문 문맥·원문 근거 검증, 미완료·API 오류는 실패', async () => {
   let payload: any;
   const text = '몸은 괜찮지만 차가 없어요';
@@ -92,7 +132,24 @@ test('gpt-6.1-sol 실제 Responses payload·질문 문맥·원문 근거 검증,
     payload = JSON.parse(String(options!.body));
     return Response.json({
       status: 'completed',
-      output: [{ content: [{ type: 'output_text', text: JSON.stringify(expected) }] }],
+      output: [
+        {
+          content: [
+            {
+              type: 'output_text',
+              text: JSON.stringify({
+                l: null,
+                m: 'h',
+                c: 'ok',
+                r: 'u',
+                e: null,
+                confidence: 1,
+                q: text,
+              }),
+            },
+          ],
+        },
+      ],
     });
   };
   const a = residentAssessment();
@@ -114,7 +171,15 @@ test('gpt-6.1-sol 실제 Responses payload·질문 문맥·원문 근거 검증,
           content: [
             {
               type: 'output_text',
-              text: JSON.stringify(facts('다른 원문', { mobility: 'possible' })),
+              text: JSON.stringify({
+                l: null,
+                m: 'p',
+                c: 'u',
+                r: 'u',
+                e: null,
+                confidence: 1,
+                q: '다른 원문',
+              }),
             },
           ],
         },
@@ -140,7 +205,7 @@ test('발신 전에 첫 질문 준비, 무음 선두 제외, 수신 2초 후 자
               type: 'session.output_audio.delta',
               delta: Buffer.alloc(16000, 255).toString('base64'),
             });
-            output(socket, residentQuestions.location, 1280);
+            output(socket, residentQuestion(residentAssessment()), 1280);
           });
       };
       s.sockets.push(socket);
@@ -159,7 +224,7 @@ test('발신 전에 첫 질문 준비, 무음 선두 제외, 수신 2초 후 자
     t.mock.timers.tick(1);
     assert.equal(s.manager.current.bridge!.active, true);
     assert.equal(s.manager.current.bridge!.output.length, 1280);
-    assert.equal(s.manager.public().transcript[0].text, residentQuestions.location);
+    assert.equal(s.manager.public().transcript[0].text, residentQuestion(residentAssessment()));
     assert.equal(s.manager.public().events.filter((e) => e.type === 'opening_playback').length, 1);
     assert.equal(s.requests.length, 1);
     hook(s.manager, 'call.hangup');
@@ -199,7 +264,7 @@ test('첫 질문이 생성되지 않거나 음성·전사만 있으면 실제 �
       else
         s.sockets[0].push({
           type: 'session.output_transcript.delta',
-          delta: residentQuestions.location,
+          delta: residentQuestion(residentAssessment()),
         });
       t.mock.timers.tick(100);
       await started;
@@ -241,13 +306,13 @@ test('인사→집→몸이 괜찮음은 이동 질문 유지, 실제 세 분기
         s.manager.current.assess = async () => facts(value, fields);
         output(socket, s.manager.current.questionLine);
         user(socket, value);
-        t.mock.timers.tick(900);
+        t.mock.timers.tick(180);
         await flush();
       };
       user(socket, '여보세요');
-      t.mock.timers.tick(900);
+      t.mock.timers.tick(180);
       await flush();
-      assert.equal(s.manager.public().assessment!.stage, 'location');
+      assert.equal(s.manager.public().assessment!.stage, 'mobility');
       await reply('어 지금 집이에요', { location: '집' });
       await reply('아니요 몸이 불편하지 않습니다', { condition: 'comfortable' });
       assert.equal(s.manager.public().completion, undefined);
@@ -302,7 +367,7 @@ test('발화 전 짧은 답 문맥은 공백이며 낡은 비동기 분류·분�
       return new Promise((r) => (resolve = r));
     };
     user(s.sockets[0], '네');
-    t.mock.timers.tick(900);
+    t.mock.timers.tick(180);
     await flush();
     user(s.sockets[0], '아니, 차가 없어요');
     resolve(facts('네', { mobility: 'possible', condition: 'comfortable' }));
@@ -311,7 +376,7 @@ test('발화 전 짧은 답 문맥은 공백이며 낡은 비동기 분류·분�
     s.manager.current.assess = async () => {
       throw new Error('API failed');
     };
-    t.mock.timers.tick(900);
+    t.mock.timers.tick(180);
     await flush();
     assert.equal(s.manager.public().completion, undefined);
     assert.equal(s.manager.public().assessment!.mobility, 'unknown');

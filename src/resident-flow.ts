@@ -10,6 +10,7 @@ export const movingFarewell = '지금 즉시 대피해주십시오.';
 export const refusalFarewell = '이장님께서 전화하실 겁니다.';
 export const reviewFarewell = '담당자가 다시 확인하도록 하겠습니다.';
 export const openingDelayMs = 2000;
+export const answerSettleMs = 180;
 export const scenarioWrapSeconds = 45;
 export const scenarioLimitSeconds = 60;
 export type ResidentAssessment = {
@@ -25,7 +26,7 @@ export type ResidentAssessment = {
 };
 export function residentAssessment(shelterName = '온빛 배움학교'): ResidentAssessment {
   return {
-    stage: 'location',
+    stage: 'mobility',
     location: '위치 미확인',
     shelterName,
     mobility: 'unknown',
@@ -63,7 +64,6 @@ export function applyResidentAnswer(
   if (answer.refusal !== 'unknown' && supported('refusal')) a.refusal = answer.refusal;
   if (supported('emergency')) a.emergency = answer.emergency;
   if (a.refusal === 'refused' || a.mobility === 'needs_help' || a.emergency) a.stage = 'done';
-  else if (a.location === '위치 미확인') a.stage = 'location';
   else if (a.mobility === 'unknown') a.stage = 'mobility';
   else if (a.condition === 'unknown') a.stage = 'condition';
   else a.stage = 'done';

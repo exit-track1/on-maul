@@ -79,7 +79,7 @@ test('발신 접수·벨소리·수신·미디어를 구분하며 수신 전에 
     );
     assert.match(
       s.sockets[0].sent.find((e) => e.type === 'session.instructions.append').content,
-      /지금 어디십니까/,
+      /현재 산불로 인하여 대피하셔야 합니다/,
     );
     hook(s.manager, 'call.initiated', 'late');
     assert.equal(s.manager.public().status, 'answered');

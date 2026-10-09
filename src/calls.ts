@@ -25,6 +25,7 @@ import {
   residentQuestion,
   greetingOnly,
   openingDelayMs,
+  answerSettleMs,
   scenarioWrapSeconds,
   scenarioLimitSeconds,
   type ResidentAssessment,
@@ -358,6 +359,7 @@ export class CallManager extends EventEmitter {
     this.current = run;
     run.link = options.link;
     run.shelterName = options.shelterName ?? run.shelterName;
+    run.questionLine = residentQuestion(residentAssessment(run.shelterName));
     if (options.classifier) {
       run.classify = options.classifier;
       run.linkedClassifier = true;
@@ -684,7 +686,7 @@ export class CallManager extends EventEmitter {
         ),
       ),
     );
-    run.live!.greet('resident');
+    run.live!.greet('resident', run.questionLine);
     try {
       await ready;
     } finally {
@@ -696,10 +698,7 @@ export class CallManager extends EventEmitter {
   }
   checkOpening(run: Run) {
     if (run.openingReady || !run.openingSpeech || !run.openingAccepted) return;
-    if (
-      run.openingText.replace(/\s|[.!?,]/g, '') !==
-      residentQuestions.location.replace(/\s|[.!?,]/g, '')
-    )
+    if (run.openingText.replace(/\s|[.!?,]/g, '') !== run.questionLine.replace(/\s|[.!?,]/g, ''))
       return;
     run.openingReady = true;
     run.openingResolve?.();
@@ -841,7 +840,7 @@ export class CallManager extends EventEmitter {
     const generation = run.generation;
     const consume = () => {
       if (run.bridge?.inputSpeaking) {
-        run.inputTimer = this.after(run, 250, consume);
+        run.inputTimer = this.after(run, 40, consume);
         return;
       }
       const utterance = run.buffer;
@@ -878,7 +877,7 @@ export class CallManager extends EventEmitter {
           }
         });
     };
-    run.inputTimer = this.after(run, run.live?.controlled ? 900 : 1500, consume);
+    run.inputTimer = this.after(run, run.live?.controlled ? answerSettleMs : 1500, consume);
   }
   async assessAnswer(run: Run, text: string, question: string, valid: () => boolean) {
     if (!valid() || !run.view.assessment || run.view.assessment.stage === 'done') return;
