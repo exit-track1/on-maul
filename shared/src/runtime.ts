@@ -1171,7 +1171,34 @@ export class Runtime {
       );
     this.log(`${result.reason} (규칙·모의 전사)`, 'assistant', id);
   }
+  validateDemoReset(input: Record<string, unknown>) {
+    this.requireRevision(input.revision);
+    requireThat(
+      input.confirmed === true,
+      '처음 상태로 초기화할지 확인하세요.',
+      'reset_confirmation',
+    );
+    requireThat(
+      !this.unresolvedLiveCalls(),
+      '진행 중이거나 종료 미확인인 실제 통화를 먼저 확인하세요.',
+      'live_session',
+    );
+  }
   command(action: string, input: Record<string, unknown> = {}): View {
+    if (action === 'demo-reset') {
+      this.validateDemoReset(input);
+      const revision = this.state.revision + 1;
+      this.state = this.initial(DATA, 'idle');
+      this.state.revision = revision;
+      this.seen.clear();
+      this.turn = 'resident';
+      this.startedSequence = 0;
+      this.cycleRemainder = 0;
+      this.cycleObservationMinute = 0;
+      this.cycleLeaderDue.clear();
+      this.cycleBaseTime = null;
+      return this.view();
+    }
     if (action === 'cycle-start') {
       this.requireRevision(input.revision);
       requireThat(

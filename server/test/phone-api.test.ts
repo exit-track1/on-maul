@@ -11,7 +11,7 @@ import { Config, type TelnyxPort } from '../src/telephony.ts';
 import { phoneOutcome } from '../src/phone-integration.ts';
 import type { PhonePort } from '../src/phone.ts';
 import type { SimulationTimer } from '../src/simulation.ts';
-import type { View } from '../../shared/src/runtime.ts';
+import { Runtime, type View } from '../../shared/src/runtime.ts';
 import { tripPosition } from '../../shared/src/dispatch.ts';
 import type {
   PhoneCall,
@@ -49,6 +49,7 @@ class FakePhone extends EventEmitter implements PhonePort {
   events: unknown[] = [];
   verificationCalls = 0;
   stops = 0;
+  resets = 0;
   attachedServer?: Server;
   disposed = false;
   value: PhoneState = {
@@ -127,6 +128,12 @@ class FakePhone extends EventEmitter implements PhonePort {
     assert.equal(call.status, 'unknown');
     assert.equal(confirmed, true);
     this.update(call.targetId, { status: 'ended', blocked: false, endedAt: Date.now() });
+    return this.state();
+  }
+  resetHistory() {
+    assert.equal(this.value.busy, false);
+    this.resets++;
+    this.value.calls = [];
     return this.state();
   }
   verifyWebhook(_raw: Buffer, requestHeaders: IncomingHttpHeaders) {
@@ -402,6 +409,92 @@ test('squad API dispatches to H009 after the captured immediate-departure respon
   assert.equal(view.trips.find((item) => item.id === trip.id)!.stage, 'shelter');
   assert.equal(householdStatus(view, 'H009').status, 'rescued');
   assert.equal(view.demonstration!.stage, 'completed');
+});
+
+test('confirmed reset clears frozen demo state and phone history, stays reset after restart, and makes no call', async (t) => {
+  const f = await fixture(t);
+  await f.start();
+  f.phone.update('H012', {
+    status: 'ended',
+    blocked: false,
+    answeredAt: Date.now(),
+    endedAt: Date.now(),
+    completion: rescue(),
+  });
+  await f.drain();
+  await f.advance(1);
+  const oldCall = f.phone.state().calls[0];
+  const before = await f.command('close', { acknowledged: true });
+  const targets = f.phone.state().targets;
+  assert.equal(before.frozen, true);
+  assert.ok(before.calls.length > 0);
+  assert.ok(before.simMinutes > 0);
+  const reset = await f.command('demo-reset', { revision: before.revision, confirmed: true });
+  const pristine = new Runtime().view();
+  assert.equal(reset.revision, before.revision + 1);
+  assert.deepEqual(reset.scenario, pristine.scenario);
+  assert.deepEqual(reset.data.households, pristine.data.households);
+  assert.deepEqual(reset.records, pristine.records);
+  assert.deepEqual(reset.memberResponses, pristine.memberResponses);
+  assert.equal(reset.simMinutes, 0);
+  assert.equal(reset.simulation.phase, 'idle');
+  assert.equal(reset.simulation.playing, false);
+  assert.equal(reset.frozen, false);
+  assert.equal(reset.demonstration, null);
+  for (const key of ['calls', 'trips', 'completedTrips', 'graphRuns', 'shelterAdmissions'] as const)
+    assert.deepEqual(reset[key], []);
+  assert.equal(f.phone.resets, 1);
+  assert.deepEqual(f.phone.state().calls, []);
+  assert.deepEqual(f.phone.state().targets, targets);
+  assert.equal(f.phone.starts.length, 1);
+  f.phone.emit('update', { requestId: oldCall.requestId, call: oldCall } satisfies PhoneUpdate);
+  assert.deepEqual((await f.drain()).calls, []);
+  assert.deepEqual((await f.advance(1)).simulation, reset.simulation);
+  const recovered = new FakePhone();
+  recovered.value = f.phone.state();
+  const restored = await f.restart(recovered);
+  assert.equal(restored.scenario.id, 'idle');
+  assert.equal(restored.simMinutes, 0);
+  assert.deepEqual(restored.calls, []);
+  assert.deepEqual(restored.graphRuns, []);
+  assert.deepEqual(recovered.state().calls, []);
+  assert.equal(recovered.starts.length, 0);
+});
+
+test('reset requires bearer auth, confirmation and current revision, and refuses active or unknown calls', async (t) => {
+  const f = await fixture(t);
+  await f.start();
+  const before = await f.state();
+  const missingConfirmation = await f.post('demo-reset', { revision: before.revision });
+  assert.equal(missingConfirmation.statusCode, 409);
+  assert.equal(missingConfirmation.json().code, 'reset_confirmation');
+  const stale = await f.post('demo-reset', { revision: before.revision - 1, confirmed: true });
+  assert.equal(stale.statusCode, 409);
+  assert.equal(stale.json().code, 'stale_revision');
+  const unauthorized = await f.current().app.inject({
+    method: 'POST',
+    url: '/api/command',
+    payload: { action: 'demo-reset', input: { revision: before.revision, confirmed: true } },
+  });
+  assert.equal(unauthorized.statusCode, 401);
+  for (const status of ['answered', 'unknown'] as const) {
+    f.phone.update('H012', { status, blocked: true });
+    const current = await f.drain();
+    const response = await f.post('demo-reset', { revision: current.revision, confirmed: true });
+    assert.equal(response.statusCode, 409);
+    assert.equal(response.json().code, 'live_session');
+    assert.equal(f.phone.resets, 0);
+    assert.equal(f.phone.state().calls.length, 1);
+  }
+  const unbound = new FakePhone();
+  unbound.value.busy = true;
+  const other = await fixture(t, unbound);
+  const response = await other.post('demo-reset', {
+    revision: (await other.state()).revision,
+    confirmed: true,
+  });
+  assert.equal(response.statusCode, 409);
+  assert.equal(unbound.resets, 0);
 });
 
 test('deployed dashboards bootstrap the environment token without caching and keep API bearer checks', async (t) => {

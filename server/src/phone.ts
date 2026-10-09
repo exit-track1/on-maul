@@ -86,6 +86,7 @@ export interface PhonePort {
   ): Promise<PhoneCall>;
   stop(callId?: string): Promise<PhoneState>;
   resolveUnknown(callId: string, confirmed: boolean): PhoneState;
+  resetHistory(): PhoneState;
   verifyWebhook(raw: Buffer, headers: IncomingHttpHeaders): boolean;
   webhook(event: unknown): void;
   attachUpgrade(server: Server): void;
@@ -423,6 +424,18 @@ export class PhoneEngine extends EventEmitter implements PhonePort {
     if (callId !== this.manager.public().id)
       throw new AppError('call_not_active', '현재 종료 미확인 통화 ID가 아닙니다.', 409);
     this.manager.resolveUnknown(confirmed);
+    return this.state();
+  }
+
+  resetHistory(): PhoneState {
+    if (this.state().busy)
+      throw new AppError('call_locked', '진행 중이거나 종료 미확인인 통화를 먼저 확인하세요.', 409);
+    // Reset the dashboard history, preserving the original voice audit and recipient settings.
+    // An unbound ended journal or late webhook cannot repopulate cleared dashboard records.
+    if (this.enabled) writePrivate(this.path, []);
+    this.calls.clear();
+    this.providerBindings.clear();
+    this.historyWarning = '';
     return this.state();
   }
 

@@ -453,9 +453,9 @@ export default function App() {
     [phoneConsent, setPhoneConsent] = useState(false),
     [logPane, setLogPane] = useState<'log' | 'phone'>('log'),
     [tab, setTab] = useState<Tab>('map'),
-    [modal, setModal] = useState<'confirm' | 'close' | 'assistant' | null>(
-      null,
-    ),
+    [modal, setModal] = useState<
+      'confirm' | 'close' | 'assistant' | 'reset' | null
+    >(null),
     [selected, setSelected] = useState<string | null>(null),
     [message, setMessage] = useState(''),
     [chat, setChat] = useState('몇 집 남았나'),
@@ -517,6 +517,47 @@ export default function App() {
   const demonstration = view.demonstration;
   const liveDemonstration = demonstration?.phoneMode === 'live';
   const phone = connection.phone;
+  const resetBlockedByCall = Boolean(
+    phone?.busy ||
+    phone?.calls.some(
+      (call) => call.blocked || !['ended', 'failed'].includes(call.status),
+    ) ||
+    view.calls.some(
+      (call) => call.mode === 'telnyx' && call.phase !== 'finished',
+    ),
+  );
+  const canReset = Boolean(
+    !connection.offline &&
+    connection.connected &&
+    !pending &&
+    (!phone?.enabled || connection.phoneConnected) &&
+    !resetBlockedByCall,
+  );
+  async function resetDemo() {
+    if (!canReset) return;
+    setPending(true);
+    try {
+      const next = await client.command('demo-reset', {
+        revision: client.snapshot().view.revision,
+        confirmed: true,
+      });
+      setView(next);
+      await client.refreshPhone();
+      setDemoStory('grandfather');
+      setPhoneConsent(false);
+      setFocusRequest(undefined);
+      setModal(null);
+      setSelected(null);
+      setTab('map');
+      setLogPane('log');
+      setMobile('canvas');
+      setMessage('상황실을 처음 상태로 초기화했습니다.');
+    } catch (error) {
+      setMessage(error instanceof Error ? error.message : '초기화 요청 오류');
+    } finally {
+      setPending(false);
+    }
+  }
   const cycleLocked = ['review', 'running', 'awaiting_handover'].includes(
     simulation.phase,
   );
@@ -616,6 +657,16 @@ export default function App() {
           <span>한 집도 빠짐없이</span>
         </div>
         <div className="header-controls">
+          {!connection.offline && (
+            <Btn
+              kind="outline"
+              size="sm"
+              disabled={!canReset}
+              onClick={() => setModal('reset')}
+            >
+              처음 상태로
+            </Btn>
+          )}
           {connection.offline && (
             <details className="static-scene-tools">
               <summary>정적 장면 점검</summary>
@@ -1260,6 +1311,34 @@ export default function App() {
           close={() => setSelected(null)}
         />
       )}{' '}
+      {modal === 'reset' && (
+        <Dialog title="처음 상태로 초기화" close={() => setModal(null)}>
+          <div className="modal-body">
+            <p>
+              경과 시간과 산불, 구조 진행, 가구·대원 상태, 상황 로그와 화면의
+              통화 내역을 처음 상태로 되돌립니다.
+            </p>
+            <p>서버 연결 설정과 등록된 수신 번호는 유지합니다.</p>
+            {resetBlockedByCall && (
+              <p role="status">
+                실제 통화의 종료를 확인한 뒤 초기화할 수 있습니다.
+              </p>
+            )}
+            <div className="toolbar">
+              <Btn
+                kind="outline"
+                disabled={pending}
+                onClick={() => setModal(null)}
+              >
+                취소
+              </Btn>
+              <Btn disabled={!canReset} onClick={() => void resetDemo()}>
+                초기화하기
+              </Btn>
+            </div>
+          </div>
+        </Dialog>
+      )}
       {modal === 'confirm' && view.plan && (
         <Dialog
           title={

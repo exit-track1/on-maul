@@ -321,6 +321,193 @@ test('deployed origin automatically configures bearer reads and keeps its token 
   ).toBe(true);
 });
 
+test('reset requires confirmation and clears elapsed time, rescue state and visible call history across reload', async ({
+  page,
+}) => {
+  const runtime = new Runtime();
+  runtime.command('cycle-start', {
+    revision: runtime.view().revision,
+    demoStory: 'squad',
+    phoneMode: 'live',
+  });
+  runtime.command('confirm', { revision: runtime.view().revision });
+  const call = fixtureCall('M01');
+  call.status = 'ended';
+  call.endedAt = call.answeredAt! + 30_000;
+  call.transcript = [{ speaker: 'user', text: '초기화 이전 통화 기록입니다.' }];
+  runtime.preparePhoneCall('M01', call.requestId, runtime.view().revision);
+  runtime.applyPhoneOutcome(call.requestId, {
+    ended: true,
+    kind: 'standby',
+    standbyAvailable: true,
+    evidence: '차량이 있고 지금 출동 가능합니다.',
+  });
+  runtime.tickCycle(2);
+  let view = runtime.view();
+  expect(view.trips.length).toBeGreaterThan(0);
+  const phone = configuredPhone();
+  phone.calls = [call];
+  const requests: {
+    action: string;
+    input: Record<string, unknown>;
+    authorization?: string;
+  }[] = [];
+  await page.route('**/api/state', (route) => route.fulfill({ json: view }));
+  await page.route('**/api/phone/state', (route) =>
+    route.fulfill({ json: phone }),
+  );
+  await page.route('**/api/command', async (route) => {
+    const body = route.request().postDataJSON() as {
+      action: string;
+      input: Record<string, unknown>;
+    };
+    requests.push({
+      ...body,
+      authorization: route.request().headers().authorization,
+    });
+    expect(body.action).toBe('demo-reset');
+    const revision = view.revision + 1;
+    view = new Runtime().view();
+    view.revision = revision;
+    phone.calls = [];
+    await route.fulfill({ json: view });
+  });
+  await page.goto('/');
+  const reset = page.getByRole('button', { name: '처음 상태로', exact: true });
+  await expect(reset).toBeEnabled();
+  await expect(page.getByTestId('cycle-time')).toContainText('T+2분');
+  await page.getByRole('tab', { name: '통화 내역', exact: true }).click();
+  await expect(page.getByTestId('call-history')).toContainText(
+    '초기화 이전 통화 기록입니다.',
+  );
+  await expect(page.getByTestId('fire-perimeter')).toBeVisible();
+  expect(requests).toEqual([]);
+  await reset.click();
+  let dialog = page.getByRole('dialog', { name: '처음 상태로 초기화' });
+  await expect(dialog).toContainText('등록된 수신 번호');
+  expect(requests).toEqual([]);
+  await dialog.getByRole('button', { name: '취소', exact: true }).click();
+  await expect(dialog).toHaveCount(0);
+  expect(requests).toEqual([]);
+  await page.getByRole('tab', { name: '자원·5분대기조', exact: true }).click();
+  await reset.click();
+  dialog = page.getByRole('dialog', { name: '처음 상태로 초기화' });
+  // State may advance while the confirmation is open; send its latest revision.
+  view.simMinutes = 3;
+  view.revision++;
+  await expect(page.getByTestId('cycle-time')).toContainText('T+3분');
+  const expectedRevision = view.revision;
+  await dialog.getByRole('button', { name: '초기화하기', exact: true }).click();
+  await expect(dialog).toHaveCount(0);
+  expect(requests).toEqual([
+    {
+      action: 'demo-reset',
+      input: { revision: expectedRevision, confirmed: true },
+      authorization: 'Bearer fixture-operator',
+    },
+  ]);
+  await expect(page.getByRole('alert')).toContainText(
+    '처음 상태로 초기화했습니다',
+  );
+  await expect(page.getByTestId('cycle-phase')).toHaveAttribute(
+    'data-phase',
+    'idle',
+  );
+  await expect(page.getByTestId('cycle-time')).toContainText('T+0분');
+  await expect(page.getByLabel('메인 시연', { exact: true })).toHaveValue(
+    'grandfather',
+  );
+  await expect(
+    page.getByRole('tab', { name: '지도', exact: true }),
+  ).toHaveAttribute('aria-selected', 'true');
+  await expect(
+    page.getByRole('tab', { name: '상황 로그', exact: true }),
+  ).toHaveAttribute('aria-selected', 'true');
+  await expect(page.getByTestId('fire-perimeter')).toHaveCount(0);
+  await expect(
+    page.getByLabel('선택한 시연 대상의 실제 발신 동의를 확인했습니다', {
+      exact: true,
+    }),
+  ).not.toBeChecked();
+  expect(view.calls).toEqual([]);
+  expect(view.trips).toEqual([]);
+  expect(view.demonstration).toBeNull();
+  await page.getByRole('tab', { name: '통화 내역', exact: true }).click();
+  await expect(page.getByTestId('call-history')).toContainText(
+    '실제 통화 내역이 없습니다',
+  );
+  await expect(page.getByTestId('actual-call-record')).toHaveCount(0);
+  await page.reload();
+  await expect(page.getByTestId('cycle-time')).toContainText('T+0분');
+  await page.getByRole('tab', { name: '통화 내역', exact: true }).click();
+  await expect(page.getByTestId('actual-call-record')).toHaveCount(0);
+  await expect(page.getByTestId('call-history')).not.toContainText(
+    '초기화 이전 통화 기록입니다.',
+  );
+  expect(requests).toHaveLength(1);
+});
+
+for (const source of ['phone', 'runtime'] as const)
+  test(`reset is disabled while an active call is reported by ${source}`, async ({
+    page,
+  }) => {
+    const runtime = new Runtime();
+    const phone = configuredPhone();
+    if (source === 'phone') {
+      phone.calls = [fixtureCall()];
+      phone.busy = true;
+    } else {
+      runtime.command('cycle-start', {
+        revision: runtime.view().revision,
+        demoStory: 'grandfather',
+        phoneMode: 'live',
+      });
+      runtime.command('confirm', { revision: runtime.view().revision });
+      runtime.preparePhoneCall(
+        'H012',
+        'ACTIVE-REQUEST',
+        runtime.view().revision,
+      );
+    }
+    await page.route('**/api/state', (route) =>
+      route.fulfill({ json: runtime.view() }),
+    );
+    await page.route('**/api/phone/state', (route) =>
+      route.fulfill({ json: phone }),
+    );
+    await page.goto('/');
+    await expect(page.getByText('서버 연결', { exact: true })).toBeVisible();
+    await expect(
+      page.getByRole('button', { name: '처음 상태로', exact: true }),
+    ).toBeDisabled();
+    await expect(page.getByRole('dialog')).toHaveCount(0);
+  });
+
+test('reset confirmation becomes unavailable when a call starts while it is open', async ({
+  page,
+}) => {
+  const runtime = new Runtime();
+  const phone = configuredPhone();
+  await page.route('**/api/state', (route) =>
+    route.fulfill({ json: runtime.view() }),
+  );
+  await page.route('**/api/phone/state', (route) =>
+    route.fulfill({ json: phone }),
+  );
+  await page.goto('/');
+  await page.getByRole('button', { name: '처음 상태로', exact: true }).click();
+  const dialog = page.getByRole('dialog', { name: '처음 상태로 초기화' });
+  await expect(
+    dialog.getByRole('button', { name: '초기화하기', exact: true }),
+  ).toBeEnabled();
+  phone.calls = [fixtureCall()];
+  phone.busy = true;
+  await expect(
+    dialog.getByRole('button', { name: '초기화하기', exact: true }),
+  ).toBeDisabled();
+  await expect(dialog).toContainText('실제 통화의 종료를 확인한 뒤');
+});
+
 function configuredPhone(): PhoneState {
   return {
     enabled: true,
@@ -386,6 +573,9 @@ test('call history shows actual records only, keeps the map on the right and mak
   });
   await page.clock.install();
   await page.goto('/index.html?demo=1');
+  await expect(
+    page.getByRole('button', { name: '처음 상태로', exact: true }),
+  ).toHaveCount(0);
   await expect(page.getByLabel('전화 모드', { exact: true })).toHaveCount(0);
   await expect(page.getByTestId('cycle-start')).toBeDisabled();
   await page.clock.runFor(2200);

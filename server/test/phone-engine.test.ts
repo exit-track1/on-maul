@@ -374,6 +374,52 @@ test('voice transcript and classifier use configured models; outcome waits for f
   }
 });
 
+test('history reset persists across restart, preserves settings and original audit, and rejects active calls', async () => {
+  const s = setup();
+  try {
+    const call = await s.engine.start('H012', 'reset-test');
+    assert.throws(() => s.engine.resetHistory(), /진행 중/);
+    assert.equal(s.engine.state().calls.length, 1);
+    s.hook('call.hangup');
+    s.engine.manager.current.view.completion = {
+      status: 'reported',
+      location: '집',
+      evidence: '테스트 응답 원본',
+      recordedAt: Date.now(),
+      playbackConfirmed: true,
+    };
+    s.engine.manager.publish();
+    const settings = readFileSync(s.store.path, 'utf8');
+    const journal = readFileSync(join(s.activeDirectory, 'active-call.json'), 'utf8');
+    const outcomePath = join(s.activeDirectory, 'call-outcomes', `${call.id}.json`);
+    const outcome = readFileSync(outcomePath, 'utf8');
+    const targets = s.engine.state().targets;
+    assert.deepEqual(s.engine.resetHistory().calls, []);
+    assert.deepEqual(
+      JSON.parse(readFileSync(join(s.activeDirectory, 'phone-history.json'), 'utf8')),
+      [],
+    );
+    assert.equal(readFileSync(s.store.path, 'utf8'), settings);
+    assert.equal(readFileSync(join(s.activeDirectory, 'active-call.json'), 'utf8'), journal);
+    assert.equal(readFileSync(outcomePath, 'utf8'), outcome);
+    s.hook('call.hangup');
+    assert.deepEqual(s.engine.state().calls, []);
+    s.engine.dispose();
+    const restored = new PhoneEngine(s.options);
+    try {
+      assert.deepEqual(restored.state().calls, []);
+      assert.deepEqual(restored.state().targets, targets);
+      assert.equal(restored.state().ready, true);
+      assert.equal(restored.state().busy, false);
+      assert.equal(s.requests.length, 1);
+    } finally {
+      restored.dispose();
+    }
+  } finally {
+    s.cleanup();
+  }
+});
+
 test('target bindings stay fixed across three calls; old provider events and secret transcripts cannot rebind', async () => {
   const s = setup({}, { ON_OPERATOR_TOKEN: 'private-operator-test-token' });
   try {

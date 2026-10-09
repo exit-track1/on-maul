@@ -289,7 +289,20 @@ export async function createApp(
           'actual_phone_only',
           '실제 전화만 운영합니다. 메인 시연에서 실제 전화 결과를 사용하세요.',
         );
-      if (action === 'cycle-start' || action === 'scenario') {
+      if (action === 'demo-reset') {
+        runtime.validateDemoReset(input);
+        if (phone.state().busy)
+          throw new DomainError(
+            'live_session',
+            '진행 중이거나 종료 미확인인 실제 통화를 먼저 확인하세요.',
+          );
+        phone.resetHistory();
+        runtime.command(action, input);
+        planThread = null;
+        for (const timer of timers.values()) clearTimeout(timer);
+        timers.clear();
+        liveCalls.clear();
+      } else if (action === 'cycle-start' || action === 'scenario') {
         if (phone.state().busy)
           throw new DomainError(
             'live_session',
