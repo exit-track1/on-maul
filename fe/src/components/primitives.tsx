@@ -16,6 +16,7 @@ export interface ButtonProps extends BasicProps {
   size?: 'sm' | 'md';
   onClick?: MouseEventHandler<HTMLButtonElement>;
   disabled?: boolean;
+  'aria-label'?: string;
 }
 
 export function Pill({
@@ -75,6 +76,7 @@ export function Btn({
   disabled,
   style,
   size = 'md',
+  'aria-label': ariaLabel,
 }: ButtonProps) {
   const h = size === 'sm' ? 30 : 36;
   const k = {
@@ -105,6 +107,7 @@ export function Btn({
   }[kind];
   return (
     <button
+      aria-label={ariaLabel}
       onClick={onClick}
       disabled={disabled}
       style={{
