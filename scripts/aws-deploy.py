@@ -8,6 +8,7 @@ import hashlib
 import json
 import os
 from pathlib import Path
+import re
 import shlex
 import subprocess
 import sys
@@ -102,7 +103,7 @@ def remote(state, script, arguments, timeout=1200):
 
 
 def package_files(root):
-    required = ('package.json', 'package-lock.json', 'fe/package.json', 'server/package.json', 'server/src/main.ts', 'fixtures/bundle.json', 'fe/dist/index.html')
+    required = ('package.json', 'package-lock.json', 'fe/package.json', 'server/package.json', 'server/src/main.ts', 'src/runtime-env.ts', 'src/config.ts', 'public/index.html', 'fixtures/bundle.json', 'fe/dist/index.html')
     for name in required:
         if not (root / name).is_file():
             raise RuntimeError(f'Missing release file: {name}')
@@ -110,35 +111,85 @@ def package_files(root):
     if fixture.get('metadata', {}).get('synthetic') is not True:
         raise RuntimeError('Release fixtures must be marked as synthetic demo data.')
     files = {root / name for name in required}
-    for name in ('server/src', 'shared/src', 'fe/dist'):
+    for name in ('server/src', 'shared/src', 'src', 'public', 'fe/dist'):
         files.update(path for path in (root / name).rglob('*') if path.is_file() or path.is_symlink())
     for path in files:
         relative = path.relative_to(root)
         if path.is_symlink():
             raise RuntimeError(f'Symlinks are not allowed in a release: {relative}')
-        if any(part.startswith('.env') or part in ('.deploy', '.data', '.aws', 'node_modules', '.git') for part in relative.parts) or path.suffix in ('.pem', '.key', '.p12', '.pfx'):
+        if any(part.startswith('.env') or part in ('.deploy', '.data', '.phone', '.aws', 'recordings', 'node_modules', '.git') for part in relative.parts) or path.suffix in ('.pem', '.key', '.p12', '.pfx'):
             raise RuntimeError(f'Private file found in release input: {relative}')
     return sorted(files)
 
 
-def build_release():
-    subprocess.run(['npm', 'run', 'build'], cwd=ROOT, check=True)
-    files = package_files(ROOT)
+def build_release(source_root=ROOT):
+    source_root = source_root.resolve()
+    subprocess.run(['git', 'diff', '--exit-code', 'HEAD', '--', 'package.json', 'package-lock.json', 'fe', 'server', 'shared', 'src', 'public', 'fixtures'], cwd=source_root, check=True, stdout=subprocess.DEVNULL)
+    source_revision = subprocess.check_output(['git', 'rev-parse', 'HEAD'], cwd=source_root, text=True).strip()
+    subprocess.run(['npm', 'run', 'build'], cwd=source_root, check=True)
+    files = package_files(source_root)
+    private_values = []
+    if (ROOT / '.env').is_file():
+        # Parse dotenv in memory; neither the values nor command arguments contain secrets.
+        parsed = subprocess.check_output(['node', '--input-type=module', '-e',
+            'import{readFileSync}from"node:fs";import{parseEnv}from"node:util";process.stdout.write(JSON.stringify(parseEnv(readFileSync(process.argv[1],"utf8"))))',
+            str(ROOT / '.env')], text=True)
+        private_values = [value.encode() for key, value in json.loads(parsed).items()
+            if re.search(r'KEY|TOKEN|CALLER_NUMBER|TEST_PHONE|REAL_.*E164', key) and len(value) >= 8]
+    docker_inputs = [ROOT / 'infrastructure' / 'Dockerfile', ROOT / 'infrastructure' / 'docker.contextignore']
+    for candidate in [*files, *docker_inputs]:
+        data = candidate.read_bytes()
+        if any(value in data for value in private_values):
+            raise RuntimeError(f'Private environment value detected in release input: {candidate.name}')
     LOCAL.mkdir(mode=0o700, parents=True, exist_ok=True)
     LOCAL.chmod(0o700)
     temporary = LOCAL / 'release.pending.tar.gz'
     with tarfile.open(temporary, 'w:gz', dereference=False) as archive:
         for path in files:
-            archive.add(path, arcname=path.relative_to(ROOT), recursive=False)
+            archive.add(path, arcname=path.relative_to(source_root), recursive=False)
+        archive.add(ROOT / 'infrastructure' / 'Dockerfile', arcname='infrastructure/Dockerfile', recursive=False)
+        archive.add(ROOT / 'infrastructure' / 'docker.contextignore', arcname='.dockerignore', recursive=False)
     temporary.chmod(0o600)
     digest = hashlib.sha256(temporary.read_bytes()).hexdigest()
     release = datetime.now(timezone.utc).strftime('%Y%m%dT%H%M%SZ') + '-' + digest[:12]
     path = LOCAL / f'{release}.tar.gz'
     temporary.replace(path)
-    manifest = {'release': release, 'sha256': digest, 'archive': str(path), 'files': [str(p.relative_to(ROOT)) for p in files]}
+    manifest = {'release': release, 'sha256': digest, 'archive': str(path), 'source_revision': source_revision, 'source_root': str(source_root), 'files': [str(p.relative_to(source_root)) for p in files] + ['infrastructure/Dockerfile', '.dockerignore']}
     private_json(LOCAL / 'release-plan.json', manifest)
     print(f'Built {release}: {len(files)} files, {path.stat().st_size} bytes. No .env, local data, infrastructure state, or dependencies included.', flush=True)
+    print(f'Application source revision: {source_revision}', flush=True)
     return manifest
+
+
+def sync_runtime_env(state):
+    source = ROOT / '.env'
+    if not source.is_file():
+        raise RuntimeError('Fill the Git-ignored root .env before deployment.')
+    if subprocess.run(['git', 'check-ignore', '--quiet', str(source)], cwd=ROOT).returncode:
+        raise RuntimeError('Root .env must be ignored by Git.')
+    if not subprocess.run(['git', 'ls-files', '--error-unmatch', str(source)], cwd=ROOT, capture_output=True).returncode:
+        raise RuntimeError('Root .env must not be tracked by Git.')
+    content = source.read_text()
+    if re.search(r'^\s*(?:export\s+)?AWS_(?:ACCESS_KEY_ID|SECRET_ACCESS_KEY|SESSION_TOKEN)\s*=', content, re.MULTILINE):
+        raise RuntimeError('AWS CLI credentials must not be stored in application dotenv.')
+    # Preserve local values; only the private deployment copy gets these overrides.
+    content += '\n# EC2 runtime settings\n' + '\n'.join([
+        'NODE_ENV=production', f"PUBLIC_BASE_URL=https://{state['domain']}",
+        'ON_PORT=8090', 'ON_PHONE_ENV=deployment',
+        'ON_JOURNAL_DIR=/var/lib/onmaul/app-data/journal',
+        'ON_LOCAL_DATA_DIR=/var/lib/onmaul/app-data/phone-settings',
+        'ON_PHONE_DATA_DIR=/var/lib/onmaul/app-data/phone-history',
+    ]) + '\n'
+    with tempfile.NamedTemporaryFile(mode='w', suffix='.env', dir=LOCAL) as stream:
+        os.chmod(stream.name, 0o600)
+        stream.write(content)
+        stream.flush()
+        try:
+            aws(state, 'secretsmanager', 'put-secret-value', '--secret-id', state['outputs']['RuntimeSecretArn'],
+                '--secret-string', f'file://{stream.name}', '--output', 'json')
+        except RuntimeError:
+            raise RuntimeError('Runtime environment upload failed; values were not logged.') from None
+    print('Runtime environment synchronized separately to Secrets Manager; values were not logged.', flush=True)
 
 
 def verify_https(domain, application=False):
@@ -151,17 +202,28 @@ def verify_https(domain, application=False):
             if response.status != 200 or health.get('ok') is not True:
                 raise RuntimeError('Public application health check failed.')
         with urlopen(f'https://{domain}/', timeout=15) as response:
-            if response.status != 200 or '<html' not in response.read().decode().lower():
+            html = response.read().decode()
+            if response.status != 200 or '<html' not in html.lower():
                 raise RuntimeError('Public frontend check failed.')
+        assets = re.findall(r'(?:src|href)="(/assets/[^"]+)"', html)
+        if not assets:
+            raise RuntimeError('Public frontend bundle references are missing.')
+        for path in assets:
+            with urlopen(f'https://{domain}{path}', timeout=15) as response:
+                expected = 'text/css' if path.endswith('.css') else 'javascript'
+                if response.status != 200 or expected not in response.headers.get('Content-Type', ''):
+                    raise RuntimeError('Public frontend asset check failed: ' + path)
+                response.read()
     print(f'HTTPS verified: https://{domain}' + (' (application and API)' if application else ' (infrastructure)'), flush=True)
 
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('action', choices=['prepare', 'prepare-runtime', 'plan', 'check', 'deploy', 'verify'])
+    parser.add_argument('--source-root', type=Path, default=ROOT, help='Clean checkout of the application revision to build')
     arguments = parser.parse_args()
     if arguments.action == 'plan':
-        build_release()
+        build_release(arguments.source_root)
         return
     state = verified_target()
     if arguments.action == 'prepare-runtime':
@@ -184,15 +246,15 @@ def main():
         verify_https(state['domain'], application=(LOCAL / 'last-deployment.json').exists())
     else:
         verify_https(state['domain'])
-        manifest = build_release()
+        manifest = build_release(arguments.source_root)
         use_secret = False
         if arguments.action == 'deploy':
-            secret = aws(state, 'secretsmanager', 'describe-secret', '--secret-id', state['outputs']['RuntimeSecretArn'], '--output', 'json')
-            use_secret = any('AWSCURRENT' in stages for stages in secret.get('VersionIdsToStages', {}).values())
+            sync_runtime_env(state)
+            use_secret = True
         # Only the release archive is uploaded; local environment files are never S3 inputs.
         destination = f"s3://{state['outputs']['ArtifactsBucket']}/releases/{manifest['release']}/app.tar.gz"
         subprocess.run(['aws', '--profile', state['profile'], '--region', state['region'], 's3', 'cp', manifest['archive'], destination, '--only-show-errors'], check=True)
-        command_id = remote(state, ROOT / 'infrastructure' / 'deploy-release.sh', [state['region'], state['outputs']['ArtifactsBucket'], manifest['release'], manifest['sha256'], state['outputs']['RuntimeSecretArn'], 'yes' if use_secret else 'no', 'check' if arguments.action == 'check' else 'activate'])
+        command_id = remote(state, ROOT / 'infrastructure' / 'deploy-docker-release.sh', [state['region'], state['outputs']['ArtifactsBucket'], manifest['release'], manifest['sha256'], state['outputs']['RuntimeSecretArn'], 'yes' if use_secret else 'no', 'check' if arguments.action == 'check' else 'activate', manifest['source_revision']])
         if arguments.action == 'check':
             verify_https(state['domain'])
             private_json(LOCAL / 'last-check.json', {**manifest, 'command_id': command_id, 'domain': state['domain']})

@@ -103,6 +103,8 @@ Persistent=true
 WantedBy=timers.target
 UNIT
 
+# Preserve an active Docker deployment when preparing HTTPS again.
+if [[ ! -f /etc/systemd/system/onmaul.service ]]; then
 cat > /etc/systemd/system/onmaul.service <<'UNIT'
 [Unit]
 Description=Onmaul application
@@ -127,6 +129,7 @@ ReadWritePaths=/var/lib/onmaul
 [Install]
 WantedBy=multi-user.target
 UNIT
+fi
 systemctl daemon-reload
 systemctl enable --now onmaul-cert-renew.timer
 openssl x509 -in "/etc/letsencrypt/live/$domain/fullchain.pem" -noout -subject -dates

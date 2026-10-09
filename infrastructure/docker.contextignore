@@ -1,0 +1,17 @@
+.env
+.env.*
+**/.env
+**/.env.*
+.git
+.deploy
+.aws
+.data
+.phone
+.tools
+node_modules
+**/node_modules
+recordings
+**/*.pem
+**/*.key
+**/*.p12
+**/*.pfx
