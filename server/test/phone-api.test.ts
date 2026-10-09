@@ -357,7 +357,7 @@ test('API waits for current human checkpoint, applies rescue after carrier termi
   assert.equal(phoneState.json<PhoneState>().calls[0].transcript[0].text, '차를 보내주세요');
 });
 
-test('squad API assumes the H009 rescue request and calls only M01, holding dispatch until termination', async (t) => {
+test('squad API dispatches to H009 after the captured immediate-departure response and final M01 termination', async (t) => {
   const f = await fixture(t);
   await f.start('squad');
   assert.deepEqual(
@@ -368,7 +368,12 @@ test('squad API assumes the H009 rescue request and calls only M01, holding disp
   assert.ok(!view.calls.some((call) => call.targetId === 'H009'));
   assert.equal(householdStatus(view, 'H009').status, 'help');
   assert.equal(view.demonstration!.phoneClockHeld, true);
-  f.phone.update('M01', { status: 'answered', answeredAt: Date.now(), completion: squadReady() });
+  const completion = squadReady(
+    '네 앞에 내 폰 차량 있어서 해당 차량 타고 이동하겠습니다',
+    '네 지금 즉시 출동 가능합니다',
+  );
+  completion.standbyAssessment!.participationEvidence = '어 네 지금 이동가능합니다';
+  f.phone.update('M01', { status: 'answered', answeredAt: Date.now(), completion });
   view = await f.drain();
   assert.equal(view.memberResponses.M01, 'waiting');
   assert.equal((await f.advance(40)).simMinutes, 0);
@@ -385,6 +390,11 @@ test('squad API assumes the H009 rescue request and calls only M01, holding disp
   assert.ok(trip.crewMemberIds.every((id) => view.memberResponses[id] === 'ok'));
   assert.equal(view.demonstration!.stage, 'responding');
   assert.equal(f.phone.starts.length, 1);
+  while (view.simMinutes < trip.shelterSim + 0.1)
+    view = await f.advance(Math.min(1, trip.shelterSim + 0.1 - view.simMinutes));
+  assert.equal(view.trips.find((item) => item.id === trip.id)!.stage, 'shelter');
+  assert.equal(householdStatus(view, 'H009').status, 'rescued');
+  assert.equal(view.demonstration!.stage, 'completed');
 });
 
 test('enabled voice rejects mock cycles and phone endpoints require the operator token', async (t) => {
@@ -623,9 +633,26 @@ test('standby mapping declines vague or negative vehicle/readiness claims and ac
     '준비 시간은 아직 모르겠습니다',
     '지금부터 30분 걸립니다',
     '지금 바로는 출발 안 할 거예요',
+    '지금 즉시 출동할 수 없습니다',
+    '지금 안 출동합니다',
+    '즉시 출동 불가합니다',
   ]) {
     const mapped = phoneOutcome({ ...call, completion: squadReady('차량 있습니다', readiness) });
     assert.equal(mapped.standbyAvailable, false, readiness);
   }
   assert.equal(phoneOutcome({ ...call, completion: squadReady() }).standbyAvailable, true);
+  for (const readiness of [
+    '네 지금 즉시 출동 가능합니다',
+    '지금 출동 가능합니다',
+    '바로 출동하겠습니다',
+    '즉시 출동합니다',
+    '지금 이동가능합니다',
+  ]) {
+    assert.equal(
+      phoneOutcome({ ...call, completion: squadReady('차량 있습니다', readiness) })
+        .standbyAvailable,
+      true,
+      readiness,
+    );
+  }
 });

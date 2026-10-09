@@ -22,14 +22,14 @@ export function phoneOutcome(call: PhoneCall) {
       );
     const affirmativeVehicle = /^(?:네|예|응)[,.!\s]*$|있|가능|이용\s*할|가지고|보유/.test(vehicle);
     const unavailableReadiness =
-      /못|불가|어려|안\s*(?:돼|되|할|가|출발|이동)|않|아니|나중|모르|미확인|수도|아마|불확실|미정/.test(
+      /없|못|불가|어려|안\s*(?:돼|되|할|가|출발|출동|이동)|않|아니|나중|모르|미확인|수도|아마|불확실|미정/.test(
         ready,
       );
     const unavailableParticipation = /못|불가|어려|아니|참여\s*안|수도|아마|불확실|미정/.test(
       assessment?.participationEvidence ?? '',
     );
     const immediate =
-      /^(?:지금|바로|즉시)[,.!\s]*$|(?:지금\s*바로|바로|즉시|지금)\s*(?:출발|이동|갈|가겠|가요|가능)|준비\s*(?:됐|되었)/.test(
+      /^(?:지금|바로|즉시)[,.!\s]*$|(?:지금\s*바로|바로|즉시|지금)\s*(?:출발|출동|이동|갈|가겠|가요|가능)|준비\s*(?:됐|되었)/.test(
         ready,
       );
     const minutes = /(\d+)\s*분/.exec(ready);
