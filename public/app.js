@@ -95,9 +95,11 @@ function render(value) {
   $('ids').textContent =
     `로컬 통화 ${value.id || '—'} · Live ${value.sessionId || '—'} · Telnyx ${value.callControlId || '—'}`;
   $('audio-stats').textContent =
-    `수신 ${(value.audioInputReceivedSeconds ?? value.audioInSeconds).toFixed(1)}초 · AI 전송 ${value.audioInSeconds.toFixed(1)}초 · 송신 ${value.audioOutSeconds.toFixed(1)}초 · 재생 중단 ${value.audioClears}회 · 재생 버퍼 ${Math.round(value.audioBufferedMs ?? 0)}ms · 버퍼 고갈 ${value.audioUnderruns ?? 0}회`;
+    `수신 ${(value.audioInputLastAt ? value.audioInputReceivedSeconds : value.audioInSeconds).toFixed(1)}초 · AI 전송 ${value.audioInSeconds.toFixed(1)}초 · 송신 ${value.audioOutSeconds.toFixed(1)}초 · 재생 중단 ${value.audioClears}회 · 재생 버퍼 ${Math.round(value.audioBufferedMs ?? 0)}ms · 버퍼 고갈 ${value.audioUnderruns ?? 0}회`;
   $('input-stats').textContent =
-    `입력 신호 ${(value.audioInputSignalSeconds ?? 0).toFixed(1)}초 · 입력 대기 ${Math.round(value.audioInputBufferedMs ?? 0)}ms · 누락된 패킷 번호 ${value.audioInputDropped ?? 0}개`;
+    !value.audioInputLastAt && value.audioInSeconds > 0
+      ? '입력 신호 진단은 다음 통화부터 기록합니다.'
+      : `입력 신호 ${(value.audioInputSignalSeconds ?? 0).toFixed(1)}초 · 입력 대기 ${Math.round(value.audioInputBufferedMs ?? 0)}ms · 누락된 패킷 번호 ${value.audioInputDropped ?? 0}개`;
   $('scenario-state').textContent = value.assessment
     ? `위치 ${value.assessment.location} · 대피소 ${value.assessment.shelterName ?? '미확인'} · 이동 ${{ possible: '가능', needs_help: '도움 필요', unknown: '미확인' }[value.assessment.mobility]} · 몸 상태 ${{ comfortable: '괜찮음', uncomfortable: '불편함', unknown: '미확인' }[value.assessment.condition]}${value.assessment.refusal === 'refused' ? ' · 대피 거부' : ''}${value.assessment.reason ? ' · ' + value.assessment.reason : ''}`
     : '주민 통화는 위치 → 이동 가능 여부 → 몸 상태를 확인하고 60초 안에 마칩니다.';
