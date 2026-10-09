@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "allowedRepository": "https://github.com/openai/skills",
+  "allowedCommit": "49f948faa9258a0c61caceaf225e179651397431",
+  "activeSkills": [
+    "vercel-deploy"
+  ],
+  "archivedSkills": [
+    "openai-docs",
+    "imagegen",
+    "pdf",
+    "vercel-deploy"
+  ],
+  "manifestSha256": "638e07e602475e542d80cf36a45f520ff256a9d84ee70cf2022754b330eb607f"
+}
