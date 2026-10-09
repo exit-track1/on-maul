@@ -9,7 +9,7 @@
   --fire-yellow: #d9a700;
   --fire-orange: #fa4616;
   --fire-lime: #cedc00;
-  --paper: #fff4d6;
+  --paper: #ffffff;
   --fire-silver: #a19e93;
   --ink: #4c4a44;
   color: var(--ink);
@@ -21,7 +21,7 @@
   --prog: var(--fire-orange);
   --safe: var(--fire-lime);
   --line: color-mix(in srgb, var(--fire-silver) 55%, var(--paper));
-  --sub: color-mix(in srgb, var(--fire-silver) 12%, var(--paper));
+  --sub: #ffffff;
   --muted: color-mix(in srgb, var(--ink) 85%, var(--paper));
 }
 * {
