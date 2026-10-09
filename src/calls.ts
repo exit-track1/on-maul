@@ -870,6 +870,8 @@ export class CallManager extends EventEmitter {
       const valid = () =>
         this.valid(run) &&
         generation === run.generation &&
+        !run.bridge?.inputSpeaking &&
+        !run.bridge?.stopped &&
         run.view.completion?.status !== 'reported';
       run.inputProcessing = true;
       const evacuation =
@@ -897,6 +899,12 @@ export class CallManager extends EventEmitter {
         })
         .finally(() => {
           run.inputProcessing = false;
+          // The caller can resume speaking before the next transcript fragment arrives.
+          // Keep polling the retained reply so audio invalidation cannot stall the loop.
+          if (this.valid(run) && run.buffer && !run.bridge?.stopped) {
+            clearTimeout(run.inputTimer);
+            run.inputTimer = this.after(run, 40, consume);
+          }
         });
     };
     run.inputTimer = this.after(run, run.live?.controlled ? answerSettleMs : 1500, consume);

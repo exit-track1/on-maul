@@ -425,6 +425,45 @@ test('지연된 전사 조각은 분류 중에도 앞 문장을 보존하고 한
     t.mock.timers.reset();
   }
 });
+test('수신자가 다시 말하기 시작하면 이전 분류를 반영하지 않고 전사 도착 후 루프를 이어간다', async (t) => {
+  const s = setup();
+  t.mock.timers.enable({ apis: ['setTimeout', 'Date'] });
+  try {
+    await s.manager.start(params);
+    media(s.manager);
+    hook(s.manager, 'call.answered');
+    t.mock.timers.tick(2000);
+    let resolveFirst!: (answer: ResidentAnswer) => void;
+    const classified: string[] = [];
+    s.manager.current.assess = async (_config, text) => {
+      classified.push(text);
+      if (classified.length === 1) return new Promise((r) => (resolveFirst = r));
+      return facts(text, { mobility: 'needs_help' });
+    };
+    user(s.sockets[0], '차가 없어서');
+    t.mock.timers.tick(180);
+    await flush();
+    const bridge = s.manager.current.bridge!;
+    bridge.input(1, Buffer.alloc(480, 0).toString('base64'));
+    for (let i = 0; i < 3; i++) bridge.tick(Date.now() + 40 + i * 20);
+    assert.equal(bridge.inputSpeaking, true);
+    resolveFirst(facts('차가 없어서', { mobility: 'needs_help' }));
+    await flush();
+    t.mock.timers.tick(40);
+    assert.equal(s.manager.public().completion, undefined);
+    assert.equal(classified.length, 1);
+    user(s.sockets[0], ' 혼자 이동할 수 없어요');
+    for (let i = 0; i < 8; i++) bridge.tick(Date.now() + 100 + i * 20);
+    assert.equal(bridge.inputSpeaking, false);
+    t.mock.timers.tick(180);
+    await flush();
+    assert.deepEqual(classified, ['차가 없어서', '차가 없어서 혼자 이동할 수 없어요']);
+    assert.equal(s.manager.public().completion!.kind, 'rescue');
+  } finally {
+    s.cleanup();
+    t.mock.timers.reset();
+  }
+});
 test('미디어 stop·close 직후 정상 최종 종료는 연결 오류가 아니며 종료 미확인은 잠금을 유지한다', async (t) => {
   for (const confirmed of [true, false]) {
     const s = setup();
