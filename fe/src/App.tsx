@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
 import { Btn, Card, Pill, Ring } from './components';
 import { Client } from './mock/client';
+import { CallHistory } from './components/phone/CallHistory';
 import {
   Calls,
   Counters,
@@ -40,16 +41,6 @@ const cyclePhases = {
   running: '대피 진행',
   awaiting_handover: '인수인계 대기',
   ended: '종료',
-};
-const demoStages = {
-  ready: '구조 시연 준비',
-  dialing: '모의 확인 전화',
-  talking: '모의 통화 중',
-  requested: '구조 요청',
-  responding: '구조 차량 출동 중',
-  boarding: '탑승 확인',
-  evacuating: '탑승·대피 중',
-  completed: '대피 완료',
 };
 function Dialog({
   title,
@@ -439,6 +430,10 @@ export default function App() {
     [demoStory, setDemoStory] = useState<'grandfather' | 'squad'>(
       'grandfather',
     ),
+    [phoneMode, setPhoneMode] = useState<'mock' | 'live'>('mock'),
+    [phoneConsent, setPhoneConsent] = useState(false),
+    [operatorToken, setOperatorToken] = useState(''),
+    [logPane, setLogPane] = useState<'log' | 'phone'>('log'),
     [tab, setTab] = useState<Tab>('map'),
     [modal, setModal] = useState<'confirm' | 'close' | 'assistant' | null>(
       null,
@@ -474,6 +469,20 @@ export default function App() {
   async function run(action: string, input: Record<string, unknown> = {}) {
     await command(action, input);
   }
+  async function runPhone(
+    action: 'dial' | 'hangup' | 'resolve',
+    input: Record<string, unknown>,
+  ) {
+    setPending(true);
+    try {
+      await client.phoneCommand(action, input);
+      setMessage('');
+    } catch (error) {
+      setMessage(error instanceof Error ? error.message : '전화 요청 오류');
+    } finally {
+      setPending(false);
+    }
+  }
   const c = view.scenario.counts,
     notChecked = view.data.households.filter(
       (h) =>
@@ -488,6 +497,30 @@ export default function App() {
     ).length;
   const simulation = view.simulation;
   const demonstration = view.demonstration;
+  const liveDemonstration = demonstration?.phoneMode === 'live';
+  const phone = connection.phone;
+  const cycleLocked = ['review', 'running', 'awaiting_handover'].includes(
+    simulation.phase,
+  );
+  const selectedPhoneMode = cycleLocked
+    ? (demonstration?.phoneMode ?? phoneMode)
+    : phoneMode;
+  const selectedDemoStory = cycleLocked
+    ? (demonstration?.story ?? demoStory)
+    : demoStory;
+  const phoneTargetIds =
+    selectedDemoStory === 'grandfather' ? ['H012'] : ['H009', 'M01'];
+  const phoneReady = Boolean(
+    !connection.offline &&
+    connection.phoneConnected &&
+    phone?.enabled &&
+    phone.ready &&
+    phoneTargetIds.every((id) =>
+      phone.targets.some(
+        (target) => target.id === id && target.configured && target.consent,
+      ),
+    ),
+  );
   const plannedPosition = useMemo(() => {
     if (view.demonstration || view.scenario.mode !== 'idle') return undefined;
     const data = structuredClone(view.data);
@@ -502,30 +535,6 @@ export default function App() {
     (activeStory === 'grandfather' ? 'H012' : 'H009');
   const demoName =
     activeStory === 'grandfather' ? '반영환 할아버지' : '박미숙 할머니';
-  const demoStage = demonstration?.stage ?? 'ready';
-  const demoVehicle =
-    demonstration?.vehicleId ?? (activeStory === 'grandfather' ? 'V01' : 'V04');
-  const demoTrip = view.trips.find(
-    (trip) => trip.householdId === demoResidentId,
-  );
-  const demoTeam = view.data.teams.find((team) =>
-    team.members.some((member) => member.id === demonstration?.memberId),
-  );
-  const demoMemberResponse = demonstration?.memberId
-    ? view.memberResponses[demonstration.memberId]
-    : undefined;
-  const residentMessage = demonstration?.messages.findLast(
-    (entry) => entry.speaker === 'resident',
-  );
-  const recentMessages = new Set(
-    demonstration?.messages
-      .filter((entry) => entry.speaker !== 'resident')
-      .slice(-2),
-  );
-  const demoMessages =
-    demonstration?.messages.filter(
-      (entry) => entry === residentMessage || recentMessages.has(entry),
-    ) ?? [];
   const available = connection.offline || connection.connected;
   const decision =
     simulation.phase === 'awaiting_handover'
@@ -567,6 +576,37 @@ export default function App() {
           <span>한 집도 빠짐없이</span>
         </div>
         <div className="header-controls">
+          {!connection.offline && (
+            <details className="phone-settings">
+              <summary>전화 연결 설정</summary>
+              <div className="phone-settings-body">
+                <label>
+                  운영자 토큰
+                  <input
+                    type="password"
+                    aria-label="운영자 토큰"
+                    value={operatorToken}
+                    autoComplete="off"
+                    spellCheck={false}
+                    onChange={(event) => setOperatorToken(event.target.value)}
+                  />
+                </label>
+                <button
+                  onClick={() => {
+                    client.setToken(operatorToken);
+                    setPhoneConsent(false);
+                  }}
+                >
+                  연결 설정 적용
+                </button>
+                <p className="muted">
+                  {connection.phoneError ??
+                    phone?.notice ??
+                    '서버에 설정한 운영자 토큰을 입력하세요.'}
+                </p>
+              </div>
+            </details>
+          )}
           <details className="static-scene-tools">
             <summary>정적 장면 점검</summary>
             <label>
@@ -634,7 +674,9 @@ export default function App() {
                 <small>
                   {id === 'event'
                     ? view.plan?.confirmed
-                      ? '모의 발신 진행'
+                      ? liveDemonstration
+                        ? '실제 전화 연동'
+                        : '모의 발신 진행'
                       : '담당자 확정 대기'
                     : '현재 단계'}
                 </small>
@@ -656,9 +698,9 @@ export default function App() {
         <div className="sidebar-bottom">
           <p>48가구 · 4개 대기조</p>
           <p>
-            실제 수신자 없음
+            {liveDemonstration ? '동의한 데모 수신자 통화' : '실제 수신자 없음'}
             <br />
-            전체 합성 데이터
+            명단·지도는 합성 데이터
           </p>
           <strong>시연 담당자</strong>
           <small>가상 면사무소 재난 담당</small>
@@ -674,27 +716,58 @@ export default function App() {
               메인 시연
               <select
                 aria-label="메인 시연"
-                value={demoStory}
+                value={selectedDemoStory}
                 disabled={
                   pending ||
                   simulation.phase === 'running' ||
                   simulation.phase === 'review' ||
                   simulation.phase === 'awaiting_handover'
                 }
-                onChange={(e) =>
-                  setDemoStory(e.target.value as 'grandfather' | 'squad')
-                }
+                onChange={(e) => {
+                  setDemoStory(e.target.value as 'grandfather' | 'squad');
+                  setPhoneConsent(false);
+                }}
               >
                 <option value="grandfather">반영환 할아버지 · 구급차</option>
                 <option value="squad">박미숙 할머니 · 5분대기조</option>
               </select>
             </label>
+            <label className="cycle-story-select">
+              전화 모드
+              <select
+                aria-label="전화 모드"
+                value={selectedPhoneMode}
+                disabled={pending || cycleLocked}
+                onChange={(event) => {
+                  setPhoneMode(event.target.value as 'mock' | 'live');
+                  setPhoneConsent(false);
+                }}
+              >
+                <option value="mock">모의 통화</option>
+                <option value="live" disabled={!phoneReady}>
+                  실제 전화
+                </option>
+              </select>
+            </label>
+            {selectedPhoneMode === 'live' && (
+              <label className="checkbox cycle-phone-consent">
+                <input
+                  type="checkbox"
+                  checked={phoneConsent}
+                  disabled={pending || cycleLocked}
+                  onChange={(event) => setPhoneConsent(event.target.checked)}
+                />
+                선택한 시연 대상의 실제 발신 동의를 확인했습니다
+              </label>
+            )}
             <button
               className="cycle-start"
               data-testid="cycle-start"
               disabled={
                 pending ||
                 !available ||
+                (selectedPhoneMode === 'live' &&
+                  (!phoneReady || !phoneConsent || Boolean(phone?.busy))) ||
                 ['review', 'running', 'awaiting_handover'].includes(
                   simulation.phase,
                 )
@@ -703,11 +776,14 @@ export default function App() {
                 void command('cycle-start', {
                   revision: view.revision,
                   demoStory,
+                  phoneMode: selectedPhoneMode,
+                  phoneConsent: selectedPhoneMode === 'live' && phoneConsent,
                 }).then((next) => {
                   if (next) {
                     setModal('confirm');
                     setTab('map');
                     setMobile('canvas');
+                    if (selectedPhoneMode === 'live') setLogPane('phone');
                     setFocusRequest({
                       id:
                         next.demonstration?.residentId ??
@@ -789,6 +865,12 @@ export default function App() {
               {connection.error}
             </span>
           )}
+          {liveDemonstration && demonstration.phoneClockHeld && (
+            <span className="phone-clock-held" role="status">
+              실제 통화 종료를 기다립니다 · 통화는 배속과 무관하며 지도 시계를
+              잠시 보류합니다
+            </span>
+          )}
         </section>
         <div className="situation-counts">
           <strong>{modes[view.scenario.mode]}</strong>
@@ -829,141 +911,214 @@ export default function App() {
       </div>
       <section
         className={`log-panel ${mobile !== 'log' ? 'mobile-hidden' : ''}`}
-        aria-label="상황 로그"
+        aria-label="상황 로그와 통화 내역"
       >
         <div className="log-heading">
-          <h2>상황 로그</h2>
-          <Pill size="sm">합성 시연</Pill>
-        </div>
-        <div className="log-scroll">
-          <div className="phase-guide">
-            <div className="eyebrow">지금 해야 할 일</div>
-            <h3>
-              {simulation.phase === 'awaiting_handover'
-                ? '미해결을 인수인계하고 종료하세요'
-                : view.scenario.mode === 'idle'
-                  ? '명단을 먼저 확인하세요'
-                  : view.scenario.mode === 'watch'
-                    ? '수신 근거를 검토하세요'
-                    : view.plan && !view.plan.confirmed
-                      ? '순서를 검토하고 확정하세요'
-                      : view.frozen
-                        ? '미해결 인수인계를 보존합니다'
-                        : '조치 필요 가구를 확인하세요'}
-            </h3>
-            <p>
-              {view.plan?.confirmed
-                ? '이동 중·차량 출동·119 모의 접수는 안전 완료가 아닙니다.'
-                : '담당자 확정 전에는 실제·가상 발신이 없습니다.'}
-            </p>
-          </div>
-          {simulation.phase === 'awaiting_handover' && (
-            <Card>
-              <span className="eyebrow">시연 진행 종료 · 담당자 결정 대기</span>
-              <h3>대피 진행을 멈추고 인수인계를 기다립니다</h3>
-              <p>
-                미해결 {handover(view.data.households, view.scenario).length}
-                건을 확인한 뒤 ‘기록으로 종료’를 눌러 종료 기록을 보존하세요.
-              </p>
-              <p className="muted">{simulation.endReason}</p>
-            </Card>
-          )}
-          {view.scenario.mode === 'watch' && (
-            <Card>
-              <span className="eyebrow">규칙 제안 · 합성 경보</span>
-              <h3>북서 구역 대피 지시 시연</h3>
-              <p>합성 재난문자와 바람 관측을 참고한 모의 경보입니다.</p>
-              <div className="toolbar">
-                <Btn
-                  size="sm"
-                  disabled={pending}
-                  onClick={() => void run('plan')}
-                >
-                  발령 절차 시작
-                </Btn>
-                <Btn
-                  kind="outline"
-                  size="sm"
-                  onClick={() => void run('dismiss')}
-                >
-                  오탐 기록
-                </Btn>
-              </div>
-              <button className="text-button" onClick={() => setTab('sources')}>
-                합성 원문 보기 →
-              </button>
-            </Card>
-          )}
-          {view.plan && !view.plan.confirmed && (
-            <Card>
-              <span className="eyebrow">규칙 제안 · 담당자 결정</span>
-              <h3>발령 제안</h3>
-              <p>
-                전화 {view.plan.order.length} · 방문 {view.plan.visit.length} ·
-                임시 제외 {view.plan.excluded.length}
-              </p>
-              <ol className="priority-preview">
-                {view.plan.order.slice(0, 4).map((x) => (
-                  <li key={x.householdId}>
-                    {x.householdId} · {x.reason}
-                  </li>
-                ))}
-              </ol>
-              <p className="muted">
-                비공식 데모 ETA · 실제 현장 판단을 대신하지 않습니다.
-              </p>
-              <Btn onClick={() => setModal('confirm')}>순서 검토·발령 확정</Btn>
-            </Card>
-          )}
-          {view.networkDown && (
-            <Card>
-              <h3>통신 두절 시연</h3>
-              <p>신규 발신·모의 인계 전송 보류. 기존 세션은 유지합니다.</p>
-              <p>
-                이 안내는 모의 방송 문안입니다. 지정 대피소를 확인해 주세요.
-                통제 도로를 피해야 합니다. 이동 지원이 필요한 집을 방문 목록에서
-                확인해 주세요. 현장 담당자의 지시를 따릅니다. 긴급 상황은
-                담당자가 수동 연락으로 연결합니다.
-              </p>
-              <Btn kind="outline" size="sm" onClick={() => setTab('records')}>
-                전체 방문·지원 목록
-              </Btn>
-            </Card>
-          )}
-          {view.records
-            .toReversed()
-            .slice(0, 15)
-            .map((r) => (
-              <article
-                className={`log-card ${r.actorType === 'human' ? 'human' : ''}`}
-                key={r.id}
+          <div
+            className="log-pane-tabs"
+            role="tablist"
+            aria-label="상황 기록 탭"
+          >
+            {(
+              [
+                { id: 'log', name: '상황 로그' },
+                { id: 'phone', name: '통화 내역' },
+              ] as const
+            ).map((item) => (
+              <button
+                key={item.id}
+                role="tab"
+                id={`log-tab-${item.id}`}
+                aria-selected={logPane === item.id}
+                aria-controls={`log-panel-${item.id}`}
+                tabIndex={logPane === item.id ? 0 : -1}
+                onClick={() => {
+                  setLogPane(item.id);
+                  if (item.id === 'phone') setTab('map');
+                }}
+                onKeyDown={(event) => {
+                  if (event.key === 'ArrowRight' || event.key === 'ArrowLeft') {
+                    event.preventDefault();
+                    const next = logPane === 'log' ? 'phone' : 'log';
+                    setLogPane(next);
+                    if (next === 'phone') setTab('map');
+                    document.getElementById(`log-tab-${next}`)?.focus();
+                  }
+                }}
               >
-                <div className="eyebrow">
-                  {r.actorType === 'human'
-                    ? '담당자 결정'
-                    : r.actorType === 'assistant'
-                      ? '규칙 제안'
-                      : '시스템 진행'}{' '}
-                  ·{' '}
-                  {new Intl.DateTimeFormat('ko-KR', {
-                    timeZone: 'Asia/Seoul',
-                    hour: '2-digit',
-                    minute: '2-digit',
-                    hour12: false,
-                  }).format(new Date(r.timestamp))}
-                </div>
-                <p>{r.label}</p>
-                {r.householdId && (
-                  <button
-                    className="text-button"
-                    onClick={() => setSelected(r.householdId!)}
-                  >
-                    {r.householdId} 상세 →
-                  </button>
-                )}
-              </article>
+                {item.name}
+              </button>
             ))}
+          </div>
+          <Pill size="sm">
+            {logPane === 'phone' ? '실제 통화' : '합성 시연'}
+          </Pill>
         </div>
+        {logPane === 'phone' ? (
+          <div
+            className="log-scroll phone-history-scroll"
+            role="tabpanel"
+            id="log-panel-phone"
+            aria-labelledby="log-tab-phone"
+          >
+            <CallHistory
+              view={view}
+              phone={phone}
+              error={connection.phoneError}
+              offline={connection.offline}
+              connected={connection.connected && connection.phoneConnected}
+              pending={pending}
+              activeResidentId={demoResidentId as 'H012' | 'H009'}
+              run={runPhone}
+              focus={(id) => {
+                setTab('map');
+                setFocusRequest({ id, sequence: performance.now() });
+              }}
+            />
+          </div>
+        ) : (
+          <div
+            className="log-scroll"
+            role="tabpanel"
+            id="log-panel-log"
+            aria-labelledby="log-tab-log"
+          >
+            <div className="phase-guide">
+              <div className="eyebrow">지금 해야 할 일</div>
+              <h3>
+                {simulation.phase === 'awaiting_handover'
+                  ? '미해결을 인수인계하고 종료하세요'
+                  : view.scenario.mode === 'idle'
+                    ? '명단을 먼저 확인하세요'
+                    : view.scenario.mode === 'watch'
+                      ? '수신 근거를 검토하세요'
+                      : view.plan && !view.plan.confirmed
+                        ? '순서를 검토하고 확정하세요'
+                        : view.frozen
+                          ? '미해결 인수인계를 보존합니다'
+                          : '조치 필요 가구를 확인하세요'}
+              </h3>
+              <p>
+                {view.plan?.confirmed
+                  ? '이동 중·차량 출동·119 모의 접수는 안전 완료가 아닙니다.'
+                  : '담당자 확정 전에는 실제·가상 발신이 없습니다.'}
+              </p>
+            </div>
+            {simulation.phase === 'awaiting_handover' && (
+              <Card>
+                <span className="eyebrow">
+                  시연 진행 종료 · 담당자 결정 대기
+                </span>
+                <h3>대피 진행을 멈추고 인수인계를 기다립니다</h3>
+                <p>
+                  미해결 {handover(view.data.households, view.scenario).length}
+                  건을 확인한 뒤 ‘기록으로 종료’를 눌러 종료 기록을 보존하세요.
+                </p>
+                <p className="muted">{simulation.endReason}</p>
+              </Card>
+            )}
+            {view.scenario.mode === 'watch' && (
+              <Card>
+                <span className="eyebrow">규칙 제안 · 합성 경보</span>
+                <h3>북서 구역 대피 지시 시연</h3>
+                <p>합성 재난문자와 바람 관측을 참고한 모의 경보입니다.</p>
+                <div className="toolbar">
+                  <Btn
+                    size="sm"
+                    disabled={pending}
+                    onClick={() => void run('plan')}
+                  >
+                    발령 절차 시작
+                  </Btn>
+                  <Btn
+                    kind="outline"
+                    size="sm"
+                    onClick={() => void run('dismiss')}
+                  >
+                    오탐 기록
+                  </Btn>
+                </div>
+                <button
+                  className="text-button"
+                  onClick={() => setTab('sources')}
+                >
+                  합성 원문 보기 →
+                </button>
+              </Card>
+            )}
+            {view.plan && !view.plan.confirmed && (
+              <Card>
+                <span className="eyebrow">규칙 제안 · 담당자 결정</span>
+                <h3>발령 제안</h3>
+                <p>
+                  전화 {view.plan.order.length} · 방문 {view.plan.visit.length}{' '}
+                  · 임시 제외 {view.plan.excluded.length}
+                </p>
+                <ol className="priority-preview">
+                  {view.plan.order.slice(0, 4).map((x) => (
+                    <li key={x.householdId}>
+                      {x.householdId} · {x.reason}
+                    </li>
+                  ))}
+                </ol>
+                <p className="muted">
+                  비공식 데모 ETA · 실제 현장 판단을 대신하지 않습니다.
+                </p>
+                <Btn onClick={() => setModal('confirm')}>
+                  순서 검토·발령 확정
+                </Btn>
+              </Card>
+            )}
+            {view.networkDown && (
+              <Card>
+                <h3>통신 두절 시연</h3>
+                <p>신규 발신·모의 인계 전송 보류. 기존 세션은 유지합니다.</p>
+                <p>
+                  이 안내는 모의 방송 문안입니다. 지정 대피소를 확인해 주세요.
+                  통제 도로를 피해야 합니다. 이동 지원이 필요한 집을 방문
+                  목록에서 확인해 주세요. 현장 담당자의 지시를 따릅니다. 긴급
+                  상황은 담당자가 수동 연락으로 연결합니다.
+                </p>
+                <Btn kind="outline" size="sm" onClick={() => setTab('records')}>
+                  전체 방문·지원 목록
+                </Btn>
+              </Card>
+            )}
+            {view.records
+              .toReversed()
+              .slice(0, 15)
+              .map((r) => (
+                <article
+                  className={`log-card ${r.actorType === 'human' ? 'human' : ''}`}
+                  key={r.id}
+                >
+                  <div className="eyebrow">
+                    {r.actorType === 'human'
+                      ? '담당자 결정'
+                      : r.actorType === 'assistant'
+                        ? '규칙 제안'
+                        : '시스템 진행'}{' '}
+                    ·{' '}
+                    {new Intl.DateTimeFormat('ko-KR', {
+                      timeZone: 'Asia/Seoul',
+                      hour: '2-digit',
+                      minute: '2-digit',
+                      hour12: false,
+                    }).format(new Date(r.timestamp))}
+                  </div>
+                  <p>{r.label}</p>
+                  {r.householdId && (
+                    <button
+                      className="text-button"
+                      onClick={() => setSelected(r.householdId!)}
+                    >
+                      {r.householdId} 상세 →
+                    </button>
+                  )}
+                </article>
+              ))}
+          </div>
+        )}
         <div className="log-summary">
           조치 {c.act} · 진행 {c.prog} · 안전 {c.safe}/{c.eligible} · 방문{' '}
           {c.visit}
@@ -1008,110 +1163,6 @@ export default function App() {
       <main
         className={`canvas-panel ${mobile !== 'canvas' ? 'mobile-hidden' : ''}`}
       >
-        {(tab === 'map' || demonstration) && (
-          <section
-            className={`demo-story-card demo-stage-${demoStage} ${tab !== 'map' ? 'demo-story-compact' : ''}`}
-            data-testid="demo-story-card"
-            data-stage={demoStage}
-            aria-label="주연 구조 시연"
-          >
-            <div className="demo-story-heading">
-              <div>
-                <span className="eyebrow">
-                  합성 모의 ·{' '}
-                  {activeStory === 'grandfather'
-                    ? '구급차 구조 시연'
-                    : '5분대기조 구조 시연'}
-                </span>
-                <h2>
-                  {demoName} <small>{demoResidentId}</small>
-                </h2>
-              </div>
-              <button
-                data-testid="demo-house-focus"
-                onClick={() => {
-                  setTab('map');
-                  setMobile('canvas');
-                  setFocusRequest({
-                    id: demoResidentId,
-                    sequence: performance.now(),
-                  });
-                }}
-              >
-                집 위치 보기 ↗
-              </button>
-            </div>
-            <div className="demo-story-status">
-              <strong data-testid="demo-stage" data-stage={demoStage}>
-                {demoStage === 'evacuating'
-                  ? activeStory === 'squad'
-                    ? '구조 중'
-                    : '대피 중'
-                  : demoStages[demoStage]}
-              </strong>
-              <span>
-                {demoVehicle} ·{' '}
-                {demoTrip
-                  ? `현재 배차 ${demoTrip.id}`
-                  : demoStage === 'completed'
-                    ? '대피소 도착 확인'
-                    : '담당자 발령 확정 후 구조 진행'}
-              </span>
-              {activeStory === 'squad' && (
-                <span data-testid="demo-member-status">
-                  반영환 대원 · {demoTeam?.id ?? 'TW'}조 ·{' '}
-                  {demoStage === 'completed'
-                    ? '구조 완료'
-                    : ['responding', 'boarding', 'evacuating'].includes(
-                          demoStage,
-                        )
-                      ? '구조 중'
-                      : demoMemberResponse === 'ok'
-                        ? '출동 가능'
-                        : demoMemberResponse === 'no'
-                          ? '출동 불가'
-                          : '응답 대기'}
-                </span>
-              )}
-            </div>
-            {demonstration?.messages.length ? (
-              <ol
-                className="demo-story-messages"
-                aria-label="합성 모의 통화 흐름"
-              >
-                {demoMessages.map((entry) => (
-                  <li key={entry.id}>
-                    <span>
-                      {entry.speaker === 'assistant'
-                        ? 'AI 안내'
-                        : entry.speaker === 'resident'
-                          ? demoName
-                          : activeStory === 'squad'
-                            ? '반영환 대원'
-                            : '구급대원'}
-                    </span>
-                    <p>
-                      {entry.text.replace(
-                        '[합성 시연 텍스트·실모델/음성통화 아님] ',
-                        '',
-                      )}
-                    </p>
-                  </li>
-                ))}
-              </ol>
-            ) : (
-              <p className="demo-story-ready">
-                {activeStory === 'grandfather'
-                  ? '화재 알림 → 구조 요청 → 구급차 탑승 → 대피소 도착'
-                  : '화재 알림 → 지원 요청 → 반영환 대원 응답 → 5분대기조 구조'}
-                를 한 흐름으로 시연합니다.
-              </p>
-            )}
-            <small className="demo-story-disclaimer">
-              합성 주민·모의 통화 전사와 경로입니다. 실제 전화·GPS가 아닙니다.
-            </small>
-          </section>
-        )}
         <div className="tab-list" role="tablist" aria-label="상황실 탭">
           {tabs.map((t, i) => (
             <button
@@ -1194,17 +1245,37 @@ export default function App() {
         />
       )}{' '}
       {modal === 'confirm' && view.plan && (
-        <Dialog title="발령 순서 검토·모의 확정" close={() => setModal(null)}>
+        <Dialog
+          title={
+            liveDemonstration
+              ? '발령 순서 검토·실제 전화 확정'
+              : '발령 순서 검토·모의 확정'
+          }
+          close={() => setModal(null)}
+        >
           <div className="modal-body">
             <p>
               전화 {view.plan.order.length} · 방문 {view.plan.visit.length} ·
               임시 제외 {view.plan.excluded.length}
             </p>
             <p>
-              공용 최대 8채널 · 전체 모의 발신 · 실제 SMS·119 없음
+              {liveDemonstration
+                ? `${demoName}${activeStory === 'squad' ? '·반영환 대원' : ''}에게 등록된 번호로 실제 전화를 겁니다. 다른 가구와 지도 이동은 모의 시연입니다.`
+                : '공용 최대 8채널 · 전체 모의 발신 · 실제 SMS·119 없음'}
               <br />
               이장 연결·결과와 조 재배정은 담당자 결정입니다.
             </p>
+            {liveDemonstration && (
+              <label className="checkbox">
+                <input
+                  type="checkbox"
+                  checked={phoneConsent}
+                  disabled={pending}
+                  onChange={(event) => setPhoneConsent(event.target.checked)}
+                />
+                선택한 시연 대상의 실제 발신 동의를 확인했습니다
+              </label>
+            )}
             <div className="plan-list">
               <table>
                 <thead>
@@ -1258,19 +1329,27 @@ export default function App() {
               임시 제외: {view.plan.excluded.join(' · ') || '없음'}
             </p>
             <Btn
-              disabled={pending || view.networkDown || view.plan.confirmed}
+              disabled={
+                pending ||
+                view.networkDown ||
+                view.plan.confirmed ||
+                (liveDemonstration && (!phoneReady || !phoneConsent))
+              }
               onClick={() =>
                 void command('confirm', { revision: view.revision }).then(
                   (v) => {
                     if (v) {
                       setModal(null);
                       setTab(v.simulation.cycleId ? 'map' : 'calls');
+                      if (liveDemonstration) setLogPane('phone');
                     }
                   },
                 )
               }
             >
-              확정하고 모의 발신 시작
+              {liveDemonstration
+                ? '확정하고 실제 전화 발신'
+                : '확정하고 모의 발신 시작'}
             </Btn>
           </div>
         </Dialog>

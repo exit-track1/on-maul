@@ -1,10 +1,14 @@
 import { Runtime, type View } from '../../../shared/src/runtime.ts';
+import type { PhoneState } from '../../../shared/src/phone.ts';
 
 export interface ClientSnapshot {
   view: View;
   connected: boolean;
   offline: boolean;
   error: string | null;
+  phone: PhoneState | null;
+  phoneError: string | null;
+  phoneConnected: boolean;
 }
 
 class CommandError extends Error {
@@ -34,6 +38,13 @@ export class Client {
   private retiredInstances = new Set<string>();
   private inFlight: Promise<View> | null = null;
   private lastLocalTick = 0;
+  private phone: PhoneState | null = null;
+  private phoneError: string | null = null;
+  private phoneConnected = false;
+  private phoneAbort: AbortController | null = null;
+  private phoneInFlight: Promise<void> | null = null;
+  private lastPhonePoll = 0;
+  private bootstrapAbort: AbortController | null = null;
 
   snapshot(): ClientSnapshot {
     return {
@@ -41,6 +52,9 @@ export class Client {
       connected: this.connected,
       offline: this.offline,
       error: this.error,
+      phone: this.phone,
+      phoneError: this.phoneError,
+      phoneConnected: this.phoneConnected,
     };
   }
 
@@ -62,6 +76,10 @@ export class Client {
         } else {
           try {
             await this.connect();
+            if (this.token && performance.now() - this.lastPhonePoll >= 1000) {
+              this.lastPhonePoll = performance.now();
+              void this.refreshPhone();
+            }
           } catch {
             // Connection state is published by connect. The same server is retried.
           }
@@ -69,7 +87,15 @@ export class Client {
         if (generation === this.generation)
           this.timer = setTimeout(poll, this.offline ? 100 : 225);
       };
-      void poll();
+      const start = async () => {
+        if (
+          !this.offline &&
+          ['localhost', '127.0.0.1', '::1', '[::1]'].includes(location.hostname)
+        )
+          await this.bootstrapPhone(generation);
+        if (generation === this.generation) void poll();
+      };
+      void start();
     }
     return () => {
       this.listeners.delete(listener);
@@ -80,8 +106,124 @@ export class Client {
         this.abort?.abort();
         this.abort = null;
         this.inFlight = null;
+        this.phoneAbort?.abort();
+        this.phoneAbort = null;
+        this.phoneInFlight = null;
+        this.bootstrapAbort?.abort();
+        this.bootstrapAbort = null;
       }
     };
+  }
+
+  private async bootstrapPhone(generation: number) {
+    const abort = new AbortController();
+    this.bootstrapAbort = abort;
+    const timeout = setTimeout(() => abort.abort(), 3000);
+    try {
+      const response = await fetch('/api/phone/bootstrap', {
+        signal: abort.signal,
+        cache: 'no-store',
+      });
+      if (!response.ok) return;
+      const body = await response.json();
+      if (
+        generation !== this.generation ||
+        this.token ||
+        !body.enabled ||
+        typeof body.token !== 'string'
+      )
+        return;
+      this.setToken(body.token);
+    } catch {
+      // Remote/manual setup remains available when this local-only endpoint is absent.
+    } finally {
+      clearTimeout(timeout);
+      if (this.bootstrapAbort === abort) this.bootstrapAbort = null;
+    }
+  }
+
+  setToken(token: string) {
+    this.token = token.trim();
+    this.abort?.abort();
+    this.inFlight = null;
+    this.phoneAbort?.abort();
+    this.phoneAbort = null;
+    this.phoneInFlight = null;
+    this.phone = null;
+    this.phoneError = null;
+    this.phoneConnected = false;
+    this.lastPhonePoll = 0;
+    this.publish();
+    if (this.token && !this.offline && this.listeners.size)
+      void this.refreshPhone();
+  }
+
+  async refreshPhone(): Promise<void> {
+    if (this.offline || !this.token || !this.listeners.size) return;
+    if (this.phoneInFlight) return this.phoneInFlight;
+    const generation = this.generation;
+    const token = this.token;
+    const abort = new AbortController();
+    this.phoneAbort = abort;
+    const request = (async () => {
+      try {
+        const response = await fetch('/api/phone/state', {
+          signal: abort.signal,
+          cache: 'no-store',
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        const body = await response.json();
+        if (!response.ok)
+          throw new Error(body.error ?? '전화 연결 상태 조회 실패');
+        if (!Array.isArray(body.calls) || !Array.isArray(body.targets))
+          throw new Error('전화 상태 형식을 확인하세요.');
+        if (generation !== this.generation || token !== this.token) return;
+        this.phone = body as PhoneState;
+        this.phoneError = null;
+        this.phoneConnected = true;
+        this.publish();
+      } catch (error) {
+        if (
+          generation === this.generation &&
+          token === this.token &&
+          !abort.signal.aborted
+        ) {
+          this.phoneConnected = false;
+          this.phoneError =
+            error instanceof Error ? error.message : '전화 연결 상태 조회 실패';
+          this.publish();
+        }
+      }
+    })();
+    this.phoneInFlight = request;
+    try {
+      await request;
+    } finally {
+      if (this.phoneInFlight === request) this.phoneInFlight = null;
+      if (this.phoneAbort === abort) this.phoneAbort = null;
+    }
+  }
+
+  async phoneCommand(
+    action: 'dial' | 'hangup' | 'resolve',
+    input: Record<string, unknown>,
+  ) {
+    if (this.offline)
+      throw new Error('브라우저 단독 시연에서는 실제 전화를 걸 수 없습니다.');
+    if (!this.connected || !this.phoneConnected || !this.token)
+      throw new Error('서버와 전화 연결 설정을 확인하세요.');
+    const response = await fetch(`/api/phone/${action}`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${this.token}`,
+      },
+      body: JSON.stringify({ ...input, revision: this.current.revision }),
+    });
+    const body = await response.json();
+    if (!response.ok) throw new Error(body.error ?? '전화 요청 실패');
+    await this.refreshPhone();
+    if (this.listeners.size) await this.connect();
   }
 
   private advanceLocal() {
@@ -131,6 +273,7 @@ export class Client {
     if (this.inFlight) return this.inFlight;
     const generation = this.generation;
     const sequence = ++this.sequence;
+    const token = this.token;
     const abort = new AbortController();
     this.abort = abort;
     const request = (async () => {
@@ -138,10 +281,12 @@ export class Client {
         const response = await fetch('/api/state', {
           signal: abort.signal,
           cache: 'no-store',
+          headers: token ? { Authorization: `Bearer ${token}` } : {},
         });
         if (!response.ok) throw new Error('서버 연결 실패');
         const view = (await response.json()) as View;
-        if (generation !== this.generation) return this.current;
+        if (generation !== this.generation || token !== this.token)
+          return this.current;
         return this.accept(
           view,
           sequence,

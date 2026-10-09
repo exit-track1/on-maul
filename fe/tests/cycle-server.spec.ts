@@ -97,9 +97,11 @@ test('real HTTP server and React share one fire-to-handover clock and a frozen r
       (message) => message.speaker === 'resident' && /다리/.test(message.text),
     ),
   ).toBe(true);
-  await expect(page.getByTestId('demo-story-card')).toContainText('반영환');
-  await expect(page.getByTestId('demo-story-card')).toContainText('대피 완료');
-  await expect(page.getByTestId('demo-story-card')).toContainText('다리');
+  await expect(page.getByTestId('demo-story-card')).toHaveCount(0);
+  await expect(page.getByTestId('demo-resident-marker')).toHaveAttribute(
+    'aria-label',
+    /H012 반영환 할아버지/,
+  );
   expect(ready.sourceState.actualModelCalls).toBe(0);
   expect(ready.calls.filter((c) => c.mode === 'telnyx')).toHaveLength(0);
   expect(ready.scenario.counts).toEqual(
@@ -146,7 +148,11 @@ test('squad story shows the named member accepting, moving and completing the gr
   await expect(page.getByText('서버 연결', { exact: true })).toBeVisible();
   await page.getByLabel('메인 시연', { exact: true }).selectOption('squad');
   await page.getByTestId('cycle-start').click();
-  await expect(page.getByTestId('demo-story-card')).toContainText('박미숙');
+  await expect(page.getByTestId('demo-story-card')).toHaveCount(0);
+  await expect(page.getByTestId('demo-resident-marker')).toHaveAttribute(
+    'aria-label',
+    /H009 박미숙 할머니/,
+  );
   await expect(page.getByTestId('demo-resident-marker')).toBeVisible();
   await page
     .getByRole('button', { name: '확정하고 모의 발신 시작', exact: true })
@@ -168,25 +174,13 @@ test('squad story shows the named member accepting, moving and completing the gr
       { timeout: 5_000 },
     )
     .toBe(true);
-  await expect(page.getByTestId('demo-member-status')).toContainText('구조 중');
-  await expect(page.getByTestId('demo-story-card')).toHaveAttribute(
-    'data-stage',
-    'evacuating',
-    {
-      timeout: 10_000,
-    },
-  );
-  await expect(page.getByTestId('demo-stage')).toContainText('구조 중');
-  await expect(page.getByTestId('demo-story-card')).toHaveAttribute(
-    'data-stage',
-    'completed',
-    {
-      timeout: 20_000,
-    },
-  );
-  await expect(page.getByTestId('demo-member-status')).toContainText(
-    '구조 완료',
-  );
+  expect((await state()).memberResponses.M01).toBe('ok');
+  await expect
+    .poll(async () => (await state()).demonstration?.stage, { timeout: 10_000 })
+    .toBe('evacuating');
+  await expect
+    .poll(async () => (await state()).demonstration?.stage, { timeout: 20_000 })
+    .toBe('completed');
   const completed = await state();
   expect(completed.demonstration?.story).toBe('squad');
   expect(completed.demonstration?.memberId).toBe('M01');

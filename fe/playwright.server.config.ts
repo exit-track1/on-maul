@@ -15,6 +15,7 @@ export default defineConfig({
   retries: 0,
   timeout: 75_000,
   reporter: 'list',
+  outputDir: join(journal, 'browser-results'),
   use: {
     baseURL: 'http://127.0.0.1:8092',
     viewport: { width: 1600, height: 1000 },

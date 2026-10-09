@@ -26,9 +26,7 @@ test('offline fire cycle waits for human decisions, shares playback clock and fr
   page.on('pageerror', (error) => errors.push(error.message));
   await page.clock.install();
   await page.goto('/index.html?demo=1');
-  await expect(page.getByTestId('demo-story-card')).toContainText(
-    '반영환 할아버지',
-  );
+  await expect(page.getByTestId('demo-story-card')).toHaveCount(0);
   await expect(page.getByTestId('demo-resident-marker')).toBeVisible();
   const plannedHome = page
     .getByTestId('demo-resident-marker')
@@ -36,6 +34,10 @@ test('offline fire cycle waits for human decisions, shares playback clock and fr
   const plannedX = await plannedHome.getAttribute('cx');
   const plannedY = await plannedHome.getAttribute('cy');
   await page.getByTestId('cycle-start').click();
+  await expect(page.getByTestId('demo-resident-marker')).toHaveAttribute(
+    'aria-label',
+    /H012 반영환 할아버지/,
+  );
   await expect(page.getByTestId('cycle-phase')).toHaveAttribute(
     'data-phase',
     'review',
