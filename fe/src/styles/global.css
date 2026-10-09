@@ -203,32 +203,6 @@ a {
   width: 110px;
   padding: 5px;
 }
-.phone-settings {
-  position: relative;
-  font-size: 11px;
-}
-.phone-settings summary {
-  cursor: pointer;
-  color: var(--fire-red);
-}
-.phone-settings-body {
-  position: absolute;
-  right: 0;
-  top: 25px;
-  width: 300px;
-  padding: 14px;
-  border: 1px solid var(--line);
-  border-radius: 6px;
-  background: var(--paper);
-  z-index: 30;
-  box-shadow: 0 4px 18px rgb(76 74 68 / 9%);
-}
-.header-controls .phone-settings-body label {
-  display: block;
-}
-.phone-settings-body input {
-  width: 100%;
-}
 .static-scene-tools {
   position: relative;
   font-size: 11px;
@@ -353,7 +327,7 @@ a {
   font-size: 11px;
   white-space: normal;
 }
-.phone-clock-held {
+.phone-clock-notice {
   flex-basis: 100%;
   color: var(--fire-red);
   font-size: 11px;

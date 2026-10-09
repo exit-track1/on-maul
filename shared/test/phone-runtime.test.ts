@@ -39,7 +39,7 @@ for (const story of ['grandfather', 'squad'] as const) {
   test(`${story} live playback plans only its actual target and creates zero mock calls`, () => {
     const { runtime, confirmed, residentId } = start(story);
     assert.equal(confirmed.demonstration!.phoneMode, 'live');
-    assert.equal(confirmed.demonstration!.phoneClockHeld, true);
+    assert.equal(confirmed.demonstration!.phoneClockHeld, false);
     assert.equal(confirmed.demonstration!.stage, story === 'squad' ? 'requested' : 'ready');
     assert.deepEqual(runtime.pendingPhoneTargets(), [story === 'squad' ? 'M01' : residentId]);
     assert.equal(confirmed.calls.length, 0);
@@ -54,10 +54,14 @@ for (const story of ['grandfather', 'squad'] as const) {
       assert.match(status(confirmed, 'H009').note, /시연 가정/u);
       assert.ok(!confirmed.calls.some((call) => call.targetId === 'H009'));
     }
-    assert.deepEqual(runtime.tickCycle(500), confirmed);
-    assert.deepEqual(confirmed.demonstration!.messages, []);
-    assert.equal(confirmed.simulation.playing, true);
-    assert.equal(confirmed.simMinutes, 0);
+    const progressing = runtime.tickCycle(1);
+    assert.equal(progressing.simMinutes, 1);
+    assert.equal(progressing.simulation.phase, 'running');
+    assert.equal(progressing.calls.length, 0);
+    assert.equal(progressing.trips.length, 0);
+    assert.deepEqual(progressing.demonstration!.messages, []);
+    assert.equal(progressing.simulation.playing, true);
+    assert.deepEqual(runtime.pendingPhoneTargets(), [story === 'squad' ? 'M01' : residentId]);
   });
 }
 
@@ -70,7 +74,7 @@ test('H009 is an assumed rescue request and cannot be prepared or reserved as an
   );
   assert.deepEqual(runtime.view(), confirmed);
   assert.deepEqual(runtime.pendingPhoneTargets(), ['M01']);
-  assert.equal(runtime.tickCycle(40).simMinutes, 0);
+  assert.equal(runtime.tickCycle(1).simMinutes, 1);
   assert.equal(runtime.view().calls.length, 0);
 });
 
@@ -165,15 +169,16 @@ test('squad rescue waits for actual named-member termination and two confirmed c
   assert.equal(status(runtime.view(), residentId).status, 'help');
   assert.equal(runtime.view().demonstration!.residentRequestAssumed, true);
   assert.deepEqual(runtime.pendingPhoneTargets(), ['M01']);
-  assert.equal(runtime.view().demonstration!.phoneClockHeld, true);
-  assert.equal(runtime.tickCycle(40).simMinutes, 0);
+  assert.equal(runtime.view().demonstration!.phoneClockHeld, false);
+  assert.equal(runtime.tickCycle(0.5).simMinutes, 0.5);
   assert.throws(
     () => runtime.command('dispatch', { id: residentId, vehicleId: 'V04' }),
     /실전화 종료/u,
   );
   const memberId = request(runtime, 'M01');
   assert.equal(runtime.view().memberResponses.M01, 'waiting');
-  assert.equal(runtime.tickCycle(40).simMinutes, 0);
+  assert.equal(runtime.tickCycle(0.5).simMinutes, 1);
+  assert.equal(runtime.view().trips.length, 0);
   runtime.applyPhoneOutcome(memberId, {
     ended: true,
     kind: 'standby',
@@ -259,7 +264,7 @@ test('real emergency is retained for human medical review without fabricating a 
   );
 });
 
-test('phone holding preserves speed and a human pause after the call terminates', () => {
+test('a human pause during a live call preserves speed and remains paused after termination', () => {
   const { runtime, residentId } = start();
   request(runtime, residentId);
   runtime.command('sim', { revision: runtime.view().revision, speed: 60, playing: false });
@@ -279,7 +284,7 @@ test('unknown provider state and a termination without assessment keep reset and
   const id = request(runtime, residentId);
   assert.throws(() => runtime.rejectPhoneCall(id, '생성 전 실패라고 주장'), /전화망 생성/u);
   runtime.rejectPhoneCall(id, '전화망 응답을 확인할 수 없음', true);
-  assert.equal(runtime.tickCycle(40).simMinutes, 0);
+  assert.equal(runtime.tickCycle(1).simMinutes, 1);
   assert.throws(() => runtime.command('close', { acknowledged: true }), /실제 통화 종료/u);
   assert.throws(() => runtime.command('scenario', { id: 'idle' }), /실제 세션/u);
   assert.throws(
@@ -287,11 +292,15 @@ test('unknown provider state and a termination without assessment keep reset and
     /실제 활성/u,
   );
   runtime.finishLive(id);
-  assert.equal(runtime.view().demonstration!.phoneClockHeld, true);
+  assert.equal(runtime.view().demonstration!.phoneClockHeld, false);
+  const unassessed = runtime.tickCycle(1);
+  assert.equal(unassessed.simMinutes, 2);
+  assert.equal(unassessed.trips.length, 0);
+  assert.equal(unassessed.simulation.phase, 'running');
   assert.throws(() => runtime.command('close', { acknowledged: true }), /실제 통화 종료/u);
   const restored = new Runtime();
   restored.restore(runtime.view());
-  assert.equal(restored.view().demonstration!.phoneClockHeld, true);
+  assert.equal(restored.view().demonstration!.phoneClockHeld, false);
   assert.throws(
     () => restored.command('cycle-start', { revision: restored.view().revision }),
     /실제 활성/u,

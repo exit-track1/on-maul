@@ -451,7 +451,6 @@ export default function App() {
       'grandfather',
     ),
     [phoneConsent, setPhoneConsent] = useState(false),
-    [operatorToken, setOperatorToken] = useState(''),
     [logPane, setLogPane] = useState<'log' | 'phone'>('log'),
     [tab, setTab] = useState<Tab>('map'),
     [modal, setModal] = useState<'confirm' | 'close' | 'assistant' | null>(
@@ -617,37 +616,6 @@ export default function App() {
           <span>한 집도 빠짐없이</span>
         </div>
         <div className="header-controls">
-          {!connection.offline && (
-            <details className="phone-settings">
-              <summary>전화 연결 설정</summary>
-              <div className="phone-settings-body">
-                <label>
-                  운영자 토큰
-                  <input
-                    type="password"
-                    aria-label="운영자 토큰"
-                    value={operatorToken}
-                    autoComplete="off"
-                    spellCheck={false}
-                    onChange={(event) => setOperatorToken(event.target.value)}
-                  />
-                </label>
-                <button
-                  onClick={() => {
-                    client.setToken(operatorToken);
-                    setPhoneConsent(false);
-                  }}
-                >
-                  연결 설정 적용
-                </button>
-                <p className="muted">
-                  {connection.phoneError ??
-                    phone?.notice ??
-                    '서버에 설정한 운영자 토큰을 입력하세요.'}
-                </p>
-              </div>
-            </details>
-          )}
           {connection.offline && (
             <details className="static-scene-tools">
               <summary>정적 장면 점검</summary>
@@ -897,10 +865,10 @@ export default function App() {
               {connection.error}
             </span>
           )}
-          {liveDemonstration && demonstration.phoneClockHeld && (
-            <span className="phone-clock-held" role="status">
-              실제 통화 종료를 기다립니다 · 통화는 배속과 무관하며 지도 시계를
-              잠시 보류합니다
+          {liveDemonstration && phone?.busy && (
+            <span className="phone-clock-notice" role="status">
+              실제 통화 진행 중 · 시간과 산불 확산은 계속됩니다. 구조 출동은
+              통화 종료와 결과 확인 후 진행합니다.
             </span>
           )}
         </section>

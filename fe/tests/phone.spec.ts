@@ -20,7 +20,7 @@ test.beforeEach(async ({ page, baseURL }) => {
     }
   });
   await page.route('**/api/phone/bootstrap', (route) =>
-    route.fulfill({ json: { enabled: false, token: '' } }),
+    route.fulfill({ json: { enabled: true, token: 'fixture-operator' } }),
   );
 });
 
@@ -248,20 +248,37 @@ test('newest call is shown first while an earlier call remains selectable', asyn
   );
 });
 
-test('localhost bootstrap configures bearer reads without putting its token in the visible interface', async ({
+test('deployed origin automatically configures bearer reads and keeps its token only in memory', async ({
   page,
+  baseURL,
 }) => {
   const runtime = new Runtime();
   const phone = configuredPhone();
   const authenticated: string[] = [];
-  await page.route('**/api/phone/bootstrap', (route) =>
-    route.fulfill({ json: { enabled: true, token: 'fixture-local-auto' } }),
-  );
+  const bootstrap: string[] = [];
+  const publicOrigin = 'https://onmaul.fixture.test';
+  // Only static files go to the local preview. API traffic must use mocked
+  // handlers below or reach the beforeEach guard, never a real phone server.
+  await page.route(`${publicOrigin}/**`, async (route) => {
+    const url = new URL(route.request().url());
+    if (url.pathname.startsWith('/api/')) return route.fallback();
+    const response = await route.fetch({
+      url: new URL(`${url.pathname}${url.search}`, baseURL).href,
+    });
+    await route.fulfill({ response });
+  });
+  await page.route('**/api/phone/bootstrap', (route) => {
+    bootstrap.push(route.request().url());
+    return route.fulfill({
+      json: { enabled: true, token: 'fixture-deployed-auto' },
+      headers: { 'Cache-Control': 'no-store' },
+    });
+  });
   await page.route('**/api/state', async (route) => {
     const authorization = route.request().headers().authorization ?? '';
     authenticated.push(authorization);
     await route.fulfill(
-      authorization === 'Bearer fixture-local-auto'
+      authorization === 'Bearer fixture-deployed-auto'
         ? { json: runtime.view() }
         : { status: 401, json: { error: '인증 필요' } },
     );
@@ -270,20 +287,36 @@ test('localhost bootstrap configures bearer reads without putting its token in t
     const authorization = route.request().headers().authorization ?? '';
     authenticated.push(authorization);
     await route.fulfill(
-      authorization === 'Bearer fixture-local-auto'
+      authorization === 'Bearer fixture-deployed-auto'
         ? { json: phone }
         : { status: 401, json: { error: '인증 필요' } },
     );
   });
-  await page.goto('/');
+  await page.goto(publicOrigin);
   await expect(page.getByText('서버 연결', { exact: true })).toBeVisible();
+  await page.getByRole('tab', { name: '통화 내역', exact: true }).click();
+  await expect(page.getByTestId('call-history')).toContainText(
+    '실제 전화 연결 준비 완료',
+  );
   await expect(page.getByLabel('전화 모드', { exact: true })).toHaveCount(0);
-  await expect(page.locator('body')).not.toContainText('fixture-local-auto');
-  await expect(page.getByLabel('운영자 토큰', { exact: true })).toHaveValue('');
+  await expect(page.getByLabel('운영자 토큰', { exact: true })).toHaveCount(0);
+  await expect(page.getByText('전화 연결 설정', { exact: true })).toHaveCount(
+    0,
+  );
+  expect(await page.content()).not.toContain('fixture-deployed-auto');
+  expect(
+    await page.evaluate(() => ({
+      local: { ...localStorage },
+      session: { ...sessionStorage },
+      cookie: document.cookie,
+    })),
+  ).toEqual({ local: {}, session: {}, cookie: '' });
+  expect(page.url()).toBe(`${publicOrigin}/`);
+  expect(bootstrap).toEqual([`${publicOrigin}/api/phone/bootstrap`]);
   expect(authenticated.length).toBeGreaterThanOrEqual(2);
   expect(
     authenticated.every(
-      (authorization) => authorization === 'Bearer fixture-local-auto',
+      (authorization) => authorization === 'Bearer fixture-deployed-auto',
     ),
   ).toBe(true);
 });
@@ -343,20 +376,6 @@ function fixtureCall(targetId: 'H012' | 'M01' = 'H012'): PhoneCall {
   };
 }
 
-async function enterToken(page: Page) {
-  await page.getByText('전화 연결 설정', { exact: true }).click();
-  await page
-    .getByLabel('운영자 토큰', { exact: true })
-    .fill('fixture-operator');
-  await page
-    .getByRole('button', { name: '연결 설정 적용', exact: true })
-    .click();
-  await expect(page.locator('.phone-settings-body')).toContainText(
-    '실제 전화 연결 준비 완료',
-  );
-  await page.getByText('전화 연결 설정', { exact: true }).click();
-}
-
 test('call history shows actual records only, keeps the map on the right and makes no phone requests offline', async ({
   page,
 }) => {
@@ -395,7 +414,7 @@ test('call history shows actual records only, keeps the map on the right and mak
   expect(api).toEqual([]);
 });
 
-test('real mode requires operator setup and explicit consent, then shows polled speech and its evidence', async ({
+test('real mode loads server settings automatically and requires explicit consent, then shows polled speech and its evidence', async ({
   page,
 }) => {
   const runtime = new Runtime();
@@ -445,8 +464,8 @@ test('real mode requires operator setup and explicit consent, then shows polled 
   });
   await page.goto('/');
   await expect(page.getByText('서버 연결', { exact: true })).toBeVisible();
-  expect(phoneReads).toEqual([]);
-  await enterToken(page);
+  await expect.poll(() => phoneReads.length).toBeGreaterThan(0);
+  await expect(page.getByLabel('운영자 토큰', { exact: true })).toHaveCount(0);
   await expect(page.getByTestId('cycle-start')).toBeDisabled();
   await page
     .getByLabel('선택한 시연 대상의 실제 발신 동의를 확인했습니다', {
@@ -472,8 +491,23 @@ test('real mode requires operator setup and explicit consent, then shows polled 
   await expect(page.getByTestId('demo-story-card')).toHaveCount(0);
   await expect(history).not.toContainText('합성 모의');
   await expect(
-    page.getByText('실제 통화 종료를 기다립니다', { exact: false }),
+    page.getByText('실제 통화 진행 중 · 시간과 산불 확산은 계속됩니다.', {
+      exact: false,
+    }),
   ).toBeVisible();
+  expect(runtime.view().demonstration?.phoneClockHeld).toBe(false);
+  const fireBefore = await page.getByTestId('fire-perimeter').getAttribute('d');
+  runtime.tickCycle(1);
+  await expect(page.getByTestId('cycle-time')).toContainText('T+1분');
+  await expect(page.getByTestId('fire-perimeter')).not.toHaveAttribute(
+    'd',
+    fireBefore!,
+  );
+  await expect(history.getByTestId('actual-call-record')).toHaveAttribute(
+    'data-status',
+    'answered',
+  );
+  expect(runtime.view().trips).toHaveLength(0);
   expect(commands[0]).toMatchObject({
     action: 'cycle-start',
     input: { phoneMode: 'live', phoneConsent: true },
@@ -568,7 +602,6 @@ test('real call controls send authenticated target requests and require a checke
     });
   }
   await page.goto('/');
-  await enterToken(page);
   await page.getByRole('tab', { name: '통화 내역', exact: true }).click();
   const history = page.getByTestId('call-history');
   await expect(

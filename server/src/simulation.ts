@@ -10,7 +10,6 @@ export interface SimulationClockOptions {
   timer?: SimulationTimer;
 }
 interface CycleClockState {
-  demonstration?: { phoneClockHeld?: boolean } | null;
   simulation: {
     cycleId: string | null;
     phase: 'idle' | 'review' | 'running' | 'awaiting_handover' | 'ended';
@@ -79,7 +78,6 @@ export class SimulationClock {
       active:
         state.simulation.phase === 'running' &&
         state.simulation.playing &&
-        !state.demonstration?.phoneClockHeld &&
         !state.networkDown &&
         !state.frozen,
       speed: state.simulation.speed,

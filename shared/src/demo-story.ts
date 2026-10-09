@@ -6,7 +6,7 @@ export interface Demonstration {
   story: DemoStory;
   /** Old snapshots without this field retain deterministic mock playback. */
   phoneMode?: DemoPhoneMode;
-  /** Derived by Runtime.view; playback preference remains unchanged while waiting. */
+  /** Legacy snapshot field; live calls no longer hold the simulation clock. */
   phoneClockHeld?: boolean;
   /** Squad calls only the responder; the resident's request is an explicit demo assumption. */
   residentRequestAssumed?: boolean;

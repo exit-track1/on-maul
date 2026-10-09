@@ -263,8 +263,7 @@ export class Runtime {
       this.state.data.households,
       this.state.scenario.householdStatuses,
     );
-    if (this.state.demonstration)
-      this.state.demonstration.phoneClockHeld = this.awaitingPhoneResults();
+    if (this.state.demonstration) this.state.demonstration.phoneClockHeld = false;
     return structuredClone(this.state);
   }
   restore(view: View) {
@@ -460,8 +459,7 @@ export class Runtime {
   private awaitingPhoneResults() {
     const demonstration = this.state.demonstration;
     if (demonstration?.phoneMode !== 'live' || !this.state.plan?.confirmed) return false;
-    // Holding the clock preserves the selected playing/speed values. A human pause is
-    // therefore still respected when the adapter eventually delivers the outcome.
+    // Pending live results delay automatic handover, never the simulation clock.
     if (this.pendingPhoneTargets().length) return true;
     return this.state.calls.some(
       (call) =>
@@ -1880,7 +1878,6 @@ export class Runtime {
       !this.state.plan?.confirmed ||
       this.state.networkDown ||
       this.state.frozen ||
-      this.awaitingPhoneResults() ||
       deltaMinutes === 0
     )
       return this.view();
@@ -1997,7 +1994,11 @@ export class Runtime {
       ) ||
       this.state.trips.some((trip) => !trip.heldReason) ||
       this.cycleLeaderDue.size > 0;
-    if (!this.unresolvedLiveCalls() && (this.state.simMinutes >= 40 || !runnable)) {
+    if (
+      !this.awaitingPhoneResults() &&
+      !this.unresolvedLiveCalls() &&
+      (this.state.simMinutes >= 40 || !runnable)
+    ) {
       this.state.simulation.phase = 'awaiting_handover';
       this.state.simulation.playing = false;
       this.state.simulation.endReason =

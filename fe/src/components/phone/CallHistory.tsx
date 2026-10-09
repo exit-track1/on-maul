@@ -178,7 +178,7 @@ export function CallHistory({
           ? '브라우저 단독 시연입니다. 실제 전화 기록은 서버 연결에서 확인합니다.'
           : (error ??
             phone?.notice ??
-            '전화 연결 설정에서 운영자 토큰을 입력하면 실제 통화 내역을 불러옵니다.')}
+            '서버의 전화 연결 설정을 자동으로 불러오는 중입니다.')}
       </p>
       {calls.length > 1 && (
         <label className="call-record-select">

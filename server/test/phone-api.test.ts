@@ -309,7 +309,7 @@ test('API waits for current human checkpoint, applies rescue after carrier termi
       .approved,
     true,
   );
-  assert.equal(view.demonstration!.phoneClockHeld, true);
+  assert.equal(view.demonstration!.phoneClockHeld, false);
   assert.equal(view.calls.filter((call) => call.targetId === 'H012').length, 1);
 
   f.phone.update('H012', {
@@ -322,7 +322,11 @@ test('API waits for current human checkpoint, applies rescue after carrier termi
   view = await f.drain();
   assert.equal(householdStatus(view, 'H012').status, 'calling');
   assert.equal(view.demonstration!.stage, 'talking');
-  assert.equal((await f.advance(40)).simMinutes, 0);
+  const answeredAtDisplay = view.scenario.displayTime;
+  view = await f.advance(1);
+  assert.equal(view.simMinutes, 1);
+  assert.notEqual(view.scenario.displayTime, answeredAtDisplay);
+  assert.equal(f.phone.starts.length, 1);
   assert.ok(!view.trips.some((trip) => trip.householdId === 'H012'));
   f.phone.update('H012', { status: 'ending', blocked: true });
   view = await f.drain();
@@ -367,7 +371,7 @@ test('squad API dispatches to H009 after the captured immediate-departure respon
   let view = await f.drain();
   assert.ok(!view.calls.some((call) => call.targetId === 'H009'));
   assert.equal(householdStatus(view, 'H009').status, 'help');
-  assert.equal(view.demonstration!.phoneClockHeld, true);
+  assert.equal(view.demonstration!.phoneClockHeld, false);
   const completion = squadReady(
     '네 앞에 내 폰 차량 있어서 해당 차량 타고 이동하겠습니다',
     '네 지금 즉시 출동 가능합니다',
@@ -376,7 +380,10 @@ test('squad API dispatches to H009 after the captured immediate-departure respon
   f.phone.update('M01', { status: 'answered', answeredAt: Date.now(), completion });
   view = await f.drain();
   assert.equal(view.memberResponses.M01, 'waiting');
-  assert.equal((await f.advance(40)).simMinutes, 0);
+  view = await f.advance(1);
+  assert.equal(view.simMinutes, 1);
+  assert.equal(view.memberResponses.M01, 'waiting');
+  assert.equal(f.phone.starts.length, 1);
   assert.ok(!view.trips.some((trip) => trip.householdId === 'H009'));
   f.phone.update('M01', { status: 'ended', blocked: false, endedAt: Date.now() });
   view = await f.drain();
@@ -395,6 +402,62 @@ test('squad API dispatches to H009 after the captured immediate-departure respon
   assert.equal(view.trips.find((item) => item.id === trip.id)!.stage, 'shelter');
   assert.equal(householdStatus(view, 'H009').status, 'rescued');
   assert.equal(view.demonstration!.stage, 'completed');
+});
+
+test('deployed dashboards bootstrap the environment token without caching and keep API bearer checks', async (t) => {
+  const f = await fixture(t);
+  for (const requestHeaders of [
+    { host: 'onmaul.example' },
+    { host: 'onmaul.example', origin: 'https://onmaul.example', 'x-forwarded-proto': 'https' },
+    {
+      host: 'internal:8090',
+      origin: 'https://onmaul.example',
+      'x-forwarded-host': 'onmaul.example',
+      'x-forwarded-proto': 'https',
+    },
+    { host: 'localhost:8090', origin: 'http://localhost:8090' },
+  ]) {
+    const bootstrap = await f.current().app.inject({
+      url: '/api/phone/bootstrap',
+      headers: requestHeaders,
+    });
+    assert.equal(bootstrap.statusCode, 200);
+    assert.equal(bootstrap.headers['cache-control'], 'no-store');
+    assert.deepEqual(bootstrap.json(), { enabled: true, token });
+    const state = await f.current().app.inject({
+      url: '/api/phone/state',
+      headers: { authorization: `Bearer ${bootstrap.json().token}` },
+    });
+    assert.equal(state.statusCode, 200);
+  }
+  const crossOrigin = await f.current().app.inject({
+    url: '/api/phone/bootstrap',
+    headers: {
+      host: 'onmaul.example',
+      origin: 'https://another.example',
+      'x-forwarded-proto': 'https',
+    },
+  });
+  assert.equal(crossOrigin.statusCode, 403);
+  assert.equal(crossOrigin.headers['cache-control'], 'no-store');
+  assert.ok(!crossOrigin.body.includes(token));
+  const unauthenticated = await f.current().app.inject('/api/phone/state');
+  assert.equal(unauthenticated.statusCode, 401);
+  assert.equal(f.phone.starts.length, 0);
+});
+
+test('disabled telephone bootstrap returns no operator token', async (t) => {
+  const phone = new FakePhone();
+  phone.value.enabled = false;
+  phone.value.ready = false;
+  const f = await fixture(t, phone);
+  const bootstrap = await f.current().app.inject({
+    url: '/api/phone/bootstrap',
+    headers: { host: 'onmaul.example' },
+  });
+  assert.equal(bootstrap.statusCode, 200);
+  assert.equal(bootstrap.headers['cache-control'], 'no-store');
+  assert.deepEqual(bootstrap.json(), { enabled: false, token: '' });
 });
 
 test('enabled voice rejects mock cycles and phone endpoints require the operator token', async (t) => {
@@ -554,7 +617,7 @@ test('manual dial validates the current runtime revision and returns its bound r
   assert.equal(f.phone.starts.length, 1);
 });
 
-test('restart with unknown carrier state preserves hold; hangup acceptance cannot unlock reset', async (t) => {
+test('restart with unknown carrier state preserves call guards; hangup acceptance cannot unlock reset', async (t) => {
   const f = await fixture(t);
   await f.start();
   f.phone.update('H012', { status: 'answered', answeredAt: Date.now() });
@@ -576,9 +639,9 @@ test('restart with unknown carrier state preserves hold; hangup acceptance canno
   Object.assign(recovered.value.calls[0], { status: 'unknown', blocked: true });
   let view = await f.restart(recovered);
   assert.equal(recovered.starts.length, 0);
-  assert.equal(view.demonstration!.phoneClockHeld, true);
+  assert.equal(view.demonstration!.phoneClockHeld, false);
   assert.equal(view.calls.find((call) => call.id === active.requestId)!.phase, 'pendingunknown');
-  assert.equal((await f.advance(40)).simMinutes, 0);
+  assert.equal((await f.advance(1)).simMinutes, 0, 'restart still requires a manual resume');
   assert.equal((await f.post('cycle-start', { revision: view.revision })).statusCode, 409);
   const resolve = await f.current().app.inject({
     method: 'POST',

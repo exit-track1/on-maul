@@ -25,7 +25,7 @@ export class Client {
   readonly local = new Runtime();
   readonly offline = new URLSearchParams(location.search).get('demo') === '1';
   connected = false;
-  token = '';
+  private token = '';
   private current = this.local.view();
   private error: string | null = null;
   private listeners = new Set<(snapshot: ClientSnapshot) => void>();
@@ -88,11 +88,7 @@ export class Client {
           this.timer = setTimeout(poll, this.offline ? 100 : 225);
       };
       const start = async () => {
-        if (
-          !this.offline &&
-          ['localhost', '127.0.0.1', '::1', '[::1]'].includes(location.hostname)
-        )
-          await this.bootstrapPhone(generation);
+        if (!this.offline) await this.bootstrapPhone(generation);
         if (generation === this.generation) void poll();
       };
       void start();
@@ -135,14 +131,14 @@ export class Client {
         return;
       this.setToken(body.token);
     } catch {
-      // Remote/manual setup remains available when this local-only endpoint is absent.
+      // Keep phone controls unavailable if this server cannot provide its settings.
     } finally {
       clearTimeout(timeout);
       if (this.bootstrapAbort === abort) this.bootstrapAbort = null;
     }
   }
 
-  setToken(token: string) {
+  private setToken(token: string) {
     this.token = token.trim();
     this.abort?.abort();
     this.inFlight = null;

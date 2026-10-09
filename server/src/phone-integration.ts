@@ -221,17 +221,20 @@ export async function registerPhoneIntegration(options: {
       throw new DomainError('operator_token', '담당자 토큰이 필요합니다.', 401);
   };
   app.get('/api/phone/bootstrap', async (req, reply) => {
-    const host = req.headers.host ?? '';
-    if (
-      !/^(?:localhost|127\.0\.0\.1|\[::1\])(?::\d+)?$/.test(host) ||
-      req.headers['x-forwarded-host'] ||
-      (req.headers.origin && req.headers.origin !== `http://${host}`)
-    )
-      return reply.code(403).send({ error: '로컬 상황실에서만 연결 설정을 가져올 수 있습니다.' });
     reply.header('Cache-Control', 'no-store');
+    const forwardedHost = req.headers['x-forwarded-host'];
+    const forwardedProto = req.headers['x-forwarded-proto'];
+    const host = (typeof forwardedHost === 'string' ? forwardedHost : (req.headers.host ?? ''))
+      .split(',')[0]
+      .trim();
+    const protocol =
+      typeof forwardedProto === 'string' ? forwardedProto.split(',')[0].trim() : req.protocol;
+    if (req.headers.origin && req.headers.origin !== `${protocol}://${host}`)
+      return reply.code(403).send({ error: '같은 상황실에서만 연결 설정을 가져올 수 있습니다.' });
+    const enabled = phone.state().enabled;
     return {
-      enabled: phone.state().enabled,
-      token: phone.state().enabled ? options.operatorToken : '',
+      enabled,
+      token: enabled ? options.operatorToken : '',
     };
   });
   app.get('/api/phone/state', async (req) => {
