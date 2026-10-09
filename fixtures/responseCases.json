@@ -1,0 +1,114 @@
+[
+  {
+    "id": "CASE01",
+    "label": "놀람·불안",
+    "fictionalUtterance": "갑자기 듣고 놀랐어요.",
+    "demoOutcome": "모의 재설명",
+    "needsHumanReview": false,
+    "synthetic": true
+  },
+  {
+    "id": "CASE02",
+    "label": "행동 질문",
+    "fictionalUtterance": "어디에서 기다리면 되나요?",
+    "demoOutcome": "모의 질문 기록",
+    "needsHumanReview": false,
+    "synthetic": true
+  },
+  {
+    "id": "CASE03",
+    "label": "이동 도움",
+    "fictionalUtterance": "혼자 차에 타기 어려워요.",
+    "demoOutcome": "도움 필요 표시",
+    "needsHumanReview": false,
+    "synthetic": true
+  },
+  {
+    "id": "CASE04",
+    "label": "동반자",
+    "fictionalUtterance": "가족 한 명도 같이 있어요.",
+    "demoOutcome": "동반자 모의 기록",
+    "needsHumanReview": false,
+    "synthetic": true
+  },
+  {
+    "id": "CASE05",
+    "label": "거부",
+    "fictionalUtterance": "지금은 밖에 나가고 싶지 않아요.",
+    "demoOutcome": "이장 검토 표시",
+    "needsHumanReview": true,
+    "synthetic": true
+  },
+  {
+    "id": "CASE06",
+    "label": "신원 확인",
+    "fictionalUtterance": "어느 곳에서 연락하신 건가요?",
+    "demoOutcome": "신원 확인 표시",
+    "needsHumanReview": true,
+    "synthetic": true
+  },
+  {
+    "id": "CASE07",
+    "label": "청각·이해 곤란",
+    "fictionalUtterance": "조금 더 천천히 말씀해 주세요.",
+    "demoOutcome": "사람 검토 표시",
+    "needsHumanReview": true,
+    "synthetic": true
+  },
+  {
+    "id": "CASE08",
+    "label": "이미 이동·도착",
+    "fictionalUtterance": "온빛 배움학교 입구에 도착했어요.",
+    "demoOutcome": "모의 도착 근거",
+    "needsHumanReview": false,
+    "synthetic": true
+  },
+  {
+    "id": "CASE09",
+    "label": "정보 질문",
+    "fictionalUtterance": "이건 실제 안내인가요?",
+    "demoOutcome": "모의 정보 질문",
+    "needsHumanReview": false,
+    "synthetic": true
+  },
+  {
+    "id": "CASE10",
+    "label": "제3자 응답",
+    "fictionalUtterance": "대신 전화를 받은 가족이에요.",
+    "demoOutcome": "대리 응답 표시",
+    "needsHumanReview": false,
+    "synthetic": true
+  },
+  {
+    "id": "CASE11",
+    "label": "통화 불가",
+    "fictionalUtterance": "통화 내용을 확인할 수 없어요.",
+    "demoOutcome": "무응답 표시",
+    "needsHumanReview": true,
+    "synthetic": true
+  },
+  {
+    "id": "CASE12",
+    "label": "응급 호소",
+    "fictionalUtterance": "숨쉬기 힘들다는 모의 발화예요.",
+    "demoOutcome": "응급 검토 표시",
+    "needsHumanReview": true,
+    "synthetic": true
+  },
+  {
+    "id": "CASE13",
+    "label": "동물 관련 질문",
+    "fictionalUtterance": "강아지와 함께 있어요.",
+    "demoOutcome": "수용 조건 확인",
+    "needsHumanReview": false,
+    "synthetic": true
+  },
+  {
+    "id": "CASE14",
+    "label": "교통·길 상태",
+    "fictionalUtterance": "북쪽 길이 막힌 상황인가요?",
+    "demoOutcome": "통제 경로 확인",
+    "needsHumanReview": true,
+    "synthetic": true
+  }
+]

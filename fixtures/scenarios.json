@@ -1,0 +1,3060 @@
+[
+  {
+    "id": "idle",
+    "label": "평시",
+    "displayTime": "2026-10-09T11:00:00+09:00",
+    "mode": "idle",
+    "householdStatuses": [
+      {
+        "householdId": "H001",
+        "status": "before",
+        "lastChangedAt": "2026-10-09T11:00:00+09:00",
+        "note": "합성 시나리오 상태; 실제 연락·안전 확인 아님",
+        "attemptCount": 0,
+        "acked": false,
+        "visitCompleted": false,
+        "handoffStatus": null
+      },
+      {
+        "householdId": "H002",
+        "status": "before",
+        "lastChangedAt": "2026-10-09T11:00:00+09:00",
+        "note": "합성 시나리오 상태; 실제 연락·안전 확인 아님",
+        "attemptCount": 0,
+        "acked": false,
+        "visitCompleted": false,
+        "handoffStatus": null
+      },
+      {
+        "householdId": "H003",
+        "status": "before",
+        "lastChangedAt": "2026-10-09T11:00:00+09:00",
+        "note": "합성 시나리오 상태; 실제 연락·안전 확인 아님",
+        "attemptCount": 0,
+        "acked": false,
+        "visitCompleted": false,
+        "handoffStatus": null
+      },
+      {
+        "householdId": "H004",
+        "status": "visit",
+        "lastChangedAt": "2026-10-09T11:00:00+09:00",
+        "note": "합성 시나리오 상태; 실제 연락·안전 확인 아님",
+        "attemptCount": 0,
+        "acked": false,
+        "visitCompleted": false,
+        "handoffStatus": null
+      },
+      {
+        "householdId": "H005",
+        "status": "before",
+        "lastChangedAt": "2026-10-09T11:00:00+09:00",
+        "note": "합성 시나리오 상태; 실제 연락·안전 확인 아님",
+        "attemptCount": 0,
+        "acked": false,
+        "visitCompleted": false,
+        "handoffStatus": null
+      },
+      {
+        "householdId": "H006",
+        "status": "before",
+        "lastChangedAt": "2026-10-09T11:00:00+09:00",
+        "note": "합성 시나리오 상태; 실제 연락·안전 확인 아님",
+        "attemptCount": 0,
+        "acked": false,
+        "visitCompleted": false,
+        "handoffStatus": null
+      },
+      {
+        "householdId": "H007",
+        "status": "before",
+        "lastChangedAt": "2026-10-09T11:00:00+09:00",
+        "note": "합성 시나리오 상태; 실제 연락·안전 확인 아님",
+        "attemptCount": 0,
+        "acked": false,
+        "visitCompleted": false,
+        "handoffStatus": null
+      },
+      {
+        "householdId": "H008",
+        "status": "before",
+        "lastChangedAt": "2026-10-09T11:00:00+09:00",
+        "note": "합성 시나리오 상태; 실제 연락·안전 확인 아님",
+        "attemptCount": 0,
+        "acked": false,
+        "visitCompleted": false,
+        "handoffStatus": null
+      },
+      {
+        "householdId": "H009",
+        "status": "before",
+        "lastChangedAt": "2026-10-09T11:00:00+09:00",
+        "note": "합성 시나리오 상태; 실제 연락·안전 확인 아님",
+        "attemptCount": 0,
+        "acked": false,
+        "visitCompleted": false,
+        "handoffStatus": null
+      },
+      {
+        "householdId": "H010",
+        "status": "before",
+        "lastChangedAt": "2026-10-09T11:00:00+09:00",
+        "note": "합성 시나리오 상태; 실제 연락·안전 확인 아님",
+        "attemptCount": 0,
+        "acked": false,
+        "visitCompleted": false,
+        "handoffStatus": null
+      },
+      {
+        "householdId": "H011",
+        "status": "before",
+        "lastChangedAt": "2026-10-09T11:00:00+09:00",
+        "note": "합성 시나리오 상태; 실제 연락·안전 확인 아님",
+        "attemptCount": 0,
+        "acked": false,
+        "visitCompleted": false,
+        "handoffStatus": null
+      },
+      {
+        "householdId": "H012",
+        "status": "before",
+        "lastChangedAt": "2026-10-09T11:00:00+09:00",
+        "note": "합성 시나리오 상태; 실제 연락·안전 확인 아님",
+        "attemptCount": 0,
+        "acked": false,
+        "visitCompleted": false,
+        "handoffStatus": null
+      },
+      {
+        "householdId": "H013",
+        "status": "before",
+        "lastChangedAt": "2026-10-09T11:00:00+09:00",
+        "note": "합성 시나리오 상태; 실제 연락·안전 확인 아님",
+        "attemptCount": 0,
+        "acked": false,
+        "visitCompleted": false,
+        "handoffStatus": null
+      },
+      {
+        "householdId": "H014",
+        "status": "before",
+        "lastChangedAt": "2026-10-09T11:00:00+09:00",
+        "note": "합성 시나리오 상태; 실제 연락·안전 확인 아님",
+        "attemptCount": 0,
+        "acked": false,
+        "visitCompleted": false,
+        "handoffStatus": null
+      },
+      {
+        "householdId": "H015",
+        "status": "before",
+        "lastChangedAt": "2026-10-09T11:00:00+09:00",
+        "note": "합성 시나리오 상태; 실제 연락·안전 확인 아님",
+        "attemptCount": 0,
+        "acked": false,
+        "visitCompleted": false,
+        "handoffStatus": null
+      },
+      {
+        "householdId": "H016",
+        "status": "before",
+        "lastChangedAt": "2026-10-09T11:00:00+09:00",
+        "note": "합성 시나리오 상태; 실제 연락·안전 확인 아님",
+        "attemptCount": 0,
+        "acked": false,
+        "visitCompleted": false,
+        "handoffStatus": null
+      },
+      {
+        "householdId": "H017",
+        "status": "before",
+        "lastChangedAt": "2026-10-09T11:00:00+09:00",
+        "note": "합성 시나리오 상태; 실제 연락·안전 확인 아님",
+        "attemptCount": 0,
+        "acked": false,
+        "visitCompleted": false,
+        "handoffStatus": null
+      },
+      {
+        "householdId": "H018",
+        "status": "before",
+        "lastChangedAt": "2026-10-09T11:00:00+09:00",
+        "note": "합성 시나리오 상태; 실제 연락·안전 확인 아님",
+        "attemptCount": 0,
+        "acked": false,
+        "visitCompleted": false,
+        "handoffStatus": null
+      },
+      {
+        "householdId": "H019",
+        "status": "before",
+        "lastChangedAt": "2026-10-09T11:00:00+09:00",
+        "note": "합성 시나리오 상태; 실제 연락·안전 확인 아님",
+        "attemptCount": 0,
+        "acked": false,
+        "visitCompleted": false,
+        "handoffStatus": null
+      },
+      {
+        "householdId": "H020",
+        "status": "before",
+        "lastChangedAt": "2026-10-09T11:00:00+09:00",
+        "note": "합성 시나리오 상태; 실제 연락·안전 확인 아님",
+        "attemptCount": 0,
+        "acked": false,
+        "visitCompleted": false,
+        "handoffStatus": null
+      },
+      {
+        "householdId": "H021",
+        "status": "before",
+        "lastChangedAt": "2026-10-09T11:00:00+09:00",
+        "note": "합성 시나리오 상태; 실제 연락·안전 확인 아님",
+        "attemptCount": 0,
+        "acked": false,
+        "visitCompleted": false,
+        "handoffStatus": null
+      },
+      {
+        "householdId": "H022",
+        "status": "before",
+        "lastChangedAt": "2026-10-09T11:00:00+09:00",
+        "note": "합성 시나리오 상태; 실제 연락·안전 확인 아님",
+        "attemptCount": 0,
+        "acked": false,
+        "visitCompleted": false,
+        "handoffStatus": null
+      },
+      {
+        "householdId": "H023",
+        "status": "before",
+        "lastChangedAt": "2026-10-09T11:00:00+09:00",
+        "note": "합성 시나리오 상태; 실제 연락·안전 확인 아님",
+        "attemptCount": 0,
+        "acked": false,
+        "visitCompleted": false,
+        "handoffStatus": null
+      },
+      {
+        "householdId": "H024",
+        "status": "before",
+        "lastChangedAt": "2026-10-09T11:00:00+09:00",
+        "note": "합성 시나리오 상태; 실제 연락·안전 확인 아님",
+        "attemptCount": 0,
+        "acked": false,
+        "visitCompleted": false,
+        "handoffStatus": null
+      },
+      {
+        "householdId": "H025",
+        "status": "before",
+        "lastChangedAt": "2026-10-09T11:00:00+09:00",
+        "note": "합성 시나리오 상태; 실제 연락·안전 확인 아님",
+        "attemptCount": 0,
+        "acked": false,
+        "visitCompleted": false,
+        "handoffStatus": null
+      },
+      {
+        "householdId": "H026",
+        "status": "before",
+        "lastChangedAt": "2026-10-09T11:00:00+09:00",
+        "note": "합성 시나리오 상태; 실제 연락·안전 확인 아님",
+        "attemptCount": 0,
+        "acked": false,
+        "visitCompleted": false,
+        "handoffStatus": null
+      },
+      {
+        "householdId": "H027",
+        "status": "visit",
+        "lastChangedAt": "2026-10-09T11:00:00+09:00",
+        "note": "합성 시나리오 상태; 실제 연락·안전 확인 아님",
+        "attemptCount": 0,
+        "acked": false,
+        "visitCompleted": false,
+        "handoffStatus": null
+      },
+      {
+        "householdId": "H028",
+        "status": "before",
+        "lastChangedAt": "2026-10-09T11:00:00+09:00",
+        "note": "합성 시나리오 상태; 실제 연락·안전 확인 아님",
+        "attemptCount": 0,
+        "acked": false,
+        "visitCompleted": false,
+        "handoffStatus": null
+      },
+      {
+        "householdId": "H029",
+        "status": "before",
+        "lastChangedAt": "2026-10-09T11:00:00+09:00",
+        "note": "합성 시나리오 상태; 실제 연락·안전 확인 아님",
+        "attemptCount": 0,
+        "acked": false,
+        "visitCompleted": false,
+        "handoffStatus": null
+      },
+      {
+        "householdId": "H030",
+        "status": "before",
+        "lastChangedAt": "2026-10-09T11:00:00+09:00",
+        "note": "합성 시나리오 상태; 실제 연락·안전 확인 아님",
+        "attemptCount": 0,
+        "acked": false,
+        "visitCompleted": false,
+        "handoffStatus": null
+      },
+      {
+        "householdId": "H031",
+        "status": "before",
+        "lastChangedAt": "2026-10-09T11:00:00+09:00",
+        "note": "합성 시나리오 상태; 실제 연락·안전 확인 아님",
+        "attemptCount": 0,
+        "acked": false,
+        "visitCompleted": false,
+        "handoffStatus": null
+      },
+      {
+        "householdId": "H032",
+        "status": "before",
+        "lastChangedAt": "2026-10-09T11:00:00+09:00",
+        "note": "합성 시나리오 상태; 실제 연락·안전 확인 아님",
+        "attemptCount": 0,
+        "acked": false,
+        "visitCompleted": false,
+        "handoffStatus": null
+      },
+      {
+        "householdId": "H033",
+        "status": "before",
+        "lastChangedAt": "2026-10-09T11:00:00+09:00",
+        "note": "합성 시나리오 상태; 실제 연락·안전 확인 아님",
+        "attemptCount": 0,
+        "acked": false,
+        "visitCompleted": false,
+        "handoffStatus": null
+      },
+      {
+        "householdId": "H034",
+        "status": "visit",
+        "lastChangedAt": "2026-10-09T11:00:00+09:00",
+        "note": "합성 시나리오 상태; 실제 연락·안전 확인 아님",
+        "attemptCount": 0,
+        "acked": false,
+        "visitCompleted": false,
+        "handoffStatus": null
+      },
+      {
+        "householdId": "H035",
+        "status": "before",
+        "lastChangedAt": "2026-10-09T11:00:00+09:00",
+        "note": "합성 시나리오 상태; 실제 연락·안전 확인 아님",
+        "attemptCount": 0,
+        "acked": false,
+        "visitCompleted": false,
+        "handoffStatus": null
+      },
+      {
+        "householdId": "H036",
+        "status": "before",
+        "lastChangedAt": "2026-10-09T11:00:00+09:00",
+        "note": "합성 시나리오 상태; 실제 연락·안전 확인 아님",
+        "attemptCount": 0,
+        "acked": false,
+        "visitCompleted": false,
+        "handoffStatus": null
+      },
+      {
+        "householdId": "H037",
+        "status": "before",
+        "lastChangedAt": "2026-10-09T11:00:00+09:00",
+        "note": "합성 시나리오 상태; 실제 연락·안전 확인 아님",
+        "attemptCount": 0,
+        "acked": false,
+        "visitCompleted": false,
+        "handoffStatus": null
+      },
+      {
+        "householdId": "H038",
+        "status": "before",
+        "lastChangedAt": "2026-10-09T11:00:00+09:00",
+        "note": "합성 시나리오 상태; 실제 연락·안전 확인 아님",
+        "attemptCount": 0,
+        "acked": false,
+        "visitCompleted": false,
+        "handoffStatus": null
+      },
+      {
+        "householdId": "H039",
+        "status": "before",
+        "lastChangedAt": "2026-10-09T11:00:00+09:00",
+        "note": "합성 시나리오 상태; 실제 연락·안전 확인 아님",
+        "attemptCount": 0,
+        "acked": false,
+        "visitCompleted": false,
+        "handoffStatus": null
+      },
+      {
+        "householdId": "H040",
+        "status": "before",
+        "lastChangedAt": "2026-10-09T11:00:00+09:00",
+        "note": "합성 시나리오 상태; 실제 연락·안전 확인 아님",
+        "attemptCount": 0,
+        "acked": false,
+        "visitCompleted": false,
+        "handoffStatus": null
+      },
+      {
+        "householdId": "H041",
+        "status": "before",
+        "lastChangedAt": "2026-10-09T11:00:00+09:00",
+        "note": "합성 시나리오 상태; 실제 연락·안전 확인 아님",
+        "attemptCount": 0,
+        "acked": false,
+        "visitCompleted": false,
+        "handoffStatus": null
+      },
+      {
+        "householdId": "H042",
+        "status": "before",
+        "lastChangedAt": "2026-10-09T11:00:00+09:00",
+        "note": "합성 시나리오 상태; 실제 연락·안전 확인 아님",
+        "attemptCount": 0,
+        "acked": false,
+        "visitCompleted": false,
+        "handoffStatus": null
+      },
+      {
+        "householdId": "H043",
+        "status": "before",
+        "lastChangedAt": "2026-10-09T11:00:00+09:00",
+        "note": "합성 시나리오 상태; 실제 연락·안전 확인 아님",
+        "attemptCount": 0,
+        "acked": false,
+        "visitCompleted": false,
+        "handoffStatus": null
+      },
+      {
+        "householdId": "H044",
+        "status": "before",
+        "lastChangedAt": "2026-10-09T11:00:00+09:00",
+        "note": "합성 시나리오 상태; 실제 연락·안전 확인 아님",
+        "attemptCount": 0,
+        "acked": false,
+        "visitCompleted": false,
+        "handoffStatus": null
+      },
+      {
+        "householdId": "H045",
+        "status": "before",
+        "lastChangedAt": "2026-10-09T11:00:00+09:00",
+        "note": "합성 시나리오 상태; 실제 연락·안전 확인 아님",
+        "attemptCount": 0,
+        "acked": false,
+        "visitCompleted": false,
+        "handoffStatus": null
+      },
+      {
+        "householdId": "H046",
+        "status": "before",
+        "lastChangedAt": "2026-10-09T11:00:00+09:00",
+        "note": "합성 시나리오 상태; 실제 연락·안전 확인 아님",
+        "attemptCount": 0,
+        "acked": false,
+        "visitCompleted": false,
+        "handoffStatus": null
+      },
+      {
+        "householdId": "H047",
+        "status": "before",
+        "lastChangedAt": "2026-10-09T11:00:00+09:00",
+        "note": "합성 시나리오 상태; 실제 연락·안전 확인 아님",
+        "attemptCount": 0,
+        "acked": false,
+        "visitCompleted": false,
+        "handoffStatus": null
+      },
+      {
+        "householdId": "H048",
+        "status": "before",
+        "lastChangedAt": "2026-10-09T11:00:00+09:00",
+        "note": "합성 시나리오 상태; 실제 연락·안전 확인 아님",
+        "attemptCount": 0,
+        "acked": false,
+        "visitCompleted": false,
+        "handoffStatus": null
+      }
+    ],
+    "counts": {
+      "total": 48,
+      "eligible": 45,
+      "act": 0,
+      "prog": 0,
+      "safe": 0,
+      "visit": 3,
+      "before": 45,
+      "temporarilyExcluded": 0
+    },
+    "pendingReviewIds": [],
+    "resourceStatuses": [
+      {
+        "vehicleId": "V01",
+        "status": "free",
+        "householdId": null
+      },
+      {
+        "vehicleId": "V02",
+        "status": "free",
+        "householdId": null
+      },
+      {
+        "vehicleId": "V03",
+        "status": "free",
+        "householdId": null
+      },
+      {
+        "vehicleId": "V04",
+        "status": "free",
+        "householdId": null
+      },
+      {
+        "vehicleId": "V05",
+        "status": "free",
+        "householdId": null
+      },
+      {
+        "vehicleId": "V06",
+        "status": "free",
+        "householdId": null
+      },
+      {
+        "vehicleId": "V07",
+        "status": "free",
+        "householdId": null
+      },
+      {
+        "vehicleId": "V08",
+        "status": "free",
+        "householdId": null
+      },
+      {
+        "vehicleId": "V09",
+        "status": "free",
+        "householdId": null
+      },
+      {
+        "vehicleId": "V10",
+        "status": "unavailable",
+        "householdId": null
+      }
+    ],
+    "sourceStatuses": [
+      {
+        "sourceId": "SRC01",
+        "status": "pending",
+        "mode": "synthetic",
+        "observedAt": "2026-10-09T11:00:00+09:00",
+        "summary": "북서 가상 능선 산불 시나리오"
+      },
+      {
+        "sourceId": "SRC02",
+        "status": "pending",
+        "mode": "synthetic",
+        "observedAt": "2026-10-09T11:00:00+09:00",
+        "summary": "온빛 마을 모의 대피 지시"
+      },
+      {
+        "sourceId": "SRC03",
+        "status": "pending",
+        "mode": "synthetic",
+        "observedAt": "2026-10-09T11:00:00+09:00",
+        "summary": "시연 지수 58"
+      },
+      {
+        "sourceId": "SRC04",
+        "status": "pending",
+        "mode": "synthetic",
+        "observedAt": "2026-10-09T11:00:00+09:00",
+        "summary": "건조 조건 모의 표시"
+      },
+      {
+        "sourceId": "SRC05",
+        "status": "pending",
+        "mode": "synthetic",
+        "observedAt": "2026-10-09T11:00:00+09:00",
+        "summary": "서풍 9 m/s 시연 값"
+      },
+      {
+        "sourceId": "SRC06",
+        "status": "pending",
+        "mode": "synthetic",
+        "observedAt": "2026-10-09T11:00:00+09:00",
+        "summary": "강수 없음 시연 값"
+      },
+      {
+        "sourceId": "SRC07",
+        "status": "pending",
+        "mode": "synthetic",
+        "observedAt": "2026-10-09T11:00:00+09:00",
+        "summary": "수위 관심 미만 시연 값"
+      },
+      {
+        "sourceId": "SRC08",
+        "status": "pending",
+        "mode": "synthetic",
+        "observedAt": "2026-10-09T11:00:00+09:00",
+        "summary": "가상 대피소 3곳"
+      }
+    ],
+    "synthetic": true
+  },
+  {
+    "id": "watch",
+    "label": "감시",
+    "displayTime": "2026-10-09T11:05:00+09:00",
+    "mode": "watch",
+    "householdStatuses": [
+      {
+        "householdId": "H001",
+        "status": "before",
+        "lastChangedAt": "2026-10-09T11:05:00+09:00",
+        "note": "합성 시나리오 상태; 실제 연락·안전 확인 아님",
+        "attemptCount": 0,
+        "acked": false,
+        "visitCompleted": false,
+        "handoffStatus": null
+      },
+      {
+        "householdId": "H002",
+        "status": "before",
+        "lastChangedAt": "2026-10-09T11:05:00+09:00",
+        "note": "합성 시나리오 상태; 실제 연락·안전 확인 아님",
+        "attemptCount": 0,
+        "acked": false,
+        "visitCompleted": false,
+        "handoffStatus": null
+      },
+      {
+        "householdId": "H003",
+        "status": "before",
+        "lastChangedAt": "2026-10-09T11:05:00+09:00",
+        "note": "합성 시나리오 상태; 실제 연락·안전 확인 아님",
+        "attemptCount": 0,
+        "acked": false,
+        "visitCompleted": false,
+        "handoffStatus": null
+      },
+      {
+        "householdId": "H004",
+        "status": "visit",
+        "lastChangedAt": "2026-10-09T11:05:00+09:00",
+        "note": "합성 시나리오 상태; 실제 연락·안전 확인 아님",
+        "attemptCount": 0,
+        "acked": false,
+        "visitCompleted": false,
+        "handoffStatus": null
+      },
+      {
+        "householdId": "H005",
+        "status": "before",
+        "lastChangedAt": "2026-10-09T11:05:00+09:00",
+        "note": "합성 시나리오 상태; 실제 연락·안전 확인 아님",
+        "attemptCount": 0,
+        "acked": false,
+        "visitCompleted": false,
+        "handoffStatus": null
+      },
+      {
+        "householdId": "H006",
+        "status": "before",
+        "lastChangedAt": "2026-10-09T11:05:00+09:00",
+        "note": "합성 시나리오 상태; 실제 연락·안전 확인 아님",
+        "attemptCount": 0,
+        "acked": false,
+        "visitCompleted": false,
+        "handoffStatus": null
+      },
+      {
+        "householdId": "H007",
+        "status": "before",
+        "lastChangedAt": "2026-10-09T11:05:00+09:00",
+        "note": "합성 시나리오 상태; 실제 연락·안전 확인 아님",
+        "attemptCount": 0,
+        "acked": false,
+        "visitCompleted": false,
+        "handoffStatus": null
+      },
+      {
+        "householdId": "H008",
+        "status": "before",
+        "lastChangedAt": "2026-10-09T11:05:00+09:00",
+        "note": "합성 시나리오 상태; 실제 연락·안전 확인 아님",
+        "attemptCount": 0,
+        "acked": false,
+        "visitCompleted": false,
+        "handoffStatus": null
+      },
+      {
+        "householdId": "H009",
+        "status": "before",
+        "lastChangedAt": "2026-10-09T11:05:00+09:00",
+        "note": "합성 시나리오 상태; 실제 연락·안전 확인 아님",
+        "attemptCount": 0,
+        "acked": false,
+        "visitCompleted": false,
+        "handoffStatus": null
+      },
+      {
+        "householdId": "H010",
+        "status": "before",
+        "lastChangedAt": "2026-10-09T11:05:00+09:00",
+        "note": "합성 시나리오 상태; 실제 연락·안전 확인 아님",
+        "attemptCount": 0,
+        "acked": false,
+        "visitCompleted": false,
+        "handoffStatus": null
+      },
+      {
+        "householdId": "H011",
+        "status": "before",
+        "lastChangedAt": "2026-10-09T11:05:00+09:00",
+        "note": "합성 시나리오 상태; 실제 연락·안전 확인 아님",
+        "attemptCount": 0,
+        "acked": false,
+        "visitCompleted": false,
+        "handoffStatus": null
+      },
+      {
+        "householdId": "H012",
+        "status": "before",
+        "lastChangedAt": "2026-10-09T11:05:00+09:00",
+        "note": "합성 시나리오 상태; 실제 연락·안전 확인 아님",
+        "attemptCount": 0,
+        "acked": false,
+        "visitCompleted": false,
+        "handoffStatus": null
+      },
+      {
+        "householdId": "H013",
+        "status": "before",
+        "lastChangedAt": "2026-10-09T11:05:00+09:00",
+        "note": "합성 시나리오 상태; 실제 연락·안전 확인 아님",
+        "attemptCount": 0,
+        "acked": false,
+        "visitCompleted": false,
+        "handoffStatus": null
+      },
+      {
+        "householdId": "H014",
+        "status": "before",
+        "lastChangedAt": "2026-10-09T11:05:00+09:00",
+        "note": "합성 시나리오 상태; 실제 연락·안전 확인 아님",
+        "attemptCount": 0,
+        "acked": false,
+        "visitCompleted": false,
+        "handoffStatus": null
+      },
+      {
+        "householdId": "H015",
+        "status": "before",
+        "lastChangedAt": "2026-10-09T11:05:00+09:00",
+        "note": "합성 시나리오 상태; 실제 연락·안전 확인 아님",
+        "attemptCount": 0,
+        "acked": false,
+        "visitCompleted": false,
+        "handoffStatus": null
+      },
+      {
+        "householdId": "H016",
+        "status": "before",
+        "lastChangedAt": "2026-10-09T11:05:00+09:00",
+        "note": "합성 시나리오 상태; 실제 연락·안전 확인 아님",
+        "attemptCount": 0,
+        "acked": false,
+        "visitCompleted": false,
+        "handoffStatus": null
+      },
+      {
+        "householdId": "H017",
+        "status": "before",
+        "lastChangedAt": "2026-10-09T11:05:00+09:00",
+        "note": "합성 시나리오 상태; 실제 연락·안전 확인 아님",
+        "attemptCount": 0,
+        "acked": false,
+        "visitCompleted": false,
+        "handoffStatus": null
+      },
+      {
+        "householdId": "H018",
+        "status": "before",
+        "lastChangedAt": "2026-10-09T11:05:00+09:00",
+        "note": "합성 시나리오 상태; 실제 연락·안전 확인 아님",
+        "attemptCount": 0,
+        "acked": false,
+        "visitCompleted": false,
+        "handoffStatus": null
+      },
+      {
+        "householdId": "H019",
+        "status": "before",
+        "lastChangedAt": "2026-10-09T11:05:00+09:00",
+        "note": "합성 시나리오 상태; 실제 연락·안전 확인 아님",
+        "attemptCount": 0,
+        "acked": false,
+        "visitCompleted": false,
+        "handoffStatus": null
+      },
+      {
+        "householdId": "H020",
+        "status": "before",
+        "lastChangedAt": "2026-10-09T11:05:00+09:00",
+        "note": "합성 시나리오 상태; 실제 연락·안전 확인 아님",
+        "attemptCount": 0,
+        "acked": false,
+        "visitCompleted": false,
+        "handoffStatus": null
+      },
+      {
+        "householdId": "H021",
+        "status": "before",
+        "lastChangedAt": "2026-10-09T11:05:00+09:00",
+        "note": "합성 시나리오 상태; 실제 연락·안전 확인 아님",
+        "attemptCount": 0,
+        "acked": false,
+        "visitCompleted": false,
+        "handoffStatus": null
+      },
+      {
+        "householdId": "H022",
+        "status": "before",
+        "lastChangedAt": "2026-10-09T11:05:00+09:00",
+        "note": "합성 시나리오 상태; 실제 연락·안전 확인 아님",
+        "attemptCount": 0,
+        "acked": false,
+        "visitCompleted": false,
+        "handoffStatus": null
+      },
+      {
+        "householdId": "H023",
+        "status": "before",
+        "lastChangedAt": "2026-10-09T11:05:00+09:00",
+        "note": "합성 시나리오 상태; 실제 연락·안전 확인 아님",
+        "attemptCount": 0,
+        "acked": false,
+        "visitCompleted": false,
+        "handoffStatus": null
+      },
+      {
+        "householdId": "H024",
+        "status": "before",
+        "lastChangedAt": "2026-10-09T11:05:00+09:00",
+        "note": "합성 시나리오 상태; 실제 연락·안전 확인 아님",
+        "attemptCount": 0,
+        "acked": false,
+        "visitCompleted": false,
+        "handoffStatus": null
+      },
+      {
+        "householdId": "H025",
+        "status": "before",
+        "lastChangedAt": "2026-10-09T11:05:00+09:00",
+        "note": "합성 시나리오 상태; 실제 연락·안전 확인 아님",
+        "attemptCount": 0,
+        "acked": false,
+        "visitCompleted": false,
+        "handoffStatus": null
+      },
+      {
+        "householdId": "H026",
+        "status": "before",
+        "lastChangedAt": "2026-10-09T11:05:00+09:00",
+        "note": "합성 시나리오 상태; 실제 연락·안전 확인 아님",
+        "attemptCount": 0,
+        "acked": false,
+        "visitCompleted": false,
+        "handoffStatus": null
+      },
+      {
+        "householdId": "H027",
+        "status": "visit",
+        "lastChangedAt": "2026-10-09T11:05:00+09:00",
+        "note": "합성 시나리오 상태; 실제 연락·안전 확인 아님",
+        "attemptCount": 0,
+        "acked": false,
+        "visitCompleted": false,
+        "handoffStatus": null
+      },
+      {
+        "householdId": "H028",
+        "status": "before",
+        "lastChangedAt": "2026-10-09T11:05:00+09:00",
+        "note": "합성 시나리오 상태; 실제 연락·안전 확인 아님",
+        "attemptCount": 0,
+        "acked": false,
+        "visitCompleted": false,
+        "handoffStatus": null
+      },
+      {
+        "householdId": "H029",
+        "status": "before",
+        "lastChangedAt": "2026-10-09T11:05:00+09:00",
+        "note": "합성 시나리오 상태; 실제 연락·안전 확인 아님",
+        "attemptCount": 0,
+        "acked": false,
+        "visitCompleted": false,
+        "handoffStatus": null
+      },
+      {
+        "householdId": "H030",
+        "status": "before",
+        "lastChangedAt": "2026-10-09T11:05:00+09:00",
+        "note": "합성 시나리오 상태; 실제 연락·안전 확인 아님",
+        "attemptCount": 0,
+        "acked": false,
+        "visitCompleted": false,
+        "handoffStatus": null
+      },
+      {
+        "householdId": "H031",
+        "status": "before",
+        "lastChangedAt": "2026-10-09T11:05:00+09:00",
+        "note": "합성 시나리오 상태; 실제 연락·안전 확인 아님",
+        "attemptCount": 0,
+        "acked": false,
+        "visitCompleted": false,
+        "handoffStatus": null
+      },
+      {
+        "householdId": "H032",
+        "status": "before",
+        "lastChangedAt": "2026-10-09T11:05:00+09:00",
+        "note": "합성 시나리오 상태; 실제 연락·안전 확인 아님",
+        "attemptCount": 0,
+        "acked": false,
+        "visitCompleted": false,
+        "handoffStatus": null
+      },
+      {
+        "householdId": "H033",
+        "status": "before",
+        "lastChangedAt": "2026-10-09T11:05:00+09:00",
+        "note": "합성 시나리오 상태; 실제 연락·안전 확인 아님",
+        "attemptCount": 0,
+        "acked": false,
+        "visitCompleted": false,
+        "handoffStatus": null
+      },
+      {
+        "householdId": "H034",
+        "status": "visit",
+        "lastChangedAt": "2026-10-09T11:05:00+09:00",
+        "note": "합성 시나리오 상태; 실제 연락·안전 확인 아님",
+        "attemptCount": 0,
+        "acked": false,
+        "visitCompleted": false,
+        "handoffStatus": null
+      },
+      {
+        "householdId": "H035",
+        "status": "before",
+        "lastChangedAt": "2026-10-09T11:05:00+09:00",
+        "note": "합성 시나리오 상태; 실제 연락·안전 확인 아님",
+        "attemptCount": 0,
+        "acked": false,
+        "visitCompleted": false,
+        "handoffStatus": null
+      },
+      {
+        "householdId": "H036",
+        "status": "before",
+        "lastChangedAt": "2026-10-09T11:05:00+09:00",
+        "note": "합성 시나리오 상태; 실제 연락·안전 확인 아님",
+        "attemptCount": 0,
+        "acked": false,
+        "visitCompleted": false,
+        "handoffStatus": null
+      },
+      {
+        "householdId": "H037",
+        "status": "before",
+        "lastChangedAt": "2026-10-09T11:05:00+09:00",
+        "note": "합성 시나리오 상태; 실제 연락·안전 확인 아님",
+        "attemptCount": 0,
+        "acked": false,
+        "visitCompleted": false,
+        "handoffStatus": null
+      },
+      {
+        "householdId": "H038",
+        "status": "before",
+        "lastChangedAt": "2026-10-09T11:05:00+09:00",
+        "note": "합성 시나리오 상태; 실제 연락·안전 확인 아님",
+        "attemptCount": 0,
+        "acked": false,
+        "visitCompleted": false,
+        "handoffStatus": null
+      },
+      {
+        "householdId": "H039",
+        "status": "before",
+        "lastChangedAt": "2026-10-09T11:05:00+09:00",
+        "note": "합성 시나리오 상태; 실제 연락·안전 확인 아님",
+        "attemptCount": 0,
+        "acked": false,
+        "visitCompleted": false,
+        "handoffStatus": null
+      },
+      {
+        "householdId": "H040",
+        "status": "before",
+        "lastChangedAt": "2026-10-09T11:05:00+09:00",
+        "note": "합성 시나리오 상태; 실제 연락·안전 확인 아님",
+        "attemptCount": 0,
+        "acked": false,
+        "visitCompleted": false,
+        "handoffStatus": null
+      },
+      {
+        "householdId": "H041",
+        "status": "before",
+        "lastChangedAt": "2026-10-09T11:05:00+09:00",
+        "note": "합성 시나리오 상태; 실제 연락·안전 확인 아님",
+        "attemptCount": 0,
+        "acked": false,
+        "visitCompleted": false,
+        "handoffStatus": null
+      },
+      {
+        "householdId": "H042",
+        "status": "before",
+        "lastChangedAt": "2026-10-09T11:05:00+09:00",
+        "note": "합성 시나리오 상태; 실제 연락·안전 확인 아님",
+        "attemptCount": 0,
+        "acked": false,
+        "visitCompleted": false,
+        "handoffStatus": null
+      },
+      {
+        "householdId": "H043",
+        "status": "before",
+        "lastChangedAt": "2026-10-09T11:05:00+09:00",
+        "note": "합성 시나리오 상태; 실제 연락·안전 확인 아님",
+        "attemptCount": 0,
+        "acked": false,
+        "visitCompleted": false,
+        "handoffStatus": null
+      },
+      {
+        "householdId": "H044",
+        "status": "before",
+        "lastChangedAt": "2026-10-09T11:05:00+09:00",
+        "note": "합성 시나리오 상태; 실제 연락·안전 확인 아님",
+        "attemptCount": 0,
+        "acked": false,
+        "visitCompleted": false,
+        "handoffStatus": null
+      },
+      {
+        "householdId": "H045",
+        "status": "before",
+        "lastChangedAt": "2026-10-09T11:05:00+09:00",
+        "note": "합성 시나리오 상태; 실제 연락·안전 확인 아님",
+        "attemptCount": 0,
+        "acked": false,
+        "visitCompleted": false,
+        "handoffStatus": null
+      },
+      {
+        "householdId": "H046",
+        "status": "before",
+        "lastChangedAt": "2026-10-09T11:05:00+09:00",
+        "note": "합성 시나리오 상태; 실제 연락·안전 확인 아님",
+        "attemptCount": 0,
+        "acked": false,
+        "visitCompleted": false,
+        "handoffStatus": null
+      },
+      {
+        "householdId": "H047",
+        "status": "before",
+        "lastChangedAt": "2026-10-09T11:05:00+09:00",
+        "note": "합성 시나리오 상태; 실제 연락·안전 확인 아님",
+        "attemptCount": 0,
+        "acked": false,
+        "visitCompleted": false,
+        "handoffStatus": null
+      },
+      {
+        "householdId": "H048",
+        "status": "before",
+        "lastChangedAt": "2026-10-09T11:05:00+09:00",
+        "note": "합성 시나리오 상태; 실제 연락·안전 확인 아님",
+        "attemptCount": 0,
+        "acked": false,
+        "visitCompleted": false,
+        "handoffStatus": null
+      }
+    ],
+    "counts": {
+      "total": 48,
+      "eligible": 45,
+      "act": 0,
+      "prog": 0,
+      "safe": 0,
+      "visit": 3,
+      "before": 45,
+      "temporarilyExcluded": 0
+    },
+    "pendingReviewIds": [],
+    "resourceStatuses": [
+      {
+        "vehicleId": "V01",
+        "status": "free",
+        "householdId": null
+      },
+      {
+        "vehicleId": "V02",
+        "status": "free",
+        "householdId": null
+      },
+      {
+        "vehicleId": "V03",
+        "status": "free",
+        "householdId": null
+      },
+      {
+        "vehicleId": "V04",
+        "status": "free",
+        "householdId": null
+      },
+      {
+        "vehicleId": "V05",
+        "status": "free",
+        "householdId": null
+      },
+      {
+        "vehicleId": "V06",
+        "status": "free",
+        "householdId": null
+      },
+      {
+        "vehicleId": "V07",
+        "status": "free",
+        "householdId": null
+      },
+      {
+        "vehicleId": "V08",
+        "status": "free",
+        "householdId": null
+      },
+      {
+        "vehicleId": "V09",
+        "status": "free",
+        "householdId": null
+      },
+      {
+        "vehicleId": "V10",
+        "status": "unavailable",
+        "householdId": null
+      }
+    ],
+    "sourceStatuses": [
+      {
+        "sourceId": "SRC01",
+        "status": "ok",
+        "mode": "synthetic",
+        "observedAt": "2026-10-09T11:05:00+09:00",
+        "summary": "북서 가상 능선 산불 시나리오"
+      },
+      {
+        "sourceId": "SRC02",
+        "status": "ok",
+        "mode": "synthetic",
+        "observedAt": "2026-10-09T11:05:00+09:00",
+        "summary": "온빛 마을 모의 대피 지시"
+      },
+      {
+        "sourceId": "SRC03",
+        "status": "ok",
+        "mode": "synthetic",
+        "observedAt": "2026-10-09T11:05:00+09:00",
+        "summary": "시연 지수 58"
+      },
+      {
+        "sourceId": "SRC04",
+        "status": "ok",
+        "mode": "synthetic",
+        "observedAt": "2026-10-09T11:05:00+09:00",
+        "summary": "건조 조건 모의 표시"
+      },
+      {
+        "sourceId": "SRC05",
+        "status": "ok",
+        "mode": "synthetic",
+        "observedAt": "2026-10-09T11:05:00+09:00",
+        "summary": "서풍 9 m/s 시연 값"
+      },
+      {
+        "sourceId": "SRC06",
+        "status": "ok",
+        "mode": "synthetic",
+        "observedAt": "2026-10-09T11:05:00+09:00",
+        "summary": "강수 없음 시연 값"
+      },
+      {
+        "sourceId": "SRC07",
+        "status": "ok",
+        "mode": "synthetic",
+        "observedAt": "2026-10-09T11:05:00+09:00",
+        "summary": "수위 관심 미만 시연 값"
+      },
+      {
+        "sourceId": "SRC08",
+        "status": "ok",
+        "mode": "synthetic",
+        "observedAt": "2026-10-09T11:05:00+09:00",
+        "summary": "가상 대피소 3곳"
+      }
+    ],
+    "synthetic": true
+  },
+  {
+    "id": "review",
+    "label": "확정 대기",
+    "displayTime": "2026-10-09T11:08:00+09:00",
+    "mode": "event",
+    "householdStatuses": [
+      {
+        "householdId": "H001",
+        "status": "before",
+        "lastChangedAt": "2026-10-09T11:08:00+09:00",
+        "note": "합성 시나리오 상태; 실제 연락·안전 확인 아님",
+        "attemptCount": 0,
+        "acked": false,
+        "visitCompleted": false,
+        "handoffStatus": null
+      },
+      {
+        "householdId": "H002",
+        "status": "before",
+        "lastChangedAt": "2026-10-09T11:08:00+09:00",
+        "note": "합성 시나리오 상태; 실제 연락·안전 확인 아님",
+        "attemptCount": 0,
+        "acked": false,
+        "visitCompleted": false,
+        "handoffStatus": null
+      },
+      {
+        "householdId": "H003",
+        "status": "before",
+        "lastChangedAt": "2026-10-09T11:08:00+09:00",
+        "note": "합성 시나리오 상태; 실제 연락·안전 확인 아님",
+        "attemptCount": 0,
+        "acked": false,
+        "visitCompleted": false,
+        "handoffStatus": null
+      },
+      {
+        "householdId": "H004",
+        "status": "visit",
+        "lastChangedAt": "2026-10-09T11:08:00+09:00",
+        "note": "합성 시나리오 상태; 실제 연락·안전 확인 아님",
+        "attemptCount": 0,
+        "acked": false,
+        "visitCompleted": false,
+        "handoffStatus": null
+      },
+      {
+        "householdId": "H005",
+        "status": "before",
+        "lastChangedAt": "2026-10-09T11:08:00+09:00",
+        "note": "합성 시나리오 상태; 실제 연락·안전 확인 아님",
+        "attemptCount": 0,
+        "acked": false,
+        "visitCompleted": false,
+        "handoffStatus": null
+      },
+      {
+        "householdId": "H006",
+        "status": "before",
+        "lastChangedAt": "2026-10-09T11:08:00+09:00",
+        "note": "합성 시나리오 상태; 실제 연락·안전 확인 아님",
+        "attemptCount": 0,
+        "acked": false,
+        "visitCompleted": false,
+        "handoffStatus": null
+      },
+      {
+        "householdId": "H007",
+        "status": "before",
+        "lastChangedAt": "2026-10-09T11:08:00+09:00",
+        "note": "합성 시나리오 상태; 실제 연락·안전 확인 아님",
+        "attemptCount": 0,
+        "acked": false,
+        "visitCompleted": false,
+        "handoffStatus": null
+      },
+      {
+        "householdId": "H008",
+        "status": "before",
+        "lastChangedAt": "2026-10-09T11:08:00+09:00",
+        "note": "합성 시나리오 상태; 실제 연락·안전 확인 아님",
+        "attemptCount": 0,
+        "acked": false,
+        "visitCompleted": false,
+        "handoffStatus": null
+      },
+      {
+        "householdId": "H009",
+        "status": "before",
+        "lastChangedAt": "2026-10-09T11:08:00+09:00",
+        "note": "합성 시나리오 상태; 실제 연락·안전 확인 아님",
+        "attemptCount": 0,
+        "acked": false,
+        "visitCompleted": false,
+        "handoffStatus": null
+      },
+      {
+        "householdId": "H010",
+        "status": "before",
+        "lastChangedAt": "2026-10-09T11:08:00+09:00",
+        "note": "합성 시나리오 상태; 실제 연락·안전 확인 아님",
+        "attemptCount": 0,
+        "acked": false,
+        "visitCompleted": false,
+        "handoffStatus": null
+      },
+      {
+        "householdId": "H011",
+        "status": "before",
+        "lastChangedAt": "2026-10-09T11:08:00+09:00",
+        "note": "합성 시나리오 상태; 실제 연락·안전 확인 아님",
+        "attemptCount": 0,
+        "acked": false,
+        "visitCompleted": false,
+        "handoffStatus": null
+      },
+      {
+        "householdId": "H012",
+        "status": "before",
+        "lastChangedAt": "2026-10-09T11:08:00+09:00",
+        "note": "합성 시나리오 상태; 실제 연락·안전 확인 아님",
+        "attemptCount": 0,
+        "acked": false,
+        "visitCompleted": false,
+        "handoffStatus": null
+      },
+      {
+        "householdId": "H013",
+        "status": "before",
+        "lastChangedAt": "2026-10-09T11:08:00+09:00",
+        "note": "합성 시나리오 상태; 실제 연락·안전 확인 아님",
+        "attemptCount": 0,
+        "acked": false,
+        "visitCompleted": false,
+        "handoffStatus": null
+      },
+      {
+        "householdId": "H014",
+        "status": "before",
+        "lastChangedAt": "2026-10-09T11:08:00+09:00",
+        "note": "합성 시나리오 상태; 실제 연락·안전 확인 아님",
+        "attemptCount": 0,
+        "acked": false,
+        "visitCompleted": false,
+        "handoffStatus": null
+      },
+      {
+        "householdId": "H015",
+        "status": "before",
+        "lastChangedAt": "2026-10-09T11:08:00+09:00",
+        "note": "합성 시나리오 상태; 실제 연락·안전 확인 아님",
+        "attemptCount": 0,
+        "acked": false,
+        "visitCompleted": false,
+        "handoffStatus": null
+      },
+      {
+        "householdId": "H016",
+        "status": "before",
+        "lastChangedAt": "2026-10-09T11:08:00+09:00",
+        "note": "합성 시나리오 상태; 실제 연락·안전 확인 아님",
+        "attemptCount": 0,
+        "acked": false,
+        "visitCompleted": false,
+        "handoffStatus": null
+      },
+      {
+        "householdId": "H017",
+        "status": "before",
+        "lastChangedAt": "2026-10-09T11:08:00+09:00",
+        "note": "합성 시나리오 상태; 실제 연락·안전 확인 아님",
+        "attemptCount": 0,
+        "acked": false,
+        "visitCompleted": false,
+        "handoffStatus": null
+      },
+      {
+        "householdId": "H018",
+        "status": "before",
+        "lastChangedAt": "2026-10-09T11:08:00+09:00",
+        "note": "합성 시나리오 상태; 실제 연락·안전 확인 아님",
+        "attemptCount": 0,
+        "acked": false,
+        "visitCompleted": false,
+        "handoffStatus": null
+      },
+      {
+        "householdId": "H019",
+        "status": "before",
+        "lastChangedAt": "2026-10-09T11:08:00+09:00",
+        "note": "합성 시나리오 상태; 실제 연락·안전 확인 아님",
+        "attemptCount": 0,
+        "acked": false,
+        "visitCompleted": false,
+        "handoffStatus": null
+      },
+      {
+        "householdId": "H020",
+        "status": "before",
+        "lastChangedAt": "2026-10-09T11:08:00+09:00",
+        "note": "합성 시나리오 상태; 실제 연락·안전 확인 아님",
+        "attemptCount": 0,
+        "acked": false,
+        "visitCompleted": false,
+        "handoffStatus": null
+      },
+      {
+        "householdId": "H021",
+        "status": "before",
+        "lastChangedAt": "2026-10-09T11:08:00+09:00",
+        "note": "합성 시나리오 상태; 실제 연락·안전 확인 아님",
+        "attemptCount": 0,
+        "acked": false,
+        "visitCompleted": false,
+        "handoffStatus": null
+      },
+      {
+        "householdId": "H022",
+        "status": "before",
+        "lastChangedAt": "2026-10-09T11:08:00+09:00",
+        "note": "합성 시나리오 상태; 실제 연락·안전 확인 아님",
+        "attemptCount": 0,
+        "acked": false,
+        "visitCompleted": false,
+        "handoffStatus": null
+      },
+      {
+        "householdId": "H023",
+        "status": "before",
+        "lastChangedAt": "2026-10-09T11:08:00+09:00",
+        "note": "합성 시나리오 상태; 실제 연락·안전 확인 아님",
+        "attemptCount": 0,
+        "acked": false,
+        "visitCompleted": false,
+        "handoffStatus": null
+      },
+      {
+        "householdId": "H024",
+        "status": "before",
+        "lastChangedAt": "2026-10-09T11:08:00+09:00",
+        "note": "합성 시나리오 상태; 실제 연락·안전 확인 아님",
+        "attemptCount": 0,
+        "acked": false,
+        "visitCompleted": false,
+        "handoffStatus": null
+      },
+      {
+        "householdId": "H025",
+        "status": "before",
+        "lastChangedAt": "2026-10-09T11:08:00+09:00",
+        "note": "합성 시나리오 상태; 실제 연락·안전 확인 아님",
+        "attemptCount": 0,
+        "acked": false,
+        "visitCompleted": false,
+        "handoffStatus": null
+      },
+      {
+        "householdId": "H026",
+        "status": "before",
+        "lastChangedAt": "2026-10-09T11:08:00+09:00",
+        "note": "합성 시나리오 상태; 실제 연락·안전 확인 아님",
+        "attemptCount": 0,
+        "acked": false,
+        "visitCompleted": false,
+        "handoffStatus": null
+      },
+      {
+        "householdId": "H027",
+        "status": "visit",
+        "lastChangedAt": "2026-10-09T11:08:00+09:00",
+        "note": "합성 시나리오 상태; 실제 연락·안전 확인 아님",
+        "attemptCount": 0,
+        "acked": false,
+        "visitCompleted": false,
+        "handoffStatus": null
+      },
+      {
+        "householdId": "H028",
+        "status": "before",
+        "lastChangedAt": "2026-10-09T11:08:00+09:00",
+        "note": "합성 시나리오 상태; 실제 연락·안전 확인 아님",
+        "attemptCount": 0,
+        "acked": false,
+        "visitCompleted": false,
+        "handoffStatus": null
+      },
+      {
+        "householdId": "H029",
+        "status": "before",
+        "lastChangedAt": "2026-10-09T11:08:00+09:00",
+        "note": "합성 시나리오 상태; 실제 연락·안전 확인 아님",
+        "attemptCount": 0,
+        "acked": false,
+        "visitCompleted": false,
+        "handoffStatus": null
+      },
+      {
+        "householdId": "H030",
+        "status": "before",
+        "lastChangedAt": "2026-10-09T11:08:00+09:00",
+        "note": "합성 시나리오 상태; 실제 연락·안전 확인 아님",
+        "attemptCount": 0,
+        "acked": false,
+        "visitCompleted": false,
+        "handoffStatus": null
+      },
+      {
+        "householdId": "H031",
+        "status": "before",
+        "lastChangedAt": "2026-10-09T11:08:00+09:00",
+        "note": "합성 시나리오 상태; 실제 연락·안전 확인 아님",
+        "attemptCount": 0,
+        "acked": false,
+        "visitCompleted": false,
+        "handoffStatus": null
+      },
+      {
+        "householdId": "H032",
+        "status": "before",
+        "lastChangedAt": "2026-10-09T11:08:00+09:00",
+        "note": "합성 시나리오 상태; 실제 연락·안전 확인 아님",
+        "attemptCount": 0,
+        "acked": false,
+        "visitCompleted": false,
+        "handoffStatus": null
+      },
+      {
+        "householdId": "H033",
+        "status": "before",
+        "lastChangedAt": "2026-10-09T11:08:00+09:00",
+        "note": "합성 시나리오 상태; 실제 연락·안전 확인 아님",
+        "attemptCount": 0,
+        "acked": false,
+        "visitCompleted": false,
+        "handoffStatus": null
+      },
+      {
+        "householdId": "H034",
+        "status": "visit",
+        "lastChangedAt": "2026-10-09T11:08:00+09:00",
+        "note": "합성 시나리오 상태; 실제 연락·안전 확인 아님",
+        "attemptCount": 0,
+        "acked": false,
+        "visitCompleted": false,
+        "handoffStatus": null
+      },
+      {
+        "householdId": "H035",
+        "status": "before",
+        "lastChangedAt": "2026-10-09T11:08:00+09:00",
+        "note": "합성 시나리오 상태; 실제 연락·안전 확인 아님",
+        "attemptCount": 0,
+        "acked": false,
+        "visitCompleted": false,
+        "handoffStatus": null
+      },
+      {
+        "householdId": "H036",
+        "status": "before",
+        "lastChangedAt": "2026-10-09T11:08:00+09:00",
+        "note": "합성 시나리오 상태; 실제 연락·안전 확인 아님",
+        "attemptCount": 0,
+        "acked": false,
+        "visitCompleted": false,
+        "handoffStatus": null
+      },
+      {
+        "householdId": "H037",
+        "status": "before",
+        "lastChangedAt": "2026-10-09T11:08:00+09:00",
+        "note": "합성 시나리오 상태; 실제 연락·안전 확인 아님",
+        "attemptCount": 0,
+        "acked": false,
+        "visitCompleted": false,
+        "handoffStatus": null
+      },
+      {
+        "householdId": "H038",
+        "status": "before",
+        "lastChangedAt": "2026-10-09T11:08:00+09:00",
+        "note": "합성 시나리오 상태; 실제 연락·안전 확인 아님",
+        "attemptCount": 0,
+        "acked": false,
+        "visitCompleted": false,
+        "handoffStatus": null
+      },
+      {
+        "householdId": "H039",
+        "status": "before",
+        "lastChangedAt": "2026-10-09T11:08:00+09:00",
+        "note": "합성 시나리오 상태; 실제 연락·안전 확인 아님",
+        "attemptCount": 0,
+        "acked": false,
+        "visitCompleted": false,
+        "handoffStatus": null
+      },
+      {
+        "householdId": "H040",
+        "status": "before",
+        "lastChangedAt": "2026-10-09T11:08:00+09:00",
+        "note": "합성 시나리오 상태; 실제 연락·안전 확인 아님",
+        "attemptCount": 0,
+        "acked": false,
+        "visitCompleted": false,
+        "handoffStatus": null
+      },
+      {
+        "householdId": "H041",
+        "status": "before",
+        "lastChangedAt": "2026-10-09T11:08:00+09:00",
+        "note": "합성 시나리오 상태; 실제 연락·안전 확인 아님",
+        "attemptCount": 0,
+        "acked": false,
+        "visitCompleted": false,
+        "handoffStatus": null
+      },
+      {
+        "householdId": "H042",
+        "status": "before",
+        "lastChangedAt": "2026-10-09T11:08:00+09:00",
+        "note": "합성 시나리오 상태; 실제 연락·안전 확인 아님",
+        "attemptCount": 0,
+        "acked": false,
+        "visitCompleted": false,
+        "handoffStatus": null
+      },
+      {
+        "householdId": "H043",
+        "status": "before",
+        "lastChangedAt": "2026-10-09T11:08:00+09:00",
+        "note": "합성 시나리오 상태; 실제 연락·안전 확인 아님",
+        "attemptCount": 0,
+        "acked": false,
+        "visitCompleted": false,
+        "handoffStatus": null
+      },
+      {
+        "householdId": "H044",
+        "status": "before",
+        "lastChangedAt": "2026-10-09T11:08:00+09:00",
+        "note": "합성 시나리오 상태; 실제 연락·안전 확인 아님",
+        "attemptCount": 0,
+        "acked": false,
+        "visitCompleted": false,
+        "handoffStatus": null
+      },
+      {
+        "householdId": "H045",
+        "status": "before",
+        "lastChangedAt": "2026-10-09T11:08:00+09:00",
+        "note": "합성 시나리오 상태; 실제 연락·안전 확인 아님",
+        "attemptCount": 0,
+        "acked": false,
+        "visitCompleted": false,
+        "handoffStatus": null
+      },
+      {
+        "householdId": "H046",
+        "status": "before",
+        "lastChangedAt": "2026-10-09T11:08:00+09:00",
+        "note": "합성 시나리오 상태; 실제 연락·안전 확인 아님",
+        "attemptCount": 0,
+        "acked": false,
+        "visitCompleted": false,
+        "handoffStatus": null
+      },
+      {
+        "householdId": "H047",
+        "status": "before",
+        "lastChangedAt": "2026-10-09T11:08:00+09:00",
+        "note": "합성 시나리오 상태; 실제 연락·안전 확인 아님",
+        "attemptCount": 0,
+        "acked": false,
+        "visitCompleted": false,
+        "handoffStatus": null
+      },
+      {
+        "householdId": "H048",
+        "status": "before",
+        "lastChangedAt": "2026-10-09T11:08:00+09:00",
+        "note": "합성 시나리오 상태; 실제 연락·안전 확인 아님",
+        "attemptCount": 0,
+        "acked": false,
+        "visitCompleted": false,
+        "handoffStatus": null
+      }
+    ],
+    "counts": {
+      "total": 48,
+      "eligible": 45,
+      "act": 0,
+      "prog": 0,
+      "safe": 0,
+      "visit": 3,
+      "before": 45,
+      "temporarilyExcluded": 0
+    },
+    "pendingReviewIds": [],
+    "resourceStatuses": [
+      {
+        "vehicleId": "V01",
+        "status": "free",
+        "householdId": null
+      },
+      {
+        "vehicleId": "V02",
+        "status": "free",
+        "householdId": null
+      },
+      {
+        "vehicleId": "V03",
+        "status": "free",
+        "householdId": null
+      },
+      {
+        "vehicleId": "V04",
+        "status": "free",
+        "householdId": null
+      },
+      {
+        "vehicleId": "V05",
+        "status": "free",
+        "householdId": null
+      },
+      {
+        "vehicleId": "V06",
+        "status": "free",
+        "householdId": null
+      },
+      {
+        "vehicleId": "V07",
+        "status": "free",
+        "householdId": null
+      },
+      {
+        "vehicleId": "V08",
+        "status": "free",
+        "householdId": null
+      },
+      {
+        "vehicleId": "V09",
+        "status": "free",
+        "householdId": null
+      },
+      {
+        "vehicleId": "V10",
+        "status": "unavailable",
+        "householdId": null
+      }
+    ],
+    "sourceStatuses": [
+      {
+        "sourceId": "SRC01",
+        "status": "ok",
+        "mode": "synthetic",
+        "observedAt": "2026-10-09T11:08:00+09:00",
+        "summary": "북서 가상 능선 산불 시나리오"
+      },
+      {
+        "sourceId": "SRC02",
+        "status": "ok",
+        "mode": "synthetic",
+        "observedAt": "2026-10-09T11:08:00+09:00",
+        "summary": "온빛 마을 모의 대피 지시"
+      },
+      {
+        "sourceId": "SRC03",
+        "status": "ok",
+        "mode": "synthetic",
+        "observedAt": "2026-10-09T11:08:00+09:00",
+        "summary": "시연 지수 58"
+      },
+      {
+        "sourceId": "SRC04",
+        "status": "ok",
+        "mode": "synthetic",
+        "observedAt": "2026-10-09T11:08:00+09:00",
+        "summary": "건조 조건 모의 표시"
+      },
+      {
+        "sourceId": "SRC05",
+        "status": "ok",
+        "mode": "synthetic",
+        "observedAt": "2026-10-09T11:08:00+09:00",
+        "summary": "서풍 9 m/s 시연 값"
+      },
+      {
+        "sourceId": "SRC06",
+        "status": "ok",
+        "mode": "synthetic",
+        "observedAt": "2026-10-09T11:08:00+09:00",
+        "summary": "강수 없음 시연 값"
+      },
+      {
+        "sourceId": "SRC07",
+        "status": "ok",
+        "mode": "synthetic",
+        "observedAt": "2026-10-09T11:08:00+09:00",
+        "summary": "수위 관심 미만 시연 값"
+      },
+      {
+        "sourceId": "SRC08",
+        "status": "ok",
+        "mode": "synthetic",
+        "observedAt": "2026-10-09T11:08:00+09:00",
+        "summary": "가상 대피소 3곳"
+      }
+    ],
+    "synthetic": true
+  },
+  {
+    "id": "active",
+    "label": "진행 중",
+    "displayTime": "2026-10-09T11:16:00+09:00",
+    "mode": "event",
+    "householdStatuses": [
+      {
+        "householdId": "H001",
+        "status": "e119",
+        "lastChangedAt": "2026-10-09T11:16:00+09:00",
+        "note": "합성 시나리오 상태; 실제 연락·안전 확인 아님",
+        "attemptCount": 1,
+        "acked": false,
+        "visitCompleted": false,
+        "handoffStatus": "mockRecorded"
+      },
+      {
+        "householdId": "H002",
+        "status": "help",
+        "lastChangedAt": "2026-10-09T11:16:00+09:00",
+        "note": "합성 시나리오 상태; 실제 연락·안전 확인 아님",
+        "attemptCount": 1,
+        "acked": false,
+        "visitCompleted": false,
+        "handoffStatus": null
+      },
+      {
+        "householdId": "H003",
+        "status": "help",
+        "lastChangedAt": "2026-10-09T11:16:00+09:00",
+        "note": "합성 시나리오 상태; 실제 연락·안전 확인 아님",
+        "attemptCount": 1,
+        "acked": false,
+        "visitCompleted": false,
+        "handoffStatus": null
+      },
+      {
+        "householdId": "H004",
+        "status": "visit",
+        "lastChangedAt": "2026-10-09T11:16:00+09:00",
+        "note": "합성 시나리오 상태; 실제 연락·안전 확인 아님",
+        "attemptCount": 0,
+        "acked": false,
+        "visitCompleted": false,
+        "handoffStatus": null
+      },
+      {
+        "householdId": "H005",
+        "status": "refuse",
+        "lastChangedAt": "2026-10-09T11:16:00+09:00",
+        "note": "합성 시나리오 상태; 실제 연락·안전 확인 아님",
+        "attemptCount": 1,
+        "acked": false,
+        "visitCompleted": false,
+        "handoffStatus": null
+      },
+      {
+        "householdId": "H006",
+        "status": "visiting",
+        "lastChangedAt": "2026-10-09T11:16:00+09:00",
+        "note": "합성 시나리오 상태; 실제 연락·안전 확인 아님",
+        "attemptCount": 1,
+        "acked": false,
+        "visitCompleted": false,
+        "handoffStatus": null
+      },
+      {
+        "householdId": "H007",
+        "status": "noanswer",
+        "lastChangedAt": "2026-10-09T11:16:00+09:00",
+        "note": "합성 시나리오 상태; 실제 연락·안전 확인 아님",
+        "attemptCount": 2,
+        "acked": false,
+        "visitCompleted": false,
+        "handoffStatus": null
+      },
+      {
+        "householdId": "H008",
+        "status": "noanswer",
+        "lastChangedAt": "2026-10-09T11:16:00+09:00",
+        "note": "합성 시나리오 상태; 실제 연락·안전 확인 아님",
+        "attemptCount": 2,
+        "acked": false,
+        "visitCompleted": false,
+        "handoffStatus": null
+      },
+      {
+        "householdId": "H009",
+        "status": "unclear",
+        "lastChangedAt": "2026-10-09T11:16:00+09:00",
+        "note": "합성 시나리오 상태; 실제 연락·안전 확인 아님",
+        "attemptCount": 1,
+        "acked": false,
+        "visitCompleted": false,
+        "handoffStatus": null
+      },
+      {
+        "householdId": "H010",
+        "status": "help",
+        "lastChangedAt": "2026-10-09T11:16:00+09:00",
+        "note": "합성 시나리오 상태; 실제 연락·안전 확인 아님",
+        "attemptCount": 1,
+        "acked": false,
+        "visitCompleted": false,
+        "handoffStatus": null
+      },
+      {
+        "householdId": "H011",
+        "status": "refuse",
+        "lastChangedAt": "2026-10-09T11:16:00+09:00",
+        "note": "합성 시나리오 상태; 실제 연락·안전 확인 아님",
+        "attemptCount": 1,
+        "acked": false,
+        "visitCompleted": false,
+        "handoffStatus": null
+      },
+      {
+        "householdId": "H012",
+        "status": "unclear",
+        "lastChangedAt": "2026-10-09T11:16:00+09:00",
+        "note": "합성 시나리오 상태; 실제 연락·안전 확인 아님",
+        "attemptCount": 1,
+        "acked": false,
+        "visitCompleted": false,
+        "handoffStatus": null
+      },
+      {
+        "householdId": "H013",
+        "status": "calling",
+        "lastChangedAt": "2026-10-09T11:16:00+09:00",
+        "note": "합성 시나리오 상태; 실제 연락·안전 확인 아님",
+        "attemptCount": 1,
+        "acked": false,
+        "visitCompleted": false,
+        "handoffStatus": null
+      },
+      {
+        "householdId": "H014",
+        "status": "calling",
+        "lastChangedAt": "2026-10-09T11:16:00+09:00",
+        "note": "합성 시나리오 상태; 실제 연락·안전 확인 아님",
+        "attemptCount": 1,
+        "acked": false,
+        "visitCompleted": false,
+        "handoffStatus": null
+      },
+      {
+        "householdId": "H015",
+        "status": "calling",
+        "lastChangedAt": "2026-10-09T11:16:00+09:00",
+        "note": "합성 시나리오 상태; 실제 연락·안전 확인 아님",
+        "attemptCount": 1,
+        "acked": false,
+        "visitCompleted": false,
+        "handoffStatus": null
+      },
+      {
+        "householdId": "H016",
+        "status": "calling",
+        "lastChangedAt": "2026-10-09T11:16:00+09:00",
+        "note": "합성 시나리오 상태; 실제 연락·안전 확인 아님",
+        "attemptCount": 1,
+        "acked": false,
+        "visitCompleted": false,
+        "handoffStatus": null
+      },
+      {
+        "householdId": "H017",
+        "status": "calling",
+        "lastChangedAt": "2026-10-09T11:16:00+09:00",
+        "note": "합성 시나리오 상태; 실제 연락·안전 확인 아님",
+        "attemptCount": 1,
+        "acked": false,
+        "visitCompleted": false,
+        "handoffStatus": null
+      },
+      {
+        "householdId": "H018",
+        "status": "calling",
+        "lastChangedAt": "2026-10-09T11:16:00+09:00",
+        "note": "합성 시나리오 상태; 실제 연락·안전 확인 아님",
+        "attemptCount": 1,
+        "acked": false,
+        "visitCompleted": false,
+        "handoffStatus": null
+      },
+      {
+        "householdId": "H019",
+        "status": "queued",
+        "lastChangedAt": "2026-10-09T11:16:00+09:00",
+        "note": "합성 시나리오 상태; 실제 연락·안전 확인 아님",
+        "attemptCount": 1,
+        "acked": false,
+        "visitCompleted": false,
+        "handoffStatus": null
+      },
+      {
+        "householdId": "H020",
+        "status": "queued",
+        "lastChangedAt": "2026-10-09T11:16:00+09:00",
+        "note": "합성 시나리오 상태; 실제 연락·안전 확인 아님",
+        "attemptCount": 1,
+        "acked": false,
+        "visitCompleted": false,
+        "handoffStatus": null
+      },
+      {
+        "householdId": "H021",
+        "status": "queued",
+        "lastChangedAt": "2026-10-09T11:16:00+09:00",
+        "note": "합성 시나리오 상태; 실제 연락·안전 확인 아님",
+        "attemptCount": 1,
+        "acked": false,
+        "visitCompleted": false,
+        "handoffStatus": null
+      },
+      {
+        "householdId": "H022",
+        "status": "queued",
+        "lastChangedAt": "2026-10-09T11:16:00+09:00",
+        "note": "합성 시나리오 상태; 실제 연락·안전 확인 아님",
+        "attemptCount": 1,
+        "acked": false,
+        "visitCompleted": false,
+        "handoffStatus": null
+      },
+      {
+        "householdId": "H023",
+        "status": "queued",
+        "lastChangedAt": "2026-10-09T11:16:00+09:00",
+        "note": "합성 시나리오 상태; 실제 연락·안전 확인 아님",
+        "attemptCount": 1,
+        "acked": false,
+        "visitCompleted": false,
+        "handoffStatus": null
+      },
+      {
+        "householdId": "H024",
+        "status": "queued",
+        "lastChangedAt": "2026-10-09T11:16:00+09:00",
+        "note": "합성 시나리오 상태; 실제 연락·안전 확인 아님",
+        "attemptCount": 1,
+        "acked": false,
+        "visitCompleted": false,
+        "handoffStatus": null
+      },
+      {
+        "householdId": "H025",
+        "status": "queued",
+        "lastChangedAt": "2026-10-09T11:16:00+09:00",
+        "note": "합성 시나리오 상태; 실제 연락·안전 확인 아님",
+        "attemptCount": 1,
+        "acked": false,
+        "visitCompleted": false,
+        "handoffStatus": null
+      },
+      {
+        "householdId": "H026",
+        "status": "queued",
+        "lastChangedAt": "2026-10-09T11:16:00+09:00",
+        "note": "합성 시나리오 상태; 실제 연락·안전 확인 아님",
+        "attemptCount": 1,
+        "acked": false,
+        "visitCompleted": false,
+        "handoffStatus": null
+      },
+      {
+        "householdId": "H027",
+        "status": "visit",
+        "lastChangedAt": "2026-10-09T11:16:00+09:00",
+        "note": "합성 시나리오 상태; 실제 연락·안전 확인 아님",
+        "attemptCount": 0,
+        "acked": false,
+        "visitCompleted": false,
+        "handoffStatus": null
+      },
+      {
+        "householdId": "H028",
+        "status": "moving",
+        "lastChangedAt": "2026-10-09T11:16:00+09:00",
+        "note": "합성 시나리오 상태; 실제 연락·안전 확인 아님",
+        "attemptCount": 1,
+        "acked": true,
+        "visitCompleted": false,
+        "handoffStatus": null
+      },
+      {
+        "householdId": "H029",
+        "status": "moving",
+        "lastChangedAt": "2026-10-09T11:16:00+09:00",
+        "note": "합성 시나리오 상태; 실제 연락·안전 확인 아님",
+        "attemptCount": 1,
+        "acked": true,
+        "visitCompleted": false,
+        "handoffStatus": null
+      },
+      {
+        "householdId": "H030",
+        "status": "moving",
+        "lastChangedAt": "2026-10-09T11:16:00+09:00",
+        "note": "합성 시나리오 상태; 실제 연락·안전 확인 아님",
+        "attemptCount": 1,
+        "acked": true,
+        "visitCompleted": false,
+        "handoffStatus": null
+      },
+      {
+        "householdId": "H031",
+        "status": "moving",
+        "lastChangedAt": "2026-10-09T11:16:00+09:00",
+        "note": "합성 시나리오 상태; 실제 연락·안전 확인 아님",
+        "attemptCount": 1,
+        "acked": true,
+        "visitCompleted": false,
+        "handoffStatus": null
+      },
+      {
+        "householdId": "H032",
+        "status": "moving",
+        "lastChangedAt": "2026-10-09T11:16:00+09:00",
+        "note": "합성 시나리오 상태; 실제 연락·안전 확인 아님",
+        "attemptCount": 1,
+        "acked": true,
+        "visitCompleted": false,
+        "handoffStatus": null
+      },
+      {
+        "householdId": "H033",
+        "status": "moving",
+        "lastChangedAt": "2026-10-09T11:16:00+09:00",
+        "note": "합성 시나리오 상태; 실제 연락·안전 확인 아님",
+        "attemptCount": 1,
+        "acked": true,
+        "visitCompleted": false,
+        "handoffStatus": null
+      },
+      {
+        "householdId": "H034",
+        "status": "visit",
+        "lastChangedAt": "2026-10-09T11:16:00+09:00",
+        "note": "합성 시나리오 상태; 실제 연락·안전 확인 아님",
+        "attemptCount": 0,
+        "acked": false,
+        "visitCompleted": false,
+        "handoffStatus": null
+      },
+      {
+        "householdId": "H035",
+        "status": "moving",
+        "lastChangedAt": "2026-10-09T11:16:00+09:00",
+        "note": "합성 시나리오 상태; 실제 연락·안전 확인 아님",
+        "attemptCount": 1,
+        "acked": true,
+        "visitCompleted": false,
+        "handoffStatus": null
+      },
+      {
+        "householdId": "H036",
+        "status": "moving",
+        "lastChangedAt": "2026-10-09T11:16:00+09:00",
+        "note": "합성 시나리오 상태; 실제 연락·안전 확인 아님",
+        "attemptCount": 1,
+        "acked": true,
+        "visitCompleted": false,
+        "handoffStatus": null
+      },
+      {
+        "householdId": "H037",
+        "status": "moving",
+        "lastChangedAt": "2026-10-09T11:16:00+09:00",
+        "note": "합성 시나리오 상태; 실제 연락·안전 확인 아님",
+        "attemptCount": 1,
+        "acked": true,
+        "visitCompleted": false,
+        "handoffStatus": null
+      },
+      {
+        "householdId": "H038",
+        "status": "moving",
+        "lastChangedAt": "2026-10-09T11:16:00+09:00",
+        "note": "합성 시나리오 상태; 실제 연락·안전 확인 아님",
+        "attemptCount": 1,
+        "acked": true,
+        "visitCompleted": false,
+        "handoffStatus": null
+      },
+      {
+        "householdId": "H039",
+        "status": "dispatched",
+        "lastChangedAt": "2026-10-09T11:16:00+09:00",
+        "note": "합성 시나리오 상태; 실제 연락·안전 확인 아님",
+        "attemptCount": 1,
+        "acked": false,
+        "visitCompleted": false,
+        "handoffStatus": null
+      },
+      {
+        "householdId": "H040",
+        "status": "dispatched",
+        "lastChangedAt": "2026-10-09T11:16:00+09:00",
+        "note": "합성 시나리오 상태; 실제 연락·안전 확인 아님",
+        "attemptCount": 1,
+        "acked": false,
+        "visitCompleted": false,
+        "handoffStatus": null
+      },
+      {
+        "householdId": "H041",
+        "status": "dispatched",
+        "lastChangedAt": "2026-10-09T11:16:00+09:00",
+        "note": "합성 시나리오 상태; 실제 연락·안전 확인 아님",
+        "attemptCount": 1,
+        "acked": false,
+        "visitCompleted": false,
+        "handoffStatus": null
+      },
+      {
+        "householdId": "H042",
+        "status": "dispatched",
+        "lastChangedAt": "2026-10-09T11:16:00+09:00",
+        "note": "합성 시나리오 상태; 실제 연락·안전 확인 아님",
+        "attemptCount": 1,
+        "acked": false,
+        "visitCompleted": false,
+        "handoffStatus": null
+      },
+      {
+        "householdId": "H043",
+        "status": "dispatched",
+        "lastChangedAt": "2026-10-09T11:16:00+09:00",
+        "note": "합성 시나리오 상태; 실제 연락·안전 확인 아님",
+        "attemptCount": 1,
+        "acked": false,
+        "visitCompleted": false,
+        "handoffStatus": null
+      },
+      {
+        "householdId": "H044",
+        "status": "dispatched",
+        "lastChangedAt": "2026-10-09T11:16:00+09:00",
+        "note": "합성 시나리오 상태; 실제 연락·안전 확인 아님",
+        "attemptCount": 1,
+        "acked": false,
+        "visitCompleted": false,
+        "handoffStatus": null
+      },
+      {
+        "householdId": "H045",
+        "status": "guided",
+        "lastChangedAt": "2026-10-09T11:16:00+09:00",
+        "note": "합성 시나리오 상태; 실제 연락·안전 확인 아님",
+        "attemptCount": 1,
+        "acked": true,
+        "visitCompleted": false,
+        "handoffStatus": null
+      },
+      {
+        "householdId": "H046",
+        "status": "safe",
+        "lastChangedAt": "2026-10-09T11:16:00+09:00",
+        "note": "합성 시나리오 상태; 실제 연락·안전 확인 아님",
+        "attemptCount": 1,
+        "acked": true,
+        "visitCompleted": false,
+        "handoffStatus": null
+      },
+      {
+        "householdId": "H047",
+        "status": "safe",
+        "lastChangedAt": "2026-10-09T11:16:00+09:00",
+        "note": "합성 시나리오 상태; 실제 연락·안전 확인 아님",
+        "attemptCount": 1,
+        "acked": true,
+        "visitCompleted": false,
+        "handoffStatus": null
+      },
+      {
+        "householdId": "H048",
+        "status": "rescued",
+        "lastChangedAt": "2026-10-09T11:16:00+09:00",
+        "note": "합성 시나리오 상태; 실제 연락·안전 확인 아님",
+        "attemptCount": 1,
+        "acked": true,
+        "visitCompleted": false,
+        "handoffStatus": null
+      }
+    ],
+    "counts": {
+      "total": 48,
+      "eligible": 45,
+      "act": 11,
+      "prog": 31,
+      "safe": 3,
+      "visit": 3,
+      "before": 0,
+      "temporarilyExcluded": 0
+    },
+    "pendingReviewIds": [
+      "H001",
+      "H005",
+      "H006",
+      "H011"
+    ],
+    "resourceStatuses": [
+      {
+        "vehicleId": "V01",
+        "status": "enroute",
+        "householdId": "H001"
+      },
+      {
+        "vehicleId": "V02",
+        "status": "free",
+        "householdId": null
+      },
+      {
+        "vehicleId": "V03",
+        "status": "free",
+        "householdId": null
+      },
+      {
+        "vehicleId": "V04",
+        "status": "free",
+        "householdId": null
+      },
+      {
+        "vehicleId": "V05",
+        "status": "enroute",
+        "householdId": "H003"
+      },
+      {
+        "vehicleId": "V06",
+        "status": "free",
+        "householdId": null
+      },
+      {
+        "vehicleId": "V07",
+        "status": "free",
+        "householdId": null
+      },
+      {
+        "vehicleId": "V08",
+        "status": "free",
+        "householdId": null
+      },
+      {
+        "vehicleId": "V09",
+        "status": "free",
+        "householdId": null
+      },
+      {
+        "vehicleId": "V10",
+        "status": "unavailable",
+        "householdId": null
+      }
+    ],
+    "sourceStatuses": [
+      {
+        "sourceId": "SRC01",
+        "status": "ok",
+        "mode": "synthetic",
+        "observedAt": "2026-10-09T11:16:00+09:00",
+        "summary": "북서 가상 능선 산불 시나리오"
+      },
+      {
+        "sourceId": "SRC02",
+        "status": "ok",
+        "mode": "synthetic",
+        "observedAt": "2026-10-09T11:16:00+09:00",
+        "summary": "온빛 마을 모의 대피 지시"
+      },
+      {
+        "sourceId": "SRC03",
+        "status": "ok",
+        "mode": "synthetic",
+        "observedAt": "2026-10-09T11:16:00+09:00",
+        "summary": "시연 지수 58"
+      },
+      {
+        "sourceId": "SRC04",
+        "status": "ok",
+        "mode": "synthetic",
+        "observedAt": "2026-10-09T11:16:00+09:00",
+        "summary": "건조 조건 모의 표시"
+      },
+      {
+        "sourceId": "SRC05",
+        "status": "ok",
+        "mode": "synthetic",
+        "observedAt": "2026-10-09T11:16:00+09:00",
+        "summary": "서풍 9 m/s 시연 값"
+      },
+      {
+        "sourceId": "SRC06",
+        "status": "ok",
+        "mode": "synthetic",
+        "observedAt": "2026-10-09T11:16:00+09:00",
+        "summary": "강수 없음 시연 값"
+      },
+      {
+        "sourceId": "SRC07",
+        "status": "ok",
+        "mode": "synthetic",
+        "observedAt": "2026-10-09T11:16:00+09:00",
+        "summary": "수위 관심 미만 시연 값"
+      },
+      {
+        "sourceId": "SRC08",
+        "status": "ok",
+        "mode": "synthetic",
+        "observedAt": "2026-10-09T11:16:00+09:00",
+        "summary": "가상 대피소 3곳"
+      }
+    ],
+    "synthetic": true
+  },
+  {
+    "id": "late",
+    "label": "진행 후반",
+    "displayTime": "2026-10-09T11:35:00+09:00",
+    "mode": "event",
+    "householdStatuses": [
+      {
+        "householdId": "H001",
+        "status": "e119",
+        "lastChangedAt": "2026-10-09T11:35:00+09:00",
+        "note": "합성 시나리오 상태; 실제 연락·안전 확인 아님",
+        "attemptCount": 1,
+        "acked": false,
+        "visitCompleted": false,
+        "handoffStatus": "mockRecorded"
+      },
+      {
+        "householdId": "H002",
+        "status": "noanswer",
+        "lastChangedAt": "2026-10-09T11:35:00+09:00",
+        "note": "합성 시나리오 상태; 실제 연락·안전 확인 아님",
+        "attemptCount": 2,
+        "acked": false,
+        "visitCompleted": false,
+        "handoffStatus": null
+      },
+      {
+        "householdId": "H003",
+        "status": "refuse",
+        "lastChangedAt": "2026-10-09T11:35:00+09:00",
+        "note": "합성 시나리오 상태; 실제 연락·안전 확인 아님",
+        "attemptCount": 1,
+        "acked": false,
+        "visitCompleted": false,
+        "handoffStatus": null
+      },
+      {
+        "householdId": "H004",
+        "status": "visit",
+        "lastChangedAt": "2026-10-09T11:35:00+09:00",
+        "note": "합성 시나리오 상태; 실제 연락·안전 확인 아님",
+        "attemptCount": 0,
+        "acked": false,
+        "visitCompleted": false,
+        "handoffStatus": null
+      },
+      {
+        "householdId": "H005",
+        "status": "dispatched",
+        "lastChangedAt": "2026-10-09T11:35:00+09:00",
+        "note": "합성 시나리오 상태; 실제 연락·안전 확인 아님",
+        "attemptCount": 1,
+        "acked": false,
+        "visitCompleted": false,
+        "handoffStatus": null
+      },
+      {
+        "householdId": "H006",
+        "status": "moving",
+        "lastChangedAt": "2026-10-09T11:35:00+09:00",
+        "note": "합성 시나리오 상태; 실제 연락·안전 확인 아님",
+        "attemptCount": 1,
+        "acked": true,
+        "visitCompleted": false,
+        "handoffStatus": null
+      },
+      {
+        "householdId": "H007",
+        "status": "safe",
+        "lastChangedAt": "2026-10-09T11:35:00+09:00",
+        "note": "합성 시나리오 상태; 실제 연락·안전 확인 아님",
+        "attemptCount": 1,
+        "acked": true,
+        "visitCompleted": false,
+        "handoffStatus": null
+      },
+      {
+        "householdId": "H008",
+        "status": "safe",
+        "lastChangedAt": "2026-10-09T11:35:00+09:00",
+        "note": "합성 시나리오 상태; 실제 연락·안전 확인 아님",
+        "attemptCount": 1,
+        "acked": true,
+        "visitCompleted": false,
+        "handoffStatus": null
+      },
+      {
+        "householdId": "H009",
+        "status": "safe",
+        "lastChangedAt": "2026-10-09T11:35:00+09:00",
+        "note": "합성 시나리오 상태; 실제 연락·안전 확인 아님",
+        "attemptCount": 1,
+        "acked": true,
+        "visitCompleted": false,
+        "handoffStatus": null
+      },
+      {
+        "householdId": "H010",
+        "status": "safe",
+        "lastChangedAt": "2026-10-09T11:35:00+09:00",
+        "note": "합성 시나리오 상태; 실제 연락·안전 확인 아님",
+        "attemptCount": 1,
+        "acked": true,
+        "visitCompleted": false,
+        "handoffStatus": null
+      },
+      {
+        "householdId": "H011",
+        "status": "safe",
+        "lastChangedAt": "2026-10-09T11:35:00+09:00",
+        "note": "합성 시나리오 상태; 실제 연락·안전 확인 아님",
+        "attemptCount": 1,
+        "acked": true,
+        "visitCompleted": false,
+        "handoffStatus": null
+      },
+      {
+        "householdId": "H012",
+        "status": "safe",
+        "lastChangedAt": "2026-10-09T11:35:00+09:00",
+        "note": "합성 시나리오 상태; 실제 연락·안전 확인 아님",
+        "attemptCount": 1,
+        "acked": true,
+        "visitCompleted": false,
+        "handoffStatus": null
+      },
+      {
+        "householdId": "H013",
+        "status": "safe",
+        "lastChangedAt": "2026-10-09T11:35:00+09:00",
+        "note": "합성 시나리오 상태; 실제 연락·안전 확인 아님",
+        "attemptCount": 1,
+        "acked": true,
+        "visitCompleted": false,
+        "handoffStatus": null
+      },
+      {
+        "householdId": "H014",
+        "status": "safe",
+        "lastChangedAt": "2026-10-09T11:35:00+09:00",
+        "note": "합성 시나리오 상태; 실제 연락·안전 확인 아님",
+        "attemptCount": 1,
+        "acked": true,
+        "visitCompleted": false,
+        "handoffStatus": null
+      },
+      {
+        "householdId": "H015",
+        "status": "safe",
+        "lastChangedAt": "2026-10-09T11:35:00+09:00",
+        "note": "합성 시나리오 상태; 실제 연락·안전 확인 아님",
+        "attemptCount": 1,
+        "acked": true,
+        "visitCompleted": false,
+        "handoffStatus": null
+      },
+      {
+        "householdId": "H016",
+        "status": "safe",
+        "lastChangedAt": "2026-10-09T11:35:00+09:00",
+        "note": "합성 시나리오 상태; 실제 연락·안전 확인 아님",
+        "attemptCount": 1,
+        "acked": true,
+        "visitCompleted": false,
+        "handoffStatus": null
+      },
+      {
+        "householdId": "H017",
+        "status": "safe",
+        "lastChangedAt": "2026-10-09T11:35:00+09:00",
+        "note": "합성 시나리오 상태; 실제 연락·안전 확인 아님",
+        "attemptCount": 1,
+        "acked": true,
+        "visitCompleted": false,
+        "handoffStatus": null
+      },
+      {
+        "householdId": "H018",
+        "status": "safe",
+        "lastChangedAt": "2026-10-09T11:35:00+09:00",
+        "note": "합성 시나리오 상태; 실제 연락·안전 확인 아님",
+        "attemptCount": 1,
+        "acked": true,
+        "visitCompleted": false,
+        "handoffStatus": null
+      },
+      {
+        "householdId": "H019",
+        "status": "safe",
+        "lastChangedAt": "2026-10-09T11:35:00+09:00",
+        "note": "합성 시나리오 상태; 실제 연락·안전 확인 아님",
+        "attemptCount": 1,
+        "acked": true,
+        "visitCompleted": false,
+        "handoffStatus": null
+      },
+      {
+        "householdId": "H020",
+        "status": "safe",
+        "lastChangedAt": "2026-10-09T11:35:00+09:00",
+        "note": "합성 시나리오 상태; 실제 연락·안전 확인 아님",
+        "attemptCount": 1,
+        "acked": true,
+        "visitCompleted": false,
+        "handoffStatus": null
+      },
+      {
+        "householdId": "H021",
+        "status": "safe",
+        "lastChangedAt": "2026-10-09T11:35:00+09:00",
+        "note": "합성 시나리오 상태; 실제 연락·안전 확인 아님",
+        "attemptCount": 1,
+        "acked": true,
+        "visitCompleted": false,
+        "handoffStatus": null
+      },
+      {
+        "householdId": "H022",
+        "status": "safe",
+        "lastChangedAt": "2026-10-09T11:35:00+09:00",
+        "note": "합성 시나리오 상태; 실제 연락·안전 확인 아님",
+        "attemptCount": 1,
+        "acked": true,
+        "visitCompleted": false,
+        "handoffStatus": null
+      },
+      {
+        "householdId": "H023",
+        "status": "safe",
+        "lastChangedAt": "2026-10-09T11:35:00+09:00",
+        "note": "합성 시나리오 상태; 실제 연락·안전 확인 아님",
+        "attemptCount": 1,
+        "acked": true,
+        "visitCompleted": false,
+        "handoffStatus": null
+      },
+      {
+        "householdId": "H024",
+        "status": "safe",
+        "lastChangedAt": "2026-10-09T11:35:00+09:00",
+        "note": "합성 시나리오 상태; 실제 연락·안전 확인 아님",
+        "attemptCount": 1,
+        "acked": true,
+        "visitCompleted": false,
+        "handoffStatus": null
+      },
+      {
+        "householdId": "H025",
+        "status": "safe",
+        "lastChangedAt": "2026-10-09T11:35:00+09:00",
+        "note": "합성 시나리오 상태; 실제 연락·안전 확인 아님",
+        "attemptCount": 1,
+        "acked": true,
+        "visitCompleted": false,
+        "handoffStatus": null
+      },
+      {
+        "householdId": "H026",
+        "status": "safe",
+        "lastChangedAt": "2026-10-09T11:35:00+09:00",
+        "note": "합성 시나리오 상태; 실제 연락·안전 확인 아님",
+        "attemptCount": 1,
+        "acked": true,
+        "visitCompleted": false,
+        "handoffStatus": null
+      },
+      {
+        "householdId": "H027",
+        "status": "visit",
+        "lastChangedAt": "2026-10-09T11:35:00+09:00",
+        "note": "합성 시나리오 상태; 실제 연락·안전 확인 아님",
+        "attemptCount": 0,
+        "acked": false,
+        "visitCompleted": false,
+        "handoffStatus": null
+      },
+      {
+        "householdId": "H028",
+        "status": "safe",
+        "lastChangedAt": "2026-10-09T11:35:00+09:00",
+        "note": "합성 시나리오 상태; 실제 연락·안전 확인 아님",
+        "attemptCount": 1,
+        "acked": true,
+        "visitCompleted": false,
+        "handoffStatus": null
+      },
+      {
+        "householdId": "H029",
+        "status": "safe",
+        "lastChangedAt": "2026-10-09T11:35:00+09:00",
+        "note": "합성 시나리오 상태; 실제 연락·안전 확인 아님",
+        "attemptCount": 1,
+        "acked": true,
+        "visitCompleted": false,
+        "handoffStatus": null
+      },
+      {
+        "householdId": "H030",
+        "status": "safe",
+        "lastChangedAt": "2026-10-09T11:35:00+09:00",
+        "note": "합성 시나리오 상태; 실제 연락·안전 확인 아님",
+        "attemptCount": 1,
+        "acked": true,
+        "visitCompleted": false,
+        "handoffStatus": null
+      },
+      {
+        "householdId": "H031",
+        "status": "safe",
+        "lastChangedAt": "2026-10-09T11:35:00+09:00",
+        "note": "합성 시나리오 상태; 실제 연락·안전 확인 아님",
+        "attemptCount": 1,
+        "acked": true,
+        "visitCompleted": false,
+        "handoffStatus": null
+      },
+      {
+        "householdId": "H032",
+        "status": "safe",
+        "lastChangedAt": "2026-10-09T11:35:00+09:00",
+        "note": "합성 시나리오 상태; 실제 연락·안전 확인 아님",
+        "attemptCount": 1,
+        "acked": true,
+        "visitCompleted": false,
+        "handoffStatus": null
+      },
+      {
+        "householdId": "H033",
+        "status": "rescued",
+        "lastChangedAt": "2026-10-09T11:35:00+09:00",
+        "note": "합성 시나리오 상태; 실제 연락·안전 확인 아님",
+        "attemptCount": 1,
+        "acked": true,
+        "visitCompleted": false,
+        "handoffStatus": null
+      },
+      {
+        "householdId": "H034",
+        "status": "visit",
+        "lastChangedAt": "2026-10-09T11:35:00+09:00",
+        "note": "합성 시나리오 상태; 실제 연락·안전 확인 아님",
+        "attemptCount": 0,
+        "acked": false,
+        "visitCompleted": false,
+        "handoffStatus": null
+      },
+      {
+        "householdId": "H035",
+        "status": "rescued",
+        "lastChangedAt": "2026-10-09T11:35:00+09:00",
+        "note": "합성 시나리오 상태; 실제 연락·안전 확인 아님",
+        "attemptCount": 1,
+        "acked": true,
+        "visitCompleted": false,
+        "handoffStatus": null
+      },
+      {
+        "householdId": "H036",
+        "status": "rescued",
+        "lastChangedAt": "2026-10-09T11:35:00+09:00",
+        "note": "합성 시나리오 상태; 실제 연락·안전 확인 아님",
+        "attemptCount": 1,
+        "acked": true,
+        "visitCompleted": false,
+        "handoffStatus": null
+      },
+      {
+        "householdId": "H037",
+        "status": "rescued",
+        "lastChangedAt": "2026-10-09T11:35:00+09:00",
+        "note": "합성 시나리오 상태; 실제 연락·안전 확인 아님",
+        "attemptCount": 1,
+        "acked": true,
+        "visitCompleted": false,
+        "handoffStatus": null
+      },
+      {
+        "householdId": "H038",
+        "status": "rescued",
+        "lastChangedAt": "2026-10-09T11:35:00+09:00",
+        "note": "합성 시나리오 상태; 실제 연락·안전 확인 아님",
+        "attemptCount": 1,
+        "acked": true,
+        "visitCompleted": false,
+        "handoffStatus": null
+      },
+      {
+        "householdId": "H039",
+        "status": "rescued",
+        "lastChangedAt": "2026-10-09T11:35:00+09:00",
+        "note": "합성 시나리오 상태; 실제 연락·안전 확인 아님",
+        "attemptCount": 1,
+        "acked": true,
+        "visitCompleted": false,
+        "handoffStatus": null
+      },
+      {
+        "householdId": "H040",
+        "status": "rescued",
+        "lastChangedAt": "2026-10-09T11:35:00+09:00",
+        "note": "합성 시나리오 상태; 실제 연락·안전 확인 아님",
+        "attemptCount": 1,
+        "acked": true,
+        "visitCompleted": false,
+        "handoffStatus": null
+      },
+      {
+        "householdId": "H041",
+        "status": "rescued",
+        "lastChangedAt": "2026-10-09T11:35:00+09:00",
+        "note": "합성 시나리오 상태; 실제 연락·안전 확인 아님",
+        "attemptCount": 1,
+        "acked": true,
+        "visitCompleted": false,
+        "handoffStatus": null
+      },
+      {
+        "householdId": "H042",
+        "status": "rescued",
+        "lastChangedAt": "2026-10-09T11:35:00+09:00",
+        "note": "합성 시나리오 상태; 실제 연락·안전 확인 아님",
+        "attemptCount": 1,
+        "acked": true,
+        "visitCompleted": false,
+        "handoffStatus": null
+      },
+      {
+        "householdId": "H043",
+        "status": "rescued",
+        "lastChangedAt": "2026-10-09T11:35:00+09:00",
+        "note": "합성 시나리오 상태; 실제 연락·안전 확인 아님",
+        "attemptCount": 1,
+        "acked": true,
+        "visitCompleted": false,
+        "handoffStatus": null
+      },
+      {
+        "householdId": "H044",
+        "status": "rescued",
+        "lastChangedAt": "2026-10-09T11:35:00+09:00",
+        "note": "합성 시나리오 상태; 실제 연락·안전 확인 아님",
+        "attemptCount": 1,
+        "acked": true,
+        "visitCompleted": false,
+        "handoffStatus": null
+      },
+      {
+        "householdId": "H045",
+        "status": "rescued",
+        "lastChangedAt": "2026-10-09T11:35:00+09:00",
+        "note": "합성 시나리오 상태; 실제 연락·안전 확인 아님",
+        "attemptCount": 1,
+        "acked": true,
+        "visitCompleted": false,
+        "handoffStatus": null
+      },
+      {
+        "householdId": "H046",
+        "status": "rescued",
+        "lastChangedAt": "2026-10-09T11:35:00+09:00",
+        "note": "합성 시나리오 상태; 실제 연락·안전 확인 아님",
+        "attemptCount": 1,
+        "acked": true,
+        "visitCompleted": false,
+        "handoffStatus": null
+      },
+      {
+        "householdId": "H047",
+        "status": "rescued",
+        "lastChangedAt": "2026-10-09T11:35:00+09:00",
+        "note": "합성 시나리오 상태; 실제 연락·안전 확인 아님",
+        "attemptCount": 1,
+        "acked": true,
+        "visitCompleted": false,
+        "handoffStatus": null
+      },
+      {
+        "householdId": "H048",
+        "status": "rescued",
+        "lastChangedAt": "2026-10-09T11:35:00+09:00",
+        "note": "합성 시나리오 상태; 실제 연락·안전 확인 아님",
+        "attemptCount": 1,
+        "acked": true,
+        "visitCompleted": false,
+        "handoffStatus": null
+      }
+    ],
+    "counts": {
+      "total": 48,
+      "eligible": 45,
+      "act": 3,
+      "prog": 2,
+      "safe": 40,
+      "visit": 3,
+      "before": 0,
+      "temporarilyExcluded": 0
+    },
+    "pendingReviewIds": [
+      "H001",
+      "H003"
+    ],
+    "resourceStatuses": [
+      {
+        "vehicleId": "V01",
+        "status": "enroute",
+        "householdId": "H001"
+      },
+      {
+        "vehicleId": "V02",
+        "status": "free",
+        "householdId": null
+      },
+      {
+        "vehicleId": "V03",
+        "status": "free",
+        "householdId": null
+      },
+      {
+        "vehicleId": "V04",
+        "status": "free",
+        "householdId": null
+      },
+      {
+        "vehicleId": "V05",
+        "status": "enroute",
+        "householdId": "H003"
+      },
+      {
+        "vehicleId": "V06",
+        "status": "free",
+        "householdId": null
+      },
+      {
+        "vehicleId": "V07",
+        "status": "free",
+        "householdId": null
+      },
+      {
+        "vehicleId": "V08",
+        "status": "free",
+        "householdId": null
+      },
+      {
+        "vehicleId": "V09",
+        "status": "free",
+        "householdId": null
+      },
+      {
+        "vehicleId": "V10",
+        "status": "unavailable",
+        "householdId": null
+      }
+    ],
+    "sourceStatuses": [
+      {
+        "sourceId": "SRC01",
+        "status": "ok",
+        "mode": "synthetic",
+        "observedAt": "2026-10-09T11:35:00+09:00",
+        "summary": "북서 가상 능선 산불 시나리오"
+      },
+      {
+        "sourceId": "SRC02",
+        "status": "ok",
+        "mode": "synthetic",
+        "observedAt": "2026-10-09T11:35:00+09:00",
+        "summary": "온빛 마을 모의 대피 지시"
+      },
+      {
+        "sourceId": "SRC03",
+        "status": "ok",
+        "mode": "synthetic",
+        "observedAt": "2026-10-09T11:35:00+09:00",
+        "summary": "시연 지수 58"
+      },
+      {
+        "sourceId": "SRC04",
+        "status": "ok",
+        "mode": "synthetic",
+        "observedAt": "2026-10-09T11:35:00+09:00",
+        "summary": "건조 조건 모의 표시"
+      },
+      {
+        "sourceId": "SRC05",
+        "status": "ok",
+        "mode": "synthetic",
+        "observedAt": "2026-10-09T11:35:00+09:00",
+        "summary": "서풍 9 m/s 시연 값"
+      },
+      {
+        "sourceId": "SRC06",
+        "status": "ok",
+        "mode": "synthetic",
+        "observedAt": "2026-10-09T11:35:00+09:00",
+        "summary": "강수 없음 시연 값"
+      },
+      {
+        "sourceId": "SRC07",
+        "status": "ok",
+        "mode": "synthetic",
+        "observedAt": "2026-10-09T11:35:00+09:00",
+        "summary": "수위 관심 미만 시연 값"
+      },
+      {
+        "sourceId": "SRC08",
+        "status": "ok",
+        "mode": "synthetic",
+        "observedAt": "2026-10-09T11:35:00+09:00",
+        "summary": "가상 대피소 3곳"
+      }
+    ],
+    "synthetic": true
+  }
+]

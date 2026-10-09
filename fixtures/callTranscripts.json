@@ -1,0 +1,202 @@
+[
+  {
+    "id": "TX-active-H001",
+    "householdId": "H001",
+    "scenarioId": "active",
+    "turns": [
+      {
+        "sequence": 1,
+        "speaker": "assistant",
+        "text": "온빛 마을 화면 시연을 위한 모의 대화입니다. 현재 상태를 말해 주세요.",
+        "offsetSeconds": 0
+      },
+      {
+        "sequence": 2,
+        "speaker": "resident",
+        "text": "숨쉬기 힘들다는 모의 발화예요.",
+        "offsetSeconds": 8
+      }
+    ],
+    "synthetic": true
+  },
+  {
+    "id": "TX-active-H002",
+    "householdId": "H002",
+    "scenarioId": "active",
+    "turns": [
+      {
+        "sequence": 1,
+        "speaker": "assistant",
+        "text": "온빛 마을 화면 시연을 위한 모의 대화입니다. 현재 상태를 말해 주세요.",
+        "offsetSeconds": 0
+      },
+      {
+        "sequence": 2,
+        "speaker": "resident",
+        "text": "혼자 차에 타기 어려워요.",
+        "offsetSeconds": 8
+      }
+    ],
+    "synthetic": true
+  },
+  {
+    "id": "TX-active-H003",
+    "householdId": "H003",
+    "scenarioId": "active",
+    "turns": [
+      {
+        "sequence": 1,
+        "speaker": "assistant",
+        "text": "온빛 마을 화면 시연을 위한 모의 대화입니다. 현재 상태를 말해 주세요.",
+        "offsetSeconds": 0
+      },
+      {
+        "sequence": 2,
+        "speaker": "resident",
+        "text": "혼자 차에 타기 어려워요.",
+        "offsetSeconds": 8
+      }
+    ],
+    "synthetic": true
+  },
+  {
+    "id": "TX-active-H005",
+    "householdId": "H005",
+    "scenarioId": "active",
+    "turns": [
+      {
+        "sequence": 1,
+        "speaker": "assistant",
+        "text": "온빛 마을 화면 시연을 위한 모의 대화입니다. 현재 상태를 말해 주세요.",
+        "offsetSeconds": 0
+      },
+      {
+        "sequence": 2,
+        "speaker": "resident",
+        "text": "지금은 밖에 나가고 싶지 않아요.",
+        "offsetSeconds": 8
+      }
+    ],
+    "synthetic": true
+  },
+  {
+    "id": "TX-active-H006",
+    "householdId": "H006",
+    "scenarioId": "active",
+    "turns": [
+      {
+        "sequence": 1,
+        "speaker": "assistant",
+        "text": "온빛 마을 화면 시연을 위한 모의 대화입니다. 현재 상태를 말해 주세요.",
+        "offsetSeconds": 0
+      },
+      {
+        "sequence": 2,
+        "speaker": "resident",
+        "text": "조금 더 천천히 말씀해 주세요.",
+        "offsetSeconds": 8
+      }
+    ],
+    "synthetic": true
+  },
+  {
+    "id": "TX-late-H001",
+    "householdId": "H001",
+    "scenarioId": "late",
+    "turns": [
+      {
+        "sequence": 1,
+        "speaker": "assistant",
+        "text": "온빛 마을 화면 시연을 위한 모의 대화입니다. 현재 상태를 말해 주세요.",
+        "offsetSeconds": 0
+      },
+      {
+        "sequence": 2,
+        "speaker": "resident",
+        "text": "숨쉬기 힘들다는 모의 발화예요.",
+        "offsetSeconds": 8
+      }
+    ],
+    "synthetic": true
+  },
+  {
+    "id": "TX-late-H002",
+    "householdId": "H002",
+    "scenarioId": "late",
+    "turns": [
+      {
+        "sequence": 1,
+        "speaker": "assistant",
+        "text": "온빛 마을 화면 시연을 위한 모의 대화입니다. 현재 상태를 말해 주세요.",
+        "offsetSeconds": 0
+      },
+      {
+        "sequence": 2,
+        "speaker": "resident",
+        "text": "혼자 차에 타기 어려워요.",
+        "offsetSeconds": 8
+      }
+    ],
+    "synthetic": true
+  },
+  {
+    "id": "TX-late-H003",
+    "householdId": "H003",
+    "scenarioId": "late",
+    "turns": [
+      {
+        "sequence": 1,
+        "speaker": "assistant",
+        "text": "온빛 마을 화면 시연을 위한 모의 대화입니다. 현재 상태를 말해 주세요.",
+        "offsetSeconds": 0
+      },
+      {
+        "sequence": 2,
+        "speaker": "resident",
+        "text": "혼자 차에 타기 어려워요.",
+        "offsetSeconds": 8
+      }
+    ],
+    "synthetic": true
+  },
+  {
+    "id": "TX-late-H005",
+    "householdId": "H005",
+    "scenarioId": "late",
+    "turns": [
+      {
+        "sequence": 1,
+        "speaker": "assistant",
+        "text": "온빛 마을 화면 시연을 위한 모의 대화입니다. 현재 상태를 말해 주세요.",
+        "offsetSeconds": 0
+      },
+      {
+        "sequence": 2,
+        "speaker": "resident",
+        "text": "지금은 밖에 나가고 싶지 않아요.",
+        "offsetSeconds": 8
+      }
+    ],
+    "synthetic": true
+  },
+  {
+    "id": "TX-late-H006",
+    "householdId": "H006",
+    "scenarioId": "late",
+    "turns": [
+      {
+        "sequence": 1,
+        "speaker": "assistant",
+        "text": "온빛 마을 화면 시연을 위한 모의 대화입니다. 현재 상태를 말해 주세요.",
+        "offsetSeconds": 0
+      },
+      {
+        "sequence": 2,
+        "speaker": "resident",
+        "text": "조금 더 천천히 말씀해 주세요.",
+        "offsetSeconds": 8
+      }
+    ],
+    "synthetic": true
+  }
+]

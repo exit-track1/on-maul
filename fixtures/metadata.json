@@ -1,0 +1,28 @@
+{
+  "schemaVersion": "1.0.0",
+  "synthetic": true,
+  "seed": 20261009,
+  "referenceDate": "2026-10-09",
+  "timeZone": "Asia/Seoul",
+  "description": "모든 인물·자원·관측·확인 이력은 새로 만든 합성 데이터. 실제 서비스 실행 이력 없음.",
+  "recordCounts": {
+    "zones": 4,
+    "shelters": 3,
+    "households": 48,
+    "teams": 4,
+    "vehicles": 10,
+    "sources": 8,
+    "responseCases": 14,
+    "scenarios": 5,
+    "callTranscripts": 10,
+    "eventLogs": 5,
+    "checkLogs": 96,
+    "map": 1
+  },
+  "countingRules": {
+    "safeDenominator": "callEligible=true인 45가구. 방문 전용 3가구 제외",
+    "scenarioCounts": "householdStatuses의 status 그룹을 직접 합산",
+    "stale": "referenceDate와 lastCheckedAt 날짜 차이가 90일보다 큼",
+    "fixturesHaveNoStateMachine": true
+  }
+}

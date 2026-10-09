@@ -1,0 +1,150 @@
+[
+  {
+    "id": "V01",
+    "name": "의료 수송차",
+    "kind": "ambulance",
+    "organizationLabel": "모의 면사무소 자원",
+    "plateLabel": "DEMO-VEHICLE-001",
+    "capacity": 3,
+    "equipment": [
+      "들것",
+      "산소",
+      "의료"
+    ],
+    "driverRef": "M02",
+    "teamId": null,
+    "availableForTransport": true,
+    "unavailableReason": null,
+    "synthetic": true
+  },
+  {
+    "id": "V02",
+    "name": "다목적 승합차",
+    "kind": "van",
+    "organizationLabel": "모의 면사무소 자원",
+    "plateLabel": "DEMO-VEHICLE-002",
+    "capacity": 7,
+    "equipment": [
+      "들것"
+    ],
+    "driverRef": "M05",
+    "teamId": null,
+    "availableForTransport": true,
+    "unavailableReason": null,
+    "synthetic": true
+  },
+  {
+    "id": "V03",
+    "name": "장비 지원차",
+    "kind": "van",
+    "organizationLabel": "모의 면사무소 자원",
+    "plateLabel": "DEMO-VEHICLE-003",
+    "capacity": 6,
+    "equipment": [
+      "휠체어"
+    ],
+    "driverRef": "M08",
+    "teamId": null,
+    "availableForTransport": true,
+    "unavailableReason": null,
+    "synthetic": true
+  },
+  {
+    "id": "V04",
+    "name": "서조 SUV",
+    "kind": "suv",
+    "organizationLabel": "서구역 대기조",
+    "plateLabel": "DEMO-VEHICLE-004",
+    "capacity": 5,
+    "equipment": [],
+    "driverRef": "M01",
+    "teamId": "TW",
+    "availableForTransport": true,
+    "unavailableReason": null,
+    "synthetic": true
+  },
+  {
+    "id": "V05",
+    "name": "북조 승합차",
+    "kind": "van",
+    "organizationLabel": "북구역 대기조",
+    "plateLabel": "DEMO-VEHICLE-005",
+    "capacity": 7,
+    "equipment": [],
+    "driverRef": "M04",
+    "teamId": "TN",
+    "availableForTransport": true,
+    "unavailableReason": null,
+    "synthetic": true
+  },
+  {
+    "id": "V06",
+    "name": "동조 SUV",
+    "kind": "suv",
+    "organizationLabel": "동구역 대기조",
+    "plateLabel": "DEMO-VEHICLE-006",
+    "capacity": 5,
+    "equipment": [],
+    "driverRef": "M07",
+    "teamId": "TE",
+    "availableForTransport": true,
+    "unavailableReason": null,
+    "synthetic": true
+  },
+  {
+    "id": "V07",
+    "name": "남조 승합차",
+    "kind": "van",
+    "organizationLabel": "남구역 대기조",
+    "plateLabel": "DEMO-VEHICLE-007",
+    "capacity": 7,
+    "equipment": [],
+    "driverRef": "M10",
+    "teamId": "TS",
+    "availableForTransport": true,
+    "unavailableReason": null,
+    "synthetic": true
+  },
+  {
+    "id": "V08",
+    "name": "면 지원 경차",
+    "kind": "car",
+    "organizationLabel": "모의 면사무소 자원",
+    "plateLabel": "DEMO-VEHICLE-008",
+    "capacity": 3,
+    "equipment": [],
+    "driverRef": "M11",
+    "teamId": null,
+    "availableForTransport": true,
+    "unavailableReason": null,
+    "synthetic": true
+  },
+  {
+    "id": "V09",
+    "name": "면 지원 트럭",
+    "kind": "truck",
+    "organizationLabel": "모의 면사무소 자원",
+    "plateLabel": "DEMO-VEHICLE-009",
+    "capacity": 3,
+    "equipment": [],
+    "driverRef": "M02",
+    "teamId": null,
+    "availableForTransport": true,
+    "unavailableReason": null,
+    "synthetic": true
+  },
+  {
+    "id": "V10",
+    "name": "진화 전용차",
+    "kind": "pump",
+    "organizationLabel": "모의 면사무소 자원",
+    "plateLabel": "DEMO-VEHICLE-010",
+    "capacity": 0,
+    "equipment": [],
+    "driverRef": "M05",
+    "teamId": null,
+    "availableForTransport": false,
+    "unavailableReason": "진화 전용·주민 수송 제외",
+    "synthetic": true
+  }
+]

@@ -1,0 +1,7118 @@
+{
+  "metadata": {
+    "schemaVersion": "1.0.0",
+    "synthetic": true,
+    "seed": 20261009,
+    "referenceDate": "2026-10-09",
+    "timeZone": "Asia/Seoul",
+    "description": "모든 인물·자원·관측·확인 이력은 새로 만든 합성 데이터. 실제 서비스 실행 이력 없음.",
+    "recordCounts": {
+      "zones": 4,
+      "shelters": 3,
+      "households": 48,
+      "teams": 4,
+      "vehicles": 10,
+      "sources": 8,
+      "responseCases": 14,
+      "scenarios": 5,
+      "callTranscripts": 10,
+      "eventLogs": 5,
+      "checkLogs": 96,
+      "map": 1
+    },
+    "countingRules": {
+      "safeDenominator": "callEligible=true인 45가구. 방문 전용 3가구 제외",
+      "scenarioCounts": "householdStatuses의 status 그룹을 직접 합산",
+      "stale": "referenceDate와 lastCheckedAt 날짜 차이가 90일보다 큼",
+      "fixturesHaveNoStateMachine": true
+    }
+  },
+  "zones": [
+    {
+      "id": "W",
+      "label": "서 구역",
+      "teamId": "TW",
+      "shelterId": "S1",
+      "householdCount": 10,
+      "predictedArrivalMinutes": 38,
+      "demoBounds": {
+        "x1": 120,
+        "y1": 270,
+        "x2": 360,
+        "y2": 670
+      },
+      "synthetic": true
+    },
+    {
+      "id": "N",
+      "label": "북 구역",
+      "teamId": "TN",
+      "shelterId": "S2",
+      "householdCount": 15,
+      "predictedArrivalMinutes": 23,
+      "demoBounds": {
+        "x1": 280,
+        "y1": 100,
+        "x2": 860,
+        "y2": 260
+      },
+      "synthetic": true
+    },
+    {
+      "id": "E",
+      "label": "동 구역",
+      "teamId": "TE",
+      "shelterId": "S2",
+      "householdCount": 13,
+      "predictedArrivalMinutes": 42,
+      "demoBounds": {
+        "x1": 890,
+        "y1": 280,
+        "x2": 1130,
+        "y2": 660
+      },
+      "synthetic": true
+    },
+    {
+      "id": "S",
+      "label": "남 구역",
+      "teamId": "TS",
+      "shelterId": "S3",
+      "householdCount": 10,
+      "predictedArrivalMinutes": 61,
+      "demoBounds": {
+        "x1": 400,
+        "y1": 450,
+        "x2": 820,
+        "y2": 700
+      },
+      "synthetic": true
+    }
+  ],
+  "shelters": [
+    {
+      "id": "S1",
+      "name": "온빛 마을회관",
+      "type": "마을회관",
+      "capacity": 40,
+      "demoLocation": {
+        "x": 370,
+        "y": 360
+      },
+      "accessibility": "unconfirmed",
+      "petsAllowed": false,
+      "synthetic": true
+    },
+    {
+      "id": "S2",
+      "name": "온빛 배움학교",
+      "type": "학교",
+      "capacity": 120,
+      "demoLocation": {
+        "x": 740,
+        "y": 390
+      },
+      "accessibility": "confirmed",
+      "petsAllowed": true,
+      "synthetic": true
+    },
+    {
+      "id": "S3",
+      "name": "온빛 생활체육관",
+      "type": "체육관",
+      "capacity": 80,
+      "demoLocation": {
+        "x": 660,
+        "y": 720
+      },
+      "accessibility": "confirmed",
+      "petsAllowed": false,
+      "synthetic": true
+    }
+  ],
+  "households": [
+    {
+      "id": "H001",
+      "name": "문윤○",
+      "age": 82,
+      "gender": "여",
+      "priorityGrade": 2,
+      "mobility": "자력",
+      "healthNotes": [
+        "특이사항 기록 없음"
+      ],
+      "zoneId": "W",
+      "addressLabel": "DEMO-W-가구-001",
+      "phoneKind": "휴대",
+      "contactRef": "DEMO-CONTACT-H001",
+      "guardian": null,
+      "consentToCall": true,
+      "callEligible": true,
+      "exclusionReason": null,
+      "sourceType": "생활지원사",
+      "lastCheckedAt": "2026-10-05",
+      "originalNote": "모의 방문 메모: 자력 / 특이사항 기록 없음",
+      "demoPosition": {
+        "x": 145,
+        "y": 292
+      },
+      "teamId": "TW",
+      "shelterId": "S1",
+      "cohabitant": "가족 동거",
+      "devices": [],
+      "synthetic": true
+    },
+    {
+      "id": "H002",
+      "name": "한정○",
+      "age": 66,
+      "gender": "남",
+      "priorityGrade": 3,
+      "mobility": "보조",
+      "healthNotes": [
+        "보행 보조 필요"
+      ],
+      "zoneId": "W",
+      "addressLabel": "DEMO-W-가구-002",
+      "phoneKind": "휴대",
+      "contactRef": "DEMO-CONTACT-H002",
+      "guardian": null,
+      "consentToCall": true,
+      "callEligible": true,
+      "exclusionReason": null,
+      "sourceType": "생활지원사",
+      "lastCheckedAt": "2026-10-04",
+      "originalNote": "모의 방문 메모: 보조 / 보행 보조 필요",
+      "demoPosition": {
+        "x": 192,
+        "y": 292
+      },
+      "teamId": "TW",
+      "shelterId": "S1",
+      "cohabitant": "가족 동거",
+      "devices": [
+        "휠체어"
+      ],
+      "synthetic": true
+    },
+    {
+      "id": "H003",
+      "name": "서민○",
+      "age": 67,
+      "gender": "여",
+      "priorityGrade": 1,
+      "mobility": "자력",
+      "healthNotes": [
+        "특이사항 기록 없음"
+      ],
+      "zoneId": "W",
+      "addressLabel": "DEMO-W-가구-003",
+      "phoneKind": "휴대",
+      "contactRef": "DEMO-CONTACT-H003",
+      "guardian": {
+        "relationship": "가족",
+        "name": "가족○",
+        "contactRef": "DEMO-CONTACT-G003"
+      },
+      "consentToCall": true,
+      "callEligible": true,
+      "exclusionReason": null,
+      "sourceType": "생활지원사",
+      "lastCheckedAt": "2026-10-03",
+      "originalNote": "모의 방문 메모: 자력 / 특이사항 기록 없음",
+      "demoPosition": {
+        "x": 240,
+        "y": 292
+      },
+      "teamId": "TW",
+      "shelterId": "S1",
+      "cohabitant": "가족 동거",
+      "devices": [],
+      "synthetic": true
+    },
+    {
+      "id": "H004",
+      "name": "도선○",
+      "age": 88,
+      "gender": "남",
+      "priorityGrade": 3,
+      "mobility": "자력",
+      "healthNotes": [
+        "특이사항 기록 없음"
+      ],
+      "zoneId": "W",
+      "addressLabel": "DEMO-W-가구-004",
+      "phoneKind": "유선",
+      "contactRef": "DEMO-CONTACT-H004",
+      "guardian": null,
+      "consentToCall": false,
+      "callEligible": false,
+      "exclusionReason": "모의 발신 동의 없음",
+      "sourceType": "생활지원사",
+      "lastCheckedAt": "2026-10-02",
+      "originalNote": "모의 방문 메모: 자력 / 특이사항 기록 없음",
+      "demoPosition": {
+        "x": 288,
+        "y": 292
+      },
+      "teamId": "TW",
+      "shelterId": "S1",
+      "cohabitant": "독거",
+      "devices": [],
+      "synthetic": true
+    },
+    {
+      "id": "H005",
+      "name": "정하○",
+      "age": 69,
+      "gender": "여",
+      "priorityGrade": 1,
+      "mobility": "자력",
+      "healthNotes": [
+        "특이사항 기록 없음"
+      ],
+      "zoneId": "W",
+      "addressLabel": "DEMO-W-가구-005",
+      "phoneKind": "휴대",
+      "contactRef": "DEMO-CONTACT-H005",
+      "guardian": null,
+      "consentToCall": true,
+      "callEligible": true,
+      "exclusionReason": null,
+      "sourceType": "생활지원사",
+      "lastCheckedAt": "2026-10-01",
+      "originalNote": "모의 방문 메모: 자력 / 특이사항 기록 없음",
+      "demoPosition": {
+        "x": 335,
+        "y": 292
+      },
+      "teamId": "TW",
+      "shelterId": "S1",
+      "cohabitant": "가족 동거",
+      "devices": [],
+      "synthetic": true
+    },
+    {
+      "id": "H006",
+      "name": "김윤○",
+      "age": 81,
+      "gender": "남",
+      "priorityGrade": 2,
+      "mobility": "자력",
+      "healthNotes": [
+        "특이사항 기록 없음"
+      ],
+      "zoneId": "W",
+      "addressLabel": "DEMO-W-가구-006",
+      "phoneKind": "휴대",
+      "contactRef": "DEMO-CONTACT-H006",
+      "guardian": {
+        "relationship": "가족",
+        "name": "가족○",
+        "contactRef": "DEMO-CONTACT-G006"
+      },
+      "consentToCall": true,
+      "callEligible": true,
+      "exclusionReason": null,
+      "sourceType": "생활지원사",
+      "lastCheckedAt": "2026-07-11",
+      "originalNote": "모의 방문 메모: 자력 / 특이사항 기록 없음",
+      "demoPosition": {
+        "x": 145,
+        "y": 648
+      },
+      "teamId": "TW",
+      "shelterId": "S1",
+      "cohabitant": "가족 동거",
+      "devices": [],
+      "synthetic": true
+    },
+    {
+      "id": "H007",
+      "name": "문정○",
+      "age": 71,
+      "gender": "여",
+      "priorityGrade": 1,
+      "mobility": "자력",
+      "healthNotes": [
+        "특이사항 기록 없음"
+      ],
+      "zoneId": "W",
+      "addressLabel": "DEMO-W-가구-007",
+      "phoneKind": "휴대",
+      "contactRef": "DEMO-CONTACT-H007",
+      "guardian": null,
+      "consentToCall": true,
+      "callEligible": true,
+      "exclusionReason": null,
+      "sourceType": "생활지원사",
+      "lastCheckedAt": "2026-09-29",
+      "originalNote": "모의 방문 메모: 자력 / 특이사항 기록 없음",
+      "demoPosition": {
+        "x": 192,
+        "y": 648
+      },
+      "teamId": "TW",
+      "shelterId": "S1",
+      "cohabitant": "가족 동거",
+      "devices": [],
+      "synthetic": true
+    },
+    {
+      "id": "H008",
+      "name": "한민○",
+      "age": 83,
+      "gender": "남",
+      "priorityGrade": 2,
+      "mobility": "자력",
+      "healthNotes": [
+        "특이사항 기록 없음"
+      ],
+      "zoneId": "W",
+      "addressLabel": "DEMO-W-가구-008",
+      "phoneKind": "유선",
+      "contactRef": "DEMO-CONTACT-H008",
+      "guardian": null,
+      "consentToCall": true,
+      "callEligible": true,
+      "exclusionReason": null,
+      "sourceType": "생활지원사",
+      "lastCheckedAt": "2026-09-28",
+      "originalNote": "모의 방문 메모: 자력 / 특이사항 기록 없음",
+      "demoPosition": {
+        "x": 240,
+        "y": 648
+      },
+      "teamId": "TW",
+      "shelterId": "S1",
+      "cohabitant": "가족 동거",
+      "devices": [],
+      "synthetic": true
+    },
+    {
+      "id": "H009",
+      "name": "서선○",
+      "age": 73,
+      "gender": "여",
+      "priorityGrade": 3,
+      "mobility": "보조",
+      "healthNotes": [
+        "보행 보조 필요"
+      ],
+      "zoneId": "W",
+      "addressLabel": "DEMO-W-가구-009",
+      "phoneKind": "휴대",
+      "contactRef": "DEMO-CONTACT-H009",
+      "guardian": {
+        "relationship": "가족",
+        "name": "가족○",
+        "contactRef": "DEMO-CONTACT-G009"
+      },
+      "consentToCall": true,
+      "callEligible": true,
+      "exclusionReason": null,
+      "sourceType": "생활지원사",
+      "lastCheckedAt": "2026-07-10",
+      "originalNote": "모의 방문 메모: 보조 / 보행 보조 필요",
+      "demoPosition": {
+        "x": 288,
+        "y": 648
+      },
+      "teamId": "TW",
+      "shelterId": "S1",
+      "cohabitant": "가족 동거",
+      "devices": [
+        "휠체어"
+      ],
+      "synthetic": true
+    },
+    {
+      "id": "H010",
+      "name": "도하○",
+      "age": 74,
+      "gender": "남",
+      "priorityGrade": 1,
+      "mobility": "자력",
+      "healthNotes": [
+        "특이사항 기록 없음"
+      ],
+      "zoneId": "W",
+      "addressLabel": "DEMO-W-가구-010",
+      "phoneKind": "휴대",
+      "contactRef": "DEMO-CONTACT-H010",
+      "guardian": null,
+      "consentToCall": true,
+      "callEligible": true,
+      "exclusionReason": null,
+      "sourceType": "생활지원사",
+      "lastCheckedAt": "2026-09-26",
+      "originalNote": "모의 방문 메모: 자력 / 특이사항 기록 없음",
+      "demoPosition": {
+        "x": 335,
+        "y": 648
+      },
+      "teamId": "TW",
+      "shelterId": "S1",
+      "cohabitant": "가족 동거",
+      "devices": [],
+      "synthetic": true
+    },
+    {
+      "id": "H011",
+      "name": "정윤○",
+      "age": 85,
+      "gender": "여",
+      "priorityGrade": 3,
+      "mobility": "자력",
+      "healthNotes": [
+        "특이사항 기록 없음"
+      ],
+      "zoneId": "N",
+      "addressLabel": "DEMO-N-가구-011",
+      "phoneKind": "휴대",
+      "contactRef": "DEMO-CONTACT-H011",
+      "guardian": null,
+      "consentToCall": true,
+      "callEligible": true,
+      "exclusionReason": null,
+      "sourceType": "생활지원사",
+      "lastCheckedAt": "2026-09-25",
+      "originalNote": "모의 방문 메모: 자력 / 특이사항 기록 없음",
+      "demoPosition": {
+        "x": 305,
+        "y": 122
+      },
+      "teamId": "TN",
+      "shelterId": "S2",
+      "cohabitant": "독거",
+      "devices": [],
+      "synthetic": true
+    },
+    {
+      "id": "H012",
+      "name": "김정○",
+      "age": 76,
+      "gender": "남",
+      "priorityGrade": 4,
+      "mobility": "와상",
+      "healthNotes": [
+        "산소 장비 사용"
+      ],
+      "zoneId": "N",
+      "addressLabel": "DEMO-N-가구-012",
+      "phoneKind": "유선",
+      "contactRef": "DEMO-CONTACT-H012",
+      "guardian": {
+        "relationship": "가족",
+        "name": "가족○",
+        "contactRef": "DEMO-CONTACT-G012"
+      },
+      "consentToCall": true,
+      "callEligible": true,
+      "exclusionReason": null,
+      "sourceType": "생활지원사",
+      "lastCheckedAt": "2026-09-24",
+      "originalNote": "모의 방문 메모: 와상 / 산소 장비 사용",
+      "demoPosition": {
+        "x": 438,
+        "y": 122
+      },
+      "teamId": "TN",
+      "shelterId": "S2",
+      "cohabitant": "가족 동거",
+      "devices": [
+        "산소",
+        "들것"
+      ],
+      "synthetic": true
+    },
+    {
+      "id": "H013",
+      "name": "문민○",
+      "age": 77,
+      "gender": "여",
+      "priorityGrade": 1,
+      "mobility": "자력",
+      "healthNotes": [
+        "특이사항 기록 없음"
+      ],
+      "zoneId": "N",
+      "addressLabel": "DEMO-N-가구-013",
+      "phoneKind": "휴대",
+      "contactRef": "DEMO-CONTACT-H013",
+      "guardian": null,
+      "consentToCall": true,
+      "callEligible": true,
+      "exclusionReason": null,
+      "sourceType": "생활지원사",
+      "lastCheckedAt": "2026-09-23",
+      "originalNote": "모의 방문 메모: 자력 / 특이사항 기록 없음",
+      "demoPosition": {
+        "x": 570,
+        "y": 122
+      },
+      "teamId": "TN",
+      "shelterId": "S2",
+      "cohabitant": "가족 동거",
+      "devices": [],
+      "synthetic": true
+    },
+    {
+      "id": "H014",
+      "name": "한선○",
+      "age": 83,
+      "gender": "남",
+      "priorityGrade": 2,
+      "mobility": "자력",
+      "healthNotes": [
+        "특이사항 기록 없음"
+      ],
+      "zoneId": "N",
+      "addressLabel": "DEMO-N-가구-014",
+      "phoneKind": "휴대",
+      "contactRef": "DEMO-CONTACT-H014",
+      "guardian": null,
+      "consentToCall": true,
+      "callEligible": true,
+      "exclusionReason": null,
+      "sourceType": "생활지원사",
+      "lastCheckedAt": "2026-09-22",
+      "originalNote": "모의 방문 메모: 자력 / 특이사항 기록 없음",
+      "demoPosition": {
+        "x": 702,
+        "y": 122
+      },
+      "teamId": "TN",
+      "shelterId": "S2",
+      "cohabitant": "가족 동거",
+      "devices": [],
+      "synthetic": true
+    },
+    {
+      "id": "H015",
+      "name": "서하○",
+      "age": 64,
+      "gender": "여",
+      "priorityGrade": 3,
+      "mobility": "보조",
+      "healthNotes": [
+        "보행 보조 필요"
+      ],
+      "zoneId": "N",
+      "addressLabel": "DEMO-N-가구-015",
+      "phoneKind": "휴대",
+      "contactRef": "DEMO-CONTACT-H015",
+      "guardian": {
+        "relationship": "가족",
+        "name": "가족○",
+        "contactRef": "DEMO-CONTACT-G015"
+      },
+      "consentToCall": true,
+      "callEligible": true,
+      "exclusionReason": null,
+      "sourceType": "생활지원사",
+      "lastCheckedAt": "2026-09-21",
+      "originalNote": "모의 방문 메모: 보조 / 보행 보조 필요",
+      "demoPosition": {
+        "x": 835,
+        "y": 122
+      },
+      "teamId": "TN",
+      "shelterId": "S2",
+      "cohabitant": "가족 동거",
+      "devices": [
+        "휠체어"
+      ],
+      "synthetic": true
+    },
+    {
+      "id": "H016",
+      "name": "도윤○",
+      "age": 65,
+      "gender": "남",
+      "priorityGrade": 1,
+      "mobility": "자력",
+      "healthNotes": [
+        "특이사항 기록 없음"
+      ],
+      "zoneId": "N",
+      "addressLabel": "DEMO-N-가구-016",
+      "phoneKind": "유선",
+      "contactRef": "DEMO-CONTACT-H016",
+      "guardian": null,
+      "consentToCall": true,
+      "callEligible": true,
+      "exclusionReason": null,
+      "sourceType": "이장",
+      "lastCheckedAt": "2026-09-20",
+      "originalNote": "모의 방문 메모: 자력 / 특이사항 기록 없음",
+      "demoPosition": {
+        "x": 305,
+        "y": 180
+      },
+      "teamId": "TN",
+      "shelterId": "S2",
+      "cohabitant": "가족 동거",
+      "devices": [],
+      "synthetic": true
+    },
+    {
+      "id": "H017",
+      "name": "정정○",
+      "age": 66,
+      "gender": "여",
+      "priorityGrade": 1,
+      "mobility": "자력",
+      "healthNotes": [
+        "특이사항 기록 없음"
+      ],
+      "zoneId": "N",
+      "addressLabel": "DEMO-N-가구-017",
+      "phoneKind": "휴대",
+      "contactRef": "DEMO-CONTACT-H017",
+      "guardian": null,
+      "consentToCall": true,
+      "callEligible": true,
+      "exclusionReason": null,
+      "sourceType": "이장",
+      "lastCheckedAt": "2026-09-19",
+      "originalNote": "모의 방문 메모: 자력 / 특이사항 기록 없음",
+      "demoPosition": {
+        "x": 438,
+        "y": 180
+      },
+      "teamId": "TN",
+      "shelterId": "S2",
+      "cohabitant": "가족 동거",
+      "devices": [],
+      "synthetic": true
+    },
+    {
+      "id": "H018",
+      "name": "김민○",
+      "age": 67,
+      "gender": "남",
+      "priorityGrade": 4,
+      "mobility": "자력",
+      "healthNotes": [
+        "산소 장비 사용"
+      ],
+      "zoneId": "N",
+      "addressLabel": "DEMO-N-가구-018",
+      "phoneKind": "휴대",
+      "contactRef": "DEMO-CONTACT-H018",
+      "guardian": {
+        "relationship": "가족",
+        "name": "가족○",
+        "contactRef": "DEMO-CONTACT-G018"
+      },
+      "consentToCall": true,
+      "callEligible": true,
+      "exclusionReason": null,
+      "sourceType": "이장",
+      "lastCheckedAt": "2026-09-18",
+      "originalNote": "모의 방문 메모: 자력 / 산소 장비 사용",
+      "demoPosition": {
+        "x": 570,
+        "y": 180
+      },
+      "teamId": "TN",
+      "shelterId": "S2",
+      "cohabitant": "가족 동거",
+      "devices": [
+        "산소"
+      ],
+      "synthetic": true
+    },
+    {
+      "id": "H019",
+      "name": "문선○",
+      "age": 68,
+      "gender": "여",
+      "priorityGrade": 1,
+      "mobility": "자력",
+      "healthNotes": [
+        "특이사항 기록 없음"
+      ],
+      "zoneId": "N",
+      "addressLabel": "DEMO-N-가구-019",
+      "phoneKind": "휴대",
+      "contactRef": "DEMO-CONTACT-H019",
+      "guardian": null,
+      "consentToCall": true,
+      "callEligible": true,
+      "exclusionReason": null,
+      "sourceType": "이장",
+      "lastCheckedAt": "2026-09-17",
+      "originalNote": "모의 방문 메모: 자력 / 특이사항 기록 없음",
+      "demoPosition": {
+        "x": 702,
+        "y": 180
+      },
+      "teamId": "TN",
+      "shelterId": "S2",
+      "cohabitant": "가족 동거",
+      "devices": [],
+      "synthetic": true
+    },
+    {
+      "id": "H020",
+      "name": "한하○",
+      "age": 83,
+      "gender": "남",
+      "priorityGrade": 2,
+      "mobility": "자력",
+      "healthNotes": [
+        "특이사항 기록 없음"
+      ],
+      "zoneId": "N",
+      "addressLabel": "DEMO-N-가구-020",
+      "phoneKind": "유선",
+      "contactRef": "DEMO-CONTACT-H020",
+      "guardian": null,
+      "consentToCall": true,
+      "callEligible": true,
+      "exclusionReason": null,
+      "sourceType": "이장",
+      "lastCheckedAt": "2026-09-16",
+      "originalNote": "모의 방문 메모: 자력 / 특이사항 기록 없음",
+      "demoPosition": {
+        "x": 835,
+        "y": 180
+      },
+      "teamId": "TN",
+      "shelterId": "S2",
+      "cohabitant": "가족 동거",
+      "devices": [],
+      "synthetic": true
+    },
+    {
+      "id": "H021",
+      "name": "서윤○",
+      "age": 85,
+      "gender": "여",
+      "priorityGrade": 3,
+      "mobility": "자력",
+      "healthNotes": [
+        "특이사항 기록 없음"
+      ],
+      "zoneId": "N",
+      "addressLabel": "DEMO-N-가구-021",
+      "phoneKind": "휴대",
+      "contactRef": "DEMO-CONTACT-H021",
+      "guardian": {
+        "relationship": "가족",
+        "name": "가족○",
+        "contactRef": "DEMO-CONTACT-G021"
+      },
+      "consentToCall": true,
+      "callEligible": true,
+      "exclusionReason": null,
+      "sourceType": "이장",
+      "lastCheckedAt": "2026-07-10",
+      "originalNote": "모의 방문 메모: 자력 / 특이사항 기록 없음",
+      "demoPosition": {
+        "x": 305,
+        "y": 238
+      },
+      "teamId": "TN",
+      "shelterId": "S2",
+      "cohabitant": "독거",
+      "devices": [],
+      "synthetic": true
+    },
+    {
+      "id": "H022",
+      "name": "도정○",
+      "age": 71,
+      "gender": "남",
+      "priorityGrade": 1,
+      "mobility": "자력",
+      "healthNotes": [
+        "특이사항 기록 없음"
+      ],
+      "zoneId": "N",
+      "addressLabel": "DEMO-N-가구-022",
+      "phoneKind": "휴대",
+      "contactRef": "DEMO-CONTACT-H022",
+      "guardian": null,
+      "consentToCall": true,
+      "callEligible": true,
+      "exclusionReason": null,
+      "sourceType": "이장",
+      "lastCheckedAt": "2026-09-14",
+      "originalNote": "모의 방문 메모: 자력 / 특이사항 기록 없음",
+      "demoPosition": {
+        "x": 438,
+        "y": 238
+      },
+      "teamId": "TN",
+      "shelterId": "S2",
+      "cohabitant": "가족 동거",
+      "devices": [],
+      "synthetic": true
+    },
+    {
+      "id": "H023",
+      "name": "정민○",
+      "age": 72,
+      "gender": "여",
+      "priorityGrade": 1,
+      "mobility": "자력",
+      "healthNotes": [
+        "특이사항 기록 없음"
+      ],
+      "zoneId": "N",
+      "addressLabel": "DEMO-N-가구-023",
+      "phoneKind": "휴대",
+      "contactRef": "DEMO-CONTACT-H023",
+      "guardian": null,
+      "consentToCall": true,
+      "callEligible": true,
+      "exclusionReason": null,
+      "sourceType": "이장",
+      "lastCheckedAt": "2026-09-13",
+      "originalNote": "모의 방문 메모: 자력 / 특이사항 기록 없음",
+      "demoPosition": {
+        "x": 570,
+        "y": 238
+      },
+      "teamId": "TN",
+      "shelterId": "S2",
+      "cohabitant": "가족 동거",
+      "devices": [],
+      "synthetic": true
+    },
+    {
+      "id": "H024",
+      "name": "김선○",
+      "age": 73,
+      "gender": "남",
+      "priorityGrade": 4,
+      "mobility": "불명",
+      "healthNotes": [
+        "거동 확인 필요"
+      ],
+      "zoneId": "N",
+      "addressLabel": "DEMO-N-가구-024",
+      "phoneKind": "유선",
+      "contactRef": "DEMO-CONTACT-H024",
+      "guardian": {
+        "relationship": "가족",
+        "name": "가족○",
+        "contactRef": "DEMO-CONTACT-G024"
+      },
+      "consentToCall": true,
+      "callEligible": true,
+      "exclusionReason": null,
+      "sourceType": "이장",
+      "lastCheckedAt": "2026-09-12",
+      "originalNote": "모의 방문 메모: 불명 / 거동 확인 필요",
+      "demoPosition": {
+        "x": 702,
+        "y": 238
+      },
+      "teamId": "TN",
+      "shelterId": "S2",
+      "cohabitant": "가족 동거",
+      "devices": [],
+      "synthetic": true
+    },
+    {
+      "id": "H025",
+      "name": "문하○",
+      "age": 74,
+      "gender": "여",
+      "priorityGrade": 1,
+      "mobility": "자력",
+      "healthNotes": [
+        "특이사항 기록 없음"
+      ],
+      "zoneId": "N",
+      "addressLabel": "DEMO-N-가구-025",
+      "phoneKind": "휴대",
+      "contactRef": "DEMO-CONTACT-H025",
+      "guardian": null,
+      "consentToCall": true,
+      "callEligible": true,
+      "exclusionReason": null,
+      "sourceType": "이장",
+      "lastCheckedAt": "2026-09-11",
+      "originalNote": "모의 방문 메모: 자력 / 특이사항 기록 없음",
+      "demoPosition": {
+        "x": 835,
+        "y": 238
+      },
+      "teamId": "TN",
+      "shelterId": "S2",
+      "cohabitant": "가족 동거",
+      "devices": [],
+      "synthetic": true
+    },
+    {
+      "id": "H026",
+      "name": "한윤○",
+      "age": 75,
+      "gender": "남",
+      "priorityGrade": 3,
+      "mobility": "보조",
+      "healthNotes": [
+        "보행 보조 필요"
+      ],
+      "zoneId": "E",
+      "addressLabel": "DEMO-E-가구-026",
+      "phoneKind": "휴대",
+      "contactRef": "DEMO-CONTACT-H026",
+      "guardian": null,
+      "consentToCall": true,
+      "callEligible": true,
+      "exclusionReason": null,
+      "sourceType": "보건지소",
+      "lastCheckedAt": "2026-09-10",
+      "originalNote": "모의 방문 메모: 보조 / 보행 보조 필요",
+      "demoPosition": {
+        "x": 915,
+        "y": 302
+      },
+      "teamId": "TE",
+      "shelterId": "S2",
+      "cohabitant": "가족 동거",
+      "devices": [
+        "휠체어"
+      ],
+      "synthetic": true
+    },
+    {
+      "id": "H027",
+      "name": "서정○",
+      "age": 81,
+      "gender": "여",
+      "priorityGrade": 2,
+      "mobility": "자력",
+      "healthNotes": [
+        "특이사항 기록 없음"
+      ],
+      "zoneId": "E",
+      "addressLabel": "DEMO-E-가구-027",
+      "phoneKind": "휴대",
+      "contactRef": "DEMO-CONTACT-H027",
+      "guardian": {
+        "relationship": "가족",
+        "name": "가족○",
+        "contactRef": "DEMO-CONTACT-G027"
+      },
+      "consentToCall": false,
+      "callEligible": false,
+      "exclusionReason": "모의 발신 동의 없음",
+      "sourceType": "보건지소",
+      "lastCheckedAt": "2026-09-09",
+      "originalNote": "모의 방문 메모: 자력 / 특이사항 기록 없음",
+      "demoPosition": {
+        "x": 962,
+        "y": 302
+      },
+      "teamId": "TE",
+      "shelterId": "S2",
+      "cohabitant": "가족 동거",
+      "devices": [],
+      "synthetic": true
+    },
+    {
+      "id": "H028",
+      "name": "도민○",
+      "age": 77,
+      "gender": "남",
+      "priorityGrade": 1,
+      "mobility": "자력",
+      "healthNotes": [
+        "특이사항 기록 없음"
+      ],
+      "zoneId": "E",
+      "addressLabel": "DEMO-E-가구-028",
+      "phoneKind": "유선",
+      "contactRef": "DEMO-CONTACT-H028",
+      "guardian": null,
+      "consentToCall": true,
+      "callEligible": true,
+      "exclusionReason": null,
+      "sourceType": "보건지소",
+      "lastCheckedAt": "2026-09-08",
+      "originalNote": "모의 방문 메모: 자력 / 특이사항 기록 없음",
+      "demoPosition": {
+        "x": 1010,
+        "y": 302
+      },
+      "teamId": "TE",
+      "shelterId": "S2",
+      "cohabitant": "가족 동거",
+      "devices": [],
+      "synthetic": true
+    },
+    {
+      "id": "H029",
+      "name": "정선○",
+      "age": 78,
+      "gender": "여",
+      "priorityGrade": 1,
+      "mobility": "자력",
+      "healthNotes": [
+        "특이사항 기록 없음"
+      ],
+      "zoneId": "E",
+      "addressLabel": "DEMO-E-가구-029",
+      "phoneKind": "휴대",
+      "contactRef": "DEMO-CONTACT-H029",
+      "guardian": null,
+      "consentToCall": true,
+      "callEligible": true,
+      "exclusionReason": null,
+      "sourceType": "보건지소",
+      "lastCheckedAt": "2026-09-07",
+      "originalNote": "모의 방문 메모: 자력 / 특이사항 기록 없음",
+      "demoPosition": {
+        "x": 1058,
+        "y": 302
+      },
+      "teamId": "TE",
+      "shelterId": "S2",
+      "cohabitant": "가족 동거",
+      "devices": [],
+      "synthetic": true
+    },
+    {
+      "id": "H030",
+      "name": "김하○",
+      "age": 84,
+      "gender": "남",
+      "priorityGrade": 3,
+      "mobility": "자력",
+      "healthNotes": [
+        "특이사항 기록 없음"
+      ],
+      "zoneId": "E",
+      "addressLabel": "DEMO-E-가구-030",
+      "phoneKind": "휴대",
+      "contactRef": "DEMO-CONTACT-H030",
+      "guardian": {
+        "relationship": "가족",
+        "name": "가족○",
+        "contactRef": "DEMO-CONTACT-G030"
+      },
+      "consentToCall": true,
+      "callEligible": true,
+      "exclusionReason": null,
+      "sourceType": "보건지소",
+      "lastCheckedAt": "2026-10-06",
+      "originalNote": "모의 방문 메모: 자력 / 특이사항 기록 없음",
+      "demoPosition": {
+        "x": 1105,
+        "y": 302
+      },
+      "teamId": "TE",
+      "shelterId": "S2",
+      "cohabitant": "독거",
+      "devices": [],
+      "synthetic": true
+    },
+    {
+      "id": "H031",
+      "name": "문윤○",
+      "age": 65,
+      "gender": "여",
+      "priorityGrade": 1,
+      "mobility": "자력",
+      "healthNotes": [
+        "특이사항 기록 없음"
+      ],
+      "zoneId": "E",
+      "addressLabel": "DEMO-E-가구-031",
+      "phoneKind": "휴대",
+      "contactRef": "DEMO-CONTACT-H031",
+      "guardian": null,
+      "consentToCall": true,
+      "callEligible": true,
+      "exclusionReason": null,
+      "sourceType": "보건지소",
+      "lastCheckedAt": "2026-10-05",
+      "originalNote": "모의 방문 메모: 자력 / 특이사항 기록 없음",
+      "demoPosition": {
+        "x": 915,
+        "y": 470
+      },
+      "teamId": "TE",
+      "shelterId": "S2",
+      "cohabitant": "가족 동거",
+      "devices": [],
+      "synthetic": true
+    },
+    {
+      "id": "H032",
+      "name": "한정○",
+      "age": 66,
+      "gender": "남",
+      "priorityGrade": 1,
+      "mobility": "자력",
+      "healthNotes": [
+        "특이사항 기록 없음"
+      ],
+      "zoneId": "E",
+      "addressLabel": "DEMO-E-가구-032",
+      "phoneKind": "유선",
+      "contactRef": "DEMO-CONTACT-H032",
+      "guardian": null,
+      "consentToCall": true,
+      "callEligible": true,
+      "exclusionReason": null,
+      "sourceType": "보건지소",
+      "lastCheckedAt": "2026-10-04",
+      "originalNote": "모의 방문 메모: 자력 / 특이사항 기록 없음",
+      "demoPosition": {
+        "x": 962,
+        "y": 470
+      },
+      "teamId": "TE",
+      "shelterId": "S2",
+      "cohabitant": "가족 동거",
+      "devices": [],
+      "synthetic": true
+    },
+    {
+      "id": "H033",
+      "name": "서민○",
+      "age": 67,
+      "gender": "여",
+      "priorityGrade": 1,
+      "mobility": "자력",
+      "healthNotes": [
+        "특이사항 기록 없음"
+      ],
+      "zoneId": "E",
+      "addressLabel": "DEMO-E-가구-033",
+      "phoneKind": "휴대",
+      "contactRef": "DEMO-CONTACT-H033",
+      "guardian": {
+        "relationship": "가족",
+        "name": "가족○",
+        "contactRef": "DEMO-CONTACT-G033"
+      },
+      "consentToCall": true,
+      "callEligible": true,
+      "exclusionReason": null,
+      "sourceType": "보건지소",
+      "lastCheckedAt": "2026-10-03",
+      "originalNote": "모의 방문 메모: 자력 / 특이사항 기록 없음",
+      "demoPosition": {
+        "x": 1010,
+        "y": 470
+      },
+      "teamId": "TE",
+      "shelterId": "S2",
+      "cohabitant": "가족 동거",
+      "devices": [],
+      "synthetic": true
+    },
+    {
+      "id": "H034",
+      "name": "도선○",
+      "age": 88,
+      "gender": "남",
+      "priorityGrade": 3,
+      "mobility": "자력",
+      "healthNotes": [
+        "특이사항 기록 없음"
+      ],
+      "zoneId": "E",
+      "addressLabel": "DEMO-E-가구-034",
+      "phoneKind": "없음",
+      "contactRef": null,
+      "guardian": null,
+      "consentToCall": true,
+      "callEligible": false,
+      "exclusionReason": "연락 기기 없음",
+      "sourceType": "보건지소",
+      "lastCheckedAt": "2026-10-02",
+      "originalNote": "모의 방문 메모: 자력 / 특이사항 기록 없음",
+      "demoPosition": {
+        "x": 1058,
+        "y": 470
+      },
+      "teamId": "TE",
+      "shelterId": "S2",
+      "cohabitant": "독거",
+      "devices": [],
+      "synthetic": true
+    },
+    {
+      "id": "H035",
+      "name": "정하○",
+      "age": 69,
+      "gender": "여",
+      "priorityGrade": 1,
+      "mobility": "자력",
+      "healthNotes": [
+        "특이사항 기록 없음"
+      ],
+      "zoneId": "E",
+      "addressLabel": "DEMO-E-가구-035",
+      "phoneKind": "휴대",
+      "contactRef": "DEMO-CONTACT-H035",
+      "guardian": null,
+      "consentToCall": true,
+      "callEligible": true,
+      "exclusionReason": null,
+      "sourceType": "보건지소",
+      "lastCheckedAt": "2026-10-01",
+      "originalNote": "모의 방문 메모: 자력 / 특이사항 기록 없음",
+      "demoPosition": {
+        "x": 1105,
+        "y": 470
+      },
+      "teamId": "TE",
+      "shelterId": "S2",
+      "cohabitant": "가족 동거",
+      "devices": [],
+      "synthetic": true
+    },
+    {
+      "id": "H036",
+      "name": "김윤○",
+      "age": 70,
+      "gender": "남",
+      "priorityGrade": 1,
+      "mobility": "자력",
+      "healthNotes": [
+        "특이사항 기록 없음"
+      ],
+      "zoneId": "E",
+      "addressLabel": "DEMO-E-가구-036",
+      "phoneKind": "유선",
+      "contactRef": "DEMO-CONTACT-H036",
+      "guardian": {
+        "relationship": "가족",
+        "name": "가족○",
+        "contactRef": "DEMO-CONTACT-G036"
+      },
+      "consentToCall": true,
+      "callEligible": true,
+      "exclusionReason": null,
+      "sourceType": "보건지소",
+      "lastCheckedAt": "2026-09-30",
+      "originalNote": "모의 방문 메모: 자력 / 특이사항 기록 없음",
+      "demoPosition": {
+        "x": 915,
+        "y": 638
+      },
+      "teamId": "TE",
+      "shelterId": "S2",
+      "cohabitant": "가족 동거",
+      "devices": [],
+      "synthetic": true
+    },
+    {
+      "id": "H037",
+      "name": "문정○",
+      "age": 71,
+      "gender": "여",
+      "priorityGrade": 1,
+      "mobility": "자력",
+      "healthNotes": [
+        "특이사항 기록 없음"
+      ],
+      "zoneId": "E",
+      "addressLabel": "DEMO-E-가구-037",
+      "phoneKind": "휴대",
+      "contactRef": "DEMO-CONTACT-H037",
+      "guardian": null,
+      "consentToCall": true,
+      "callEligible": true,
+      "exclusionReason": null,
+      "sourceType": "보건지소",
+      "lastCheckedAt": "2026-09-29",
+      "originalNote": "모의 방문 메모: 자력 / 특이사항 기록 없음",
+      "demoPosition": {
+        "x": 962,
+        "y": 638
+      },
+      "teamId": "TE",
+      "shelterId": "S2",
+      "cohabitant": "가족 동거",
+      "devices": [],
+      "synthetic": true
+    },
+    {
+      "id": "H038",
+      "name": "한민○",
+      "age": 72,
+      "gender": "남",
+      "priorityGrade": 1,
+      "mobility": "자력",
+      "healthNotes": [
+        "특이사항 기록 없음"
+      ],
+      "zoneId": "E",
+      "addressLabel": "DEMO-E-가구-038",
+      "phoneKind": "휴대",
+      "contactRef": "DEMO-CONTACT-H038",
+      "guardian": null,
+      "consentToCall": true,
+      "callEligible": true,
+      "exclusionReason": null,
+      "sourceType": "가족",
+      "lastCheckedAt": "2026-09-28",
+      "originalNote": "모의 방문 메모: 자력 / 특이사항 기록 없음",
+      "demoPosition": {
+        "x": 1010,
+        "y": 638
+      },
+      "teamId": "TE",
+      "shelterId": "S2",
+      "cohabitant": "가족 동거",
+      "devices": [],
+      "synthetic": true
+    },
+    {
+      "id": "H039",
+      "name": "서선○",
+      "age": 73,
+      "gender": "여",
+      "priorityGrade": 3,
+      "mobility": "보조",
+      "healthNotes": [
+        "보행 보조 필요"
+      ],
+      "zoneId": "S",
+      "addressLabel": "DEMO-S-가구-039",
+      "phoneKind": "휴대",
+      "contactRef": "DEMO-CONTACT-H039",
+      "guardian": {
+        "relationship": "가족",
+        "name": "가족○",
+        "contactRef": "DEMO-CONTACT-G039"
+      },
+      "consentToCall": true,
+      "callEligible": true,
+      "exclusionReason": null,
+      "sourceType": "가족",
+      "lastCheckedAt": "2026-09-27",
+      "originalNote": "모의 방문 메모: 보조 / 보행 보조 필요",
+      "demoPosition": {
+        "x": 425,
+        "y": 472
+      },
+      "teamId": "TS",
+      "shelterId": "S3",
+      "cohabitant": "가족 동거",
+      "devices": [
+        "휠체어"
+      ],
+      "synthetic": true
+    },
+    {
+      "id": "H040",
+      "name": "도하○",
+      "age": 82,
+      "gender": "남",
+      "priorityGrade": 2,
+      "mobility": "자력",
+      "healthNotes": [
+        "특이사항 기록 없음"
+      ],
+      "zoneId": "S",
+      "addressLabel": "DEMO-S-가구-040",
+      "phoneKind": "유선",
+      "contactRef": "DEMO-CONTACT-H040",
+      "guardian": null,
+      "consentToCall": true,
+      "callEligible": true,
+      "exclusionReason": null,
+      "sourceType": "가족",
+      "lastCheckedAt": "2026-07-09",
+      "originalNote": "모의 방문 메모: 자력 / 특이사항 기록 없음",
+      "demoPosition": {
+        "x": 518,
+        "y": 472
+      },
+      "teamId": "TS",
+      "shelterId": "S3",
+      "cohabitant": "가족 동거",
+      "devices": [],
+      "synthetic": true
+    },
+    {
+      "id": "H041",
+      "name": "정윤○",
+      "age": 75,
+      "gender": "여",
+      "priorityGrade": 1,
+      "mobility": "자력",
+      "healthNotes": [
+        "특이사항 기록 없음"
+      ],
+      "zoneId": "S",
+      "addressLabel": "DEMO-S-가구-041",
+      "phoneKind": "휴대",
+      "contactRef": "DEMO-CONTACT-H041",
+      "guardian": null,
+      "consentToCall": true,
+      "callEligible": true,
+      "exclusionReason": null,
+      "sourceType": "가족",
+      "lastCheckedAt": "2026-09-25",
+      "originalNote": "모의 방문 메모: 자력 / 특이사항 기록 없음",
+      "demoPosition": {
+        "x": 610,
+        "y": 472
+      },
+      "teamId": "TS",
+      "shelterId": "S3",
+      "cohabitant": "가족 동거",
+      "devices": [],
+      "synthetic": true
+    },
+    {
+      "id": "H042",
+      "name": "김정○",
+      "age": 76,
+      "gender": "남",
+      "priorityGrade": 1,
+      "mobility": "자력",
+      "healthNotes": [
+        "특이사항 기록 없음"
+      ],
+      "zoneId": "S",
+      "addressLabel": "DEMO-S-가구-042",
+      "phoneKind": "휴대",
+      "contactRef": "DEMO-CONTACT-H042",
+      "guardian": {
+        "relationship": "가족",
+        "name": "가족○",
+        "contactRef": "DEMO-CONTACT-G042"
+      },
+      "consentToCall": true,
+      "callEligible": true,
+      "exclusionReason": null,
+      "sourceType": "가족",
+      "lastCheckedAt": "2026-09-24",
+      "originalNote": "모의 방문 메모: 자력 / 특이사항 기록 없음",
+      "demoPosition": {
+        "x": 702,
+        "y": 472
+      },
+      "teamId": "TS",
+      "shelterId": "S3",
+      "cohabitant": "가족 동거",
+      "devices": [],
+      "synthetic": true
+    },
+    {
+      "id": "H043",
+      "name": "문민○",
+      "age": 77,
+      "gender": "여",
+      "priorityGrade": 1,
+      "mobility": "자력",
+      "healthNotes": [
+        "특이사항 기록 없음"
+      ],
+      "zoneId": "S",
+      "addressLabel": "DEMO-S-가구-043",
+      "phoneKind": "휴대",
+      "contactRef": "DEMO-CONTACT-H043",
+      "guardian": null,
+      "consentToCall": true,
+      "callEligible": true,
+      "exclusionReason": null,
+      "sourceType": "통화",
+      "lastCheckedAt": "2026-09-23",
+      "originalNote": "모의 방문 메모: 자력 / 특이사항 기록 없음",
+      "demoPosition": {
+        "x": 795,
+        "y": 472
+      },
+      "teamId": "TS",
+      "shelterId": "S3",
+      "cohabitant": "가족 동거",
+      "devices": [],
+      "synthetic": true
+    },
+    {
+      "id": "H044",
+      "name": "한선○",
+      "age": 78,
+      "gender": "남",
+      "priorityGrade": 3,
+      "mobility": "보조",
+      "healthNotes": [
+        "보행 보조 필요"
+      ],
+      "zoneId": "S",
+      "addressLabel": "DEMO-S-가구-044",
+      "phoneKind": "유선",
+      "contactRef": "DEMO-CONTACT-H044",
+      "guardian": null,
+      "consentToCall": true,
+      "callEligible": true,
+      "exclusionReason": null,
+      "sourceType": "통화",
+      "lastCheckedAt": "2026-09-22",
+      "originalNote": "모의 방문 메모: 보조 / 보행 보조 필요",
+      "demoPosition": {
+        "x": 425,
+        "y": 678
+      },
+      "teamId": "TS",
+      "shelterId": "S3",
+      "cohabitant": "가족 동거",
+      "devices": [
+        "휠체어"
+      ],
+      "synthetic": true
+    },
+    {
+      "id": "H045",
+      "name": "서하○",
+      "age": 81,
+      "gender": "여",
+      "priorityGrade": 2,
+      "mobility": "자력",
+      "healthNotes": [
+        "특이사항 기록 없음"
+      ],
+      "zoneId": "S",
+      "addressLabel": "DEMO-S-가구-045",
+      "phoneKind": "휴대",
+      "contactRef": "DEMO-CONTACT-H045",
+      "guardian": {
+        "relationship": "가족",
+        "name": "가족○",
+        "contactRef": "DEMO-CONTACT-G045"
+      },
+      "consentToCall": true,
+      "callEligible": true,
+      "exclusionReason": null,
+      "sourceType": "통화",
+      "lastCheckedAt": "2026-09-21",
+      "originalNote": "모의 방문 메모: 자력 / 특이사항 기록 없음",
+      "demoPosition": {
+        "x": 518,
+        "y": 678
+      },
+      "teamId": "TS",
+      "shelterId": "S3",
+      "cohabitant": "가족 동거",
+      "devices": [],
+      "synthetic": true
+    },
+    {
+      "id": "H046",
+      "name": "도윤○",
+      "age": 65,
+      "gender": "남",
+      "priorityGrade": 1,
+      "mobility": "자력",
+      "healthNotes": [
+        "특이사항 기록 없음"
+      ],
+      "zoneId": "S",
+      "addressLabel": "DEMO-S-가구-046",
+      "phoneKind": "휴대",
+      "contactRef": "DEMO-CONTACT-H046",
+      "guardian": null,
+      "consentToCall": true,
+      "callEligible": true,
+      "exclusionReason": null,
+      "sourceType": "통화",
+      "lastCheckedAt": "2026-09-20",
+      "originalNote": "모의 방문 메모: 자력 / 특이사항 기록 없음",
+      "demoPosition": {
+        "x": 610,
+        "y": 678
+      },
+      "teamId": "TS",
+      "shelterId": "S3",
+      "cohabitant": "가족 동거",
+      "devices": [],
+      "synthetic": true
+    },
+    {
+      "id": "H047",
+      "name": "정정○",
+      "age": 66,
+      "gender": "여",
+      "priorityGrade": 1,
+      "mobility": "자력",
+      "healthNotes": [
+        "특이사항 기록 없음"
+      ],
+      "zoneId": "S",
+      "addressLabel": "DEMO-S-가구-047",
+      "phoneKind": "휴대",
+      "contactRef": "DEMO-CONTACT-H047",
+      "guardian": null,
+      "consentToCall": true,
+      "callEligible": true,
+      "exclusionReason": null,
+      "sourceType": "통화",
+      "lastCheckedAt": "2026-09-19",
+      "originalNote": "모의 방문 메모: 자력 / 특이사항 기록 없음",
+      "demoPosition": {
+        "x": 702,
+        "y": 678
+      },
+      "teamId": "TS",
+      "shelterId": "S3",
+      "cohabitant": "가족 동거",
+      "devices": [],
+      "synthetic": true
+    },
+    {
+      "id": "H048",
+      "name": "김민○",
+      "age": 87,
+      "gender": "남",
+      "priorityGrade": 3,
+      "mobility": "자력",
+      "healthNotes": [
+        "특이사항 기록 없음"
+      ],
+      "zoneId": "S",
+      "addressLabel": "DEMO-S-가구-048",
+      "phoneKind": "유선",
+      "contactRef": "DEMO-CONTACT-H048",
+      "guardian": {
+        "relationship": "가족",
+        "name": "가족○",
+        "contactRef": "DEMO-CONTACT-G048"
+      },
+      "consentToCall": true,
+      "callEligible": true,
+      "exclusionReason": null,
+      "sourceType": "통화",
+      "lastCheckedAt": "2026-09-18",
+      "originalNote": "모의 방문 메모: 자력 / 특이사항 기록 없음",
+      "demoPosition": {
+        "x": 795,
+        "y": 678
+      },
+      "teamId": "TS",
+      "shelterId": "S3",
+      "cohabitant": "독거",
+      "devices": [],
+      "synthetic": true
+    }
+  ],
+  "teams": [
+    {
+      "id": "TW",
+      "zoneId": "W",
+      "name": "서구역 대기조",
+      "vehicleId": "V04",
+      "members": [
+        {
+          "id": "M01",
+          "name": "백대○",
+          "roleLabel": "운전 담당",
+          "canDrive": true,
+          "availability": "가능",
+          "reason": null,
+          "synthetic": true
+        },
+        {
+          "id": "M02",
+          "name": "차대○",
+          "roleLabel": "방문 담당",
+          "canDrive": true,
+          "availability": "가능",
+          "reason": null,
+          "synthetic": true
+        },
+        {
+          "id": "M03",
+          "name": "길대○",
+          "roleLabel": "지원 담당",
+          "canDrive": false,
+          "availability": "불가",
+          "reason": "모의 일정 중복",
+          "synthetic": true
+        }
+      ],
+      "assignedHouseholdIds": [
+        "H001",
+        "H002",
+        "H003",
+        "H004",
+        "H005",
+        "H006",
+        "H007",
+        "H008",
+        "H009",
+        "H010"
+      ],
+      "meetingPoint": {
+        "x": 240,
+        "y": 470
+      },
+      "synthetic": true
+    },
+    {
+      "id": "TN",
+      "zoneId": "N",
+      "name": "북구역 대기조",
+      "vehicleId": "V05",
+      "members": [
+        {
+          "id": "M04",
+          "name": "백대○",
+          "roleLabel": "운전 담당",
+          "canDrive": true,
+          "availability": "가능",
+          "reason": null,
+          "synthetic": true
+        },
+        {
+          "id": "M05",
+          "name": "차대○",
+          "roleLabel": "방문 담당",
+          "canDrive": true,
+          "availability": "가능",
+          "reason": null,
+          "synthetic": true
+        },
+        {
+          "id": "M06",
+          "name": "길대○",
+          "roleLabel": "지원 담당",
+          "canDrive": false,
+          "availability": "불가",
+          "reason": "모의 일정 중복",
+          "synthetic": true
+        }
+      ],
+      "assignedHouseholdIds": [
+        "H011",
+        "H012",
+        "H013",
+        "H014",
+        "H015",
+        "H016",
+        "H017",
+        "H018",
+        "H019",
+        "H020",
+        "H021",
+        "H022",
+        "H023",
+        "H024",
+        "H025"
+      ],
+      "meetingPoint": {
+        "x": 570,
+        "y": 180
+      },
+      "synthetic": true
+    },
+    {
+      "id": "TE",
+      "zoneId": "E",
+      "name": "동구역 대기조",
+      "vehicleId": "V06",
+      "members": [
+        {
+          "id": "M07",
+          "name": "백대○",
+          "roleLabel": "운전 담당",
+          "canDrive": true,
+          "availability": "가능",
+          "reason": null,
+          "synthetic": true
+        },
+        {
+          "id": "M08",
+          "name": "차대○",
+          "roleLabel": "방문 담당",
+          "canDrive": true,
+          "availability": "가능",
+          "reason": null,
+          "synthetic": true
+        },
+        {
+          "id": "M09",
+          "name": "길대○",
+          "roleLabel": "지원 담당",
+          "canDrive": false,
+          "availability": "불가",
+          "reason": "모의 일정 중복",
+          "synthetic": true
+        }
+      ],
+      "assignedHouseholdIds": [
+        "H026",
+        "H027",
+        "H028",
+        "H029",
+        "H030",
+        "H031",
+        "H032",
+        "H033",
+        "H034",
+        "H035",
+        "H036",
+        "H037",
+        "H038"
+      ],
+      "meetingPoint": {
+        "x": 1010,
+        "y": 470
+      },
+      "synthetic": true
+    },
+    {
+      "id": "TS",
+      "zoneId": "S",
+      "name": "남구역 대기조",
+      "vehicleId": "V07",
+      "members": [
+        {
+          "id": "M10",
+          "name": "백대○",
+          "roleLabel": "운전 담당",
+          "canDrive": true,
+          "availability": "가능",
+          "reason": null,
+          "synthetic": true
+        },
+        {
+          "id": "M11",
+          "name": "차대○",
+          "roleLabel": "방문 담당",
+          "canDrive": true,
+          "availability": "가능",
+          "reason": null,
+          "synthetic": true
+        },
+        {
+          "id": "M12",
+          "name": "길대○",
+          "roleLabel": "지원 담당",
+          "canDrive": false,
+          "availability": "가능",
+          "reason": null,
+          "synthetic": true
+        }
+      ],
+      "assignedHouseholdIds": [
+        "H039",
+        "H040",
+        "H041",
+        "H042",
+        "H043",
+        "H044",
+        "H045",
+        "H046",
+        "H047",
+        "H048"
+      ],
+      "meetingPoint": {
+        "x": 610,
+        "y": 575
+      },
+      "synthetic": true
+    }
+  ],
+  "vehicles": [
+    {
+      "id": "V01",
+      "name": "의료 수송차",
+      "kind": "ambulance",
+      "organizationLabel": "모의 면사무소 자원",
+      "plateLabel": "DEMO-VEHICLE-001",
+      "capacity": 3,
+      "equipment": [
+        "들것",
+        "산소",
+        "의료"
+      ],
+      "driverRef": "M02",
+      "teamId": null,
+      "availableForTransport": true,
+      "unavailableReason": null,
+      "synthetic": true
+    },
+    {
+      "id": "V02",
+      "name": "다목적 승합차",
+      "kind": "van",
+      "organizationLabel": "모의 면사무소 자원",
+      "plateLabel": "DEMO-VEHICLE-002",
+      "capacity": 7,
+      "equipment": [
+        "들것"
+      ],
+      "driverRef": "M05",
+      "teamId": null,
+      "availableForTransport": true,
+      "unavailableReason": null,
+      "synthetic": true
+    },
+    {
+      "id": "V03",
+      "name": "장비 지원차",
+      "kind": "van",
+      "organizationLabel": "모의 면사무소 자원",
+      "plateLabel": "DEMO-VEHICLE-003",
+      "capacity": 6,
+      "equipment": [
+        "휠체어"
+      ],
+      "driverRef": "M08",
+      "teamId": null,
+      "availableForTransport": true,
+      "unavailableReason": null,
+      "synthetic": true
+    },
+    {
+      "id": "V04",
+      "name": "서조 SUV",
+      "kind": "suv",
+      "organizationLabel": "서구역 대기조",
+      "plateLabel": "DEMO-VEHICLE-004",
+      "capacity": 5,
+      "equipment": [],
+      "driverRef": "M01",
+      "teamId": "TW",
+      "availableForTransport": true,
+      "unavailableReason": null,
+      "synthetic": true
+    },
+    {
+      "id": "V05",
+      "name": "북조 승합차",
+      "kind": "van",
+      "organizationLabel": "북구역 대기조",
+      "plateLabel": "DEMO-VEHICLE-005",
+      "capacity": 7,
+      "equipment": [],
+      "driverRef": "M04",
+      "teamId": "TN",
+      "availableForTransport": true,
+      "unavailableReason": null,
+      "synthetic": true
+    },
+    {
+      "id": "V06",
+      "name": "동조 SUV",
+      "kind": "suv",
+      "organizationLabel": "동구역 대기조",
+      "plateLabel": "DEMO-VEHICLE-006",
+      "capacity": 5,
+      "equipment": [],
+      "driverRef": "M07",
+      "teamId": "TE",
+      "availableForTransport": true,
+      "unavailableReason": null,
+      "synthetic": true
+    },
+    {
+      "id": "V07",
+      "name": "남조 승합차",
+      "kind": "van",
+      "organizationLabel": "남구역 대기조",
+      "plateLabel": "DEMO-VEHICLE-007",
+      "capacity": 7,
+      "equipment": [],
+      "driverRef": "M10",
+      "teamId": "TS",
+      "availableForTransport": true,
+      "unavailableReason": null,
+      "synthetic": true
+    },
+    {
+      "id": "V08",
+      "name": "면 지원 경차",
+      "kind": "car",
+      "organizationLabel": "모의 면사무소 자원",
+      "plateLabel": "DEMO-VEHICLE-008",
+      "capacity": 3,
+      "equipment": [],
+      "driverRef": "M11",
+      "teamId": null,
+      "availableForTransport": true,
+      "unavailableReason": null,
+      "synthetic": true
+    },
+    {
+      "id": "V09",
+      "name": "면 지원 트럭",
+      "kind": "truck",
+      "organizationLabel": "모의 면사무소 자원",
+      "plateLabel": "DEMO-VEHICLE-009",
+      "capacity": 3,
+      "equipment": [],
+      "driverRef": "M02",
+      "teamId": null,
+      "availableForTransport": true,
+      "unavailableReason": null,
+      "synthetic": true
+    },
+    {
+      "id": "V10",
+      "name": "진화 전용차",
+      "kind": "pump",
+      "organizationLabel": "모의 면사무소 자원",
+      "plateLabel": "DEMO-VEHICLE-010",
+      "capacity": 0,
+      "equipment": [],
+      "driverRef": "M05",
+      "teamId": null,
+      "availableForTransport": false,
+      "unavailableReason": "진화 전용·주민 수송 제외",
+      "synthetic": true
+    }
+  ],
+  "sources": [
+    {
+      "id": "SRC01",
+      "category": "산불 현황",
+      "name": "산불 현황 모의 자료",
+      "demoRefreshSeconds": 600,
+      "demoPayload": {
+        "schema": "onmaul-demo/v1",
+        "summary": "북서 가상 능선 산불 시나리오",
+        "observedAt": "2026-10-09T11:00:00+09:00",
+        "windDirection": null,
+        "windSpeedMps": null,
+        "value": null
+      },
+      "synthetic": true
+    },
+    {
+      "id": "SRC02",
+      "category": "재난문자",
+      "name": "재난문자 모의 자료",
+      "demoRefreshSeconds": 60,
+      "demoPayload": {
+        "schema": "onmaul-demo/v1",
+        "summary": "온빛 마을 모의 대피 지시",
+        "observedAt": "2026-10-09T11:00:00+09:00",
+        "windDirection": null,
+        "windSpeedMps": null,
+        "value": null
+      },
+      "synthetic": true
+    },
+    {
+      "id": "SRC03",
+      "category": "위험 지수",
+      "name": "위험 지수 모의 자료",
+      "demoRefreshSeconds": 600,
+      "demoPayload": {
+        "schema": "onmaul-demo/v1",
+        "summary": "시연 지수 58",
+        "observedAt": "2026-10-09T11:00:00+09:00",
+        "windDirection": null,
+        "windSpeedMps": null,
+        "value": 58
+      },
+      "synthetic": true
+    },
+    {
+      "id": "SRC04",
+      "category": "기상특보",
+      "name": "기상특보 모의 자료",
+      "demoRefreshSeconds": 600,
+      "demoPayload": {
+        "schema": "onmaul-demo/v1",
+        "summary": "건조 조건 모의 표시",
+        "observedAt": "2026-10-09T11:00:00+09:00",
+        "windDirection": null,
+        "windSpeedMps": null,
+        "value": null
+      },
+      "synthetic": true
+    },
+    {
+      "id": "SRC05",
+      "category": "바람 관측",
+      "name": "바람 관측 모의 자료",
+      "demoRefreshSeconds": 600,
+      "demoPayload": {
+        "schema": "onmaul-demo/v1",
+        "summary": "서풍 9 m/s 시연 값",
+        "observedAt": "2026-10-09T11:00:00+09:00",
+        "windDirection": 280,
+        "windSpeedMps": 9,
+        "value": null
+      },
+      "synthetic": true
+    },
+    {
+      "id": "SRC06",
+      "category": "예보",
+      "name": "예보 모의 자료",
+      "demoRefreshSeconds": 3600,
+      "demoPayload": {
+        "schema": "onmaul-demo/v1",
+        "summary": "강수 없음 시연 값",
+        "observedAt": "2026-10-09T11:00:00+09:00",
+        "windDirection": null,
+        "windSpeedMps": null,
+        "value": null
+      },
+      "synthetic": true
+    },
+    {
+      "id": "SRC07",
+      "category": "하천 수위",
+      "name": "하천 수위 모의 자료",
+      "demoRefreshSeconds": 600,
+      "demoPayload": {
+        "schema": "onmaul-demo/v1",
+        "summary": "수위 관심 미만 시연 값",
+        "observedAt": "2026-10-09T11:00:00+09:00",
+        "windDirection": null,
+        "windSpeedMps": null,
+        "value": null
+      },
+      "synthetic": true
+    },
+    {
+      "id": "SRC08",
+      "category": "대피소",
+      "name": "대피소 모의 자료",
+      "demoRefreshSeconds": 3600,
+      "demoPayload": {
+        "schema": "onmaul-demo/v1",
+        "summary": "가상 대피소 3곳",
+        "observedAt": "2026-10-09T11:00:00+09:00",
+        "windDirection": null,
+        "windSpeedMps": null,
+        "value": null
+      },
+      "synthetic": true
+    }
+  ],
+  "responseCases": [
+    {
+      "id": "CASE01",
+      "label": "놀람·불안",
+      "fictionalUtterance": "갑자기 듣고 놀랐어요.",
+      "demoOutcome": "모의 재설명",
+      "needsHumanReview": false,
+      "synthetic": true
+    },
+    {
+      "id": "CASE02",
+      "label": "행동 질문",
+      "fictionalUtterance": "어디에서 기다리면 되나요?",
+      "demoOutcome": "모의 질문 기록",
+      "needsHumanReview": false,
+      "synthetic": true
+    },
+    {
+      "id": "CASE03",
+      "label": "이동 도움",
+      "fictionalUtterance": "혼자 차에 타기 어려워요.",
+      "demoOutcome": "도움 필요 표시",
+      "needsHumanReview": false,
+      "synthetic": true
+    },
+    {
+      "id": "CASE04",
+      "label": "동반자",
+      "fictionalUtterance": "가족 한 명도 같이 있어요.",
+      "demoOutcome": "동반자 모의 기록",
+      "needsHumanReview": false,
+      "synthetic": true
+    },
+    {
+      "id": "CASE05",
+      "label": "거부",
+      "fictionalUtterance": "지금은 밖에 나가고 싶지 않아요.",
+      "demoOutcome": "이장 검토 표시",
+      "needsHumanReview": true,
+      "synthetic": true
+    },
+    {
+      "id": "CASE06",
+      "label": "신원 확인",
+      "fictionalUtterance": "어느 곳에서 연락하신 건가요?",
+      "demoOutcome": "신원 확인 표시",
+      "needsHumanReview": true,
+      "synthetic": true
+    },
+    {
+      "id": "CASE07",
+      "label": "청각·이해 곤란",
+      "fictionalUtterance": "조금 더 천천히 말씀해 주세요.",
+      "demoOutcome": "사람 검토 표시",
+      "needsHumanReview": true,
+      "synthetic": true
+    },
+    {
+      "id": "CASE08",
+      "label": "이미 이동·도착",
+      "fictionalUtterance": "온빛 배움학교 입구에 도착했어요.",
+      "demoOutcome": "모의 도착 근거",
+      "needsHumanReview": false,
+      "synthetic": true
+    },
+    {
+      "id": "CASE09",
+      "label": "정보 질문",
+      "fictionalUtterance": "이건 실제 안내인가요?",
+      "demoOutcome": "모의 정보 질문",
+      "needsHumanReview": false,
+      "synthetic": true
+    },
+    {
+      "id": "CASE10",
+      "label": "제3자 응답",
+      "fictionalUtterance": "대신 전화를 받은 가족이에요.",
+      "demoOutcome": "대리 응답 표시",
+      "needsHumanReview": false,
+      "synthetic": true
+    },
+    {
+      "id": "CASE11",
+      "label": "통화 불가",
+      "fictionalUtterance": "통화 내용을 확인할 수 없어요.",
+      "demoOutcome": "무응답 표시",
+      "needsHumanReview": true,
+      "synthetic": true
+    },
+    {
+      "id": "CASE12",
+      "label": "응급 호소",
+      "fictionalUtterance": "숨쉬기 힘들다는 모의 발화예요.",
+      "demoOutcome": "응급 검토 표시",
+      "needsHumanReview": true,
+      "synthetic": true
+    },
+    {
+      "id": "CASE13",
+      "label": "동물 관련 질문",
+      "fictionalUtterance": "강아지와 함께 있어요.",
+      "demoOutcome": "수용 조건 확인",
+      "needsHumanReview": false,
+      "synthetic": true
+    },
+    {
+      "id": "CASE14",
+      "label": "교통·길 상태",
+      "fictionalUtterance": "북쪽 길이 막힌 상황인가요?",
+      "demoOutcome": "통제 경로 확인",
+      "needsHumanReview": true,
+      "synthetic": true
+    }
+  ],
+  "scenarios": [
+    {
+      "id": "idle",
+      "label": "평시",
+      "displayTime": "2026-10-09T11:00:00+09:00",
+      "mode": "idle",
+      "householdStatuses": [
+        {
+          "householdId": "H001",
+          "status": "before",
+          "lastChangedAt": "2026-10-09T11:00:00+09:00",
+          "note": "합성 시나리오 상태; 실제 연락·안전 확인 아님",
+          "attemptCount": 0,
+          "acked": false,
+          "visitCompleted": false,
+          "handoffStatus": null
+        },
+        {
+          "householdId": "H002",
+          "status": "before",
+          "lastChangedAt": "2026-10-09T11:00:00+09:00",
+          "note": "합성 시나리오 상태; 실제 연락·안전 확인 아님",
+          "attemptCount": 0,
+          "acked": false,
+          "visitCompleted": false,
+          "handoffStatus": null
+        },
+        {
+          "householdId": "H003",
+          "status": "before",
+          "lastChangedAt": "2026-10-09T11:00:00+09:00",
+          "note": "합성 시나리오 상태; 실제 연락·안전 확인 아님",
+          "attemptCount": 0,
+          "acked": false,
+          "visitCompleted": false,
+          "handoffStatus": null
+        },
+        {
+          "householdId": "H004",
+          "status": "visit",
+          "lastChangedAt": "2026-10-09T11:00:00+09:00",
+          "note": "합성 시나리오 상태; 실제 연락·안전 확인 아님",
+          "attemptCount": 0,
+          "acked": false,
+          "visitCompleted": false,
+          "handoffStatus": null
+        },
+        {
+          "householdId": "H005",
+          "status": "before",
+          "lastChangedAt": "2026-10-09T11:00:00+09:00",
+          "note": "합성 시나리오 상태; 실제 연락·안전 확인 아님",
+          "attemptCount": 0,
+          "acked": false,
+          "visitCompleted": false,
+          "handoffStatus": null
+        },
+        {
+          "householdId": "H006",
+          "status": "before",
+          "lastChangedAt": "2026-10-09T11:00:00+09:00",
+          "note": "합성 시나리오 상태; 실제 연락·안전 확인 아님",
+          "attemptCount": 0,
+          "acked": false,
+          "visitCompleted": false,
+          "handoffStatus": null
+        },
+        {
+          "householdId": "H007",
+          "status": "before",
+          "lastChangedAt": "2026-10-09T11:00:00+09:00",
+          "note": "합성 시나리오 상태; 실제 연락·안전 확인 아님",
+          "attemptCount": 0,
+          "acked": false,
+          "visitCompleted": false,
+          "handoffStatus": null
+        },
+        {
+          "householdId": "H008",
+          "status": "before",
+          "lastChangedAt": "2026-10-09T11:00:00+09:00",
+          "note": "합성 시나리오 상태; 실제 연락·안전 확인 아님",
+          "attemptCount": 0,
+          "acked": false,
+          "visitCompleted": false,
+          "handoffStatus": null
+        },
+        {
+          "householdId": "H009",
+          "status": "before",
+          "lastChangedAt": "2026-10-09T11:00:00+09:00",
+          "note": "합성 시나리오 상태; 실제 연락·안전 확인 아님",
+          "attemptCount": 0,
+          "acked": false,
+          "visitCompleted": false,
+          "handoffStatus": null
+        },
+        {
+          "householdId": "H010",
+          "status": "before",
+          "lastChangedAt": "2026-10-09T11:00:00+09:00",
+          "note": "합성 시나리오 상태; 실제 연락·안전 확인 아님",
+          "attemptCount": 0,
+          "acked": false,
+          "visitCompleted": false,
+          "handoffStatus": null
+        },
+        {
+          "householdId": "H011",
+          "status": "before",
+          "lastChangedAt": "2026-10-09T11:00:00+09:00",
+          "note": "합성 시나리오 상태; 실제 연락·안전 확인 아님",
+          "attemptCount": 0,
+          "acked": false,
+          "visitCompleted": false,
+          "handoffStatus": null
+        },
+        {
+          "householdId": "H012",
+          "status": "before",
+          "lastChangedAt": "2026-10-09T11:00:00+09:00",
+          "note": "합성 시나리오 상태; 실제 연락·안전 확인 아님",
+          "attemptCount": 0,
+          "acked": false,
+          "visitCompleted": false,
+          "handoffStatus": null
+        },
+        {
+          "householdId": "H013",
+          "status": "before",
+          "lastChangedAt": "2026-10-09T11:00:00+09:00",
+          "note": "합성 시나리오 상태; 실제 연락·안전 확인 아님",
+          "attemptCount": 0,
+          "acked": false,
+          "visitCompleted": false,
+          "handoffStatus": null
+        },
+        {
+          "householdId": "H014",
+          "status": "before",
+          "lastChangedAt": "2026-10-09T11:00:00+09:00",
+          "note": "합성 시나리오 상태; 실제 연락·안전 확인 아님",
+          "attemptCount": 0,
+          "acked": false,
+          "visitCompleted": false,
+          "handoffStatus": null
+        },
+        {
+          "householdId": "H015",
+          "status": "before",
+          "lastChangedAt": "2026-10-09T11:00:00+09:00",
+          "note": "합성 시나리오 상태; 실제 연락·안전 확인 아님",
+          "attemptCount": 0,
+          "acked": false,
+          "visitCompleted": false,
+          "handoffStatus": null
+        },
+        {
+          "householdId": "H016",
+          "status": "before",
+          "lastChangedAt": "2026-10-09T11:00:00+09:00",
+          "note": "합성 시나리오 상태; 실제 연락·안전 확인 아님",
+          "attemptCount": 0,
+          "acked": false,
+          "visitCompleted": false,
+          "handoffStatus": null
+        },
+        {
+          "householdId": "H017",
+          "status": "before",
+          "lastChangedAt": "2026-10-09T11:00:00+09:00",
+          "note": "합성 시나리오 상태; 실제 연락·안전 확인 아님",
+          "attemptCount": 0,
+          "acked": false,
+          "visitCompleted": false,
+          "handoffStatus": null
+        },
+        {
+          "householdId": "H018",
+          "status": "before",
+          "lastChangedAt": "2026-10-09T11:00:00+09:00",
+          "note": "합성 시나리오 상태; 실제 연락·안전 확인 아님",
+          "attemptCount": 0,
+          "acked": false,
+          "visitCompleted": false,
+          "handoffStatus": null
+        },
+        {
+          "householdId": "H019",
+          "status": "before",
+          "lastChangedAt": "2026-10-09T11:00:00+09:00",
+          "note": "합성 시나리오 상태; 실제 연락·안전 확인 아님",
+          "attemptCount": 0,
+          "acked": false,
+          "visitCompleted": false,
+          "handoffStatus": null
+        },
+        {
+          "householdId": "H020",
+          "status": "before",
+          "lastChangedAt": "2026-10-09T11:00:00+09:00",
+          "note": "합성 시나리오 상태; 실제 연락·안전 확인 아님",
+          "attemptCount": 0,
+          "acked": false,
+          "visitCompleted": false,
+          "handoffStatus": null
+        },
+        {
+          "householdId": "H021",
+          "status": "before",
+          "lastChangedAt": "2026-10-09T11:00:00+09:00",
+          "note": "합성 시나리오 상태; 실제 연락·안전 확인 아님",
+          "attemptCount": 0,
+          "acked": false,
+          "visitCompleted": false,
+          "handoffStatus": null
+        },
+        {
+          "householdId": "H022",
+          "status": "before",
+          "lastChangedAt": "2026-10-09T11:00:00+09:00",
+          "note": "합성 시나리오 상태; 실제 연락·안전 확인 아님",
+          "attemptCount": 0,
+          "acked": false,
+          "visitCompleted": false,
+          "handoffStatus": null
+        },
+        {
+          "householdId": "H023",
+          "status": "before",
+          "lastChangedAt": "2026-10-09T11:00:00+09:00",
+          "note": "합성 시나리오 상태; 실제 연락·안전 확인 아님",
+          "attemptCount": 0,
+          "acked": false,
+          "visitCompleted": false,
+          "handoffStatus": null
+        },
+        {
+          "householdId": "H024",
+          "status": "before",
+          "lastChangedAt": "2026-10-09T11:00:00+09:00",
+          "note": "합성 시나리오 상태; 실제 연락·안전 확인 아님",
+          "attemptCount": 0,
+          "acked": false,
+          "visitCompleted": false,
+          "handoffStatus": null
+        },
+        {
+          "householdId": "H025",
+          "status": "before",
+          "lastChangedAt": "2026-10-09T11:00:00+09:00",
+          "note": "합성 시나리오 상태; 실제 연락·안전 확인 아님",
+          "attemptCount": 0,
+          "acked": false,
+          "visitCompleted": false,
+          "handoffStatus": null
+        },
+        {
+          "householdId": "H026",
+          "status": "before",
+          "lastChangedAt": "2026-10-09T11:00:00+09:00",
+          "note": "합성 시나리오 상태; 실제 연락·안전 확인 아님",
+          "attemptCount": 0,
+          "acked": false,
+          "visitCompleted": false,
+          "handoffStatus": null
+        },
+        {
+          "householdId": "H027",
+          "status": "visit",
+          "lastChangedAt": "2026-10-09T11:00:00+09:00",
+          "note": "합성 시나리오 상태; 실제 연락·안전 확인 아님",
+          "attemptCount": 0,
+          "acked": false,
+          "visitCompleted": false,
+          "handoffStatus": null
+        },
+        {
+          "householdId": "H028",
+          "status": "before",
+          "lastChangedAt": "2026-10-09T11:00:00+09:00",
+          "note": "합성 시나리오 상태; 실제 연락·안전 확인 아님",
+          "attemptCount": 0,
+          "acked": false,
+          "visitCompleted": false,
+          "handoffStatus": null
+        },
+        {
+          "householdId": "H029",
+          "status": "before",
+          "lastChangedAt": "2026-10-09T11:00:00+09:00",
+          "note": "합성 시나리오 상태; 실제 연락·안전 확인 아님",
+          "attemptCount": 0,
+          "acked": false,
+          "visitCompleted": false,
+          "handoffStatus": null
+        },
+        {
+          "householdId": "H030",
+          "status": "before",
+          "lastChangedAt": "2026-10-09T11:00:00+09:00",
+          "note": "합성 시나리오 상태; 실제 연락·안전 확인 아님",
+          "attemptCount": 0,
+          "acked": false,
+          "visitCompleted": false,
+          "handoffStatus": null
+        },
+        {
+          "householdId": "H031",
+          "status": "before",
+          "lastChangedAt": "2026-10-09T11:00:00+09:00",
+          "note": "합성 시나리오 상태; 실제 연락·안전 확인 아님",
+          "attemptCount": 0,
+          "acked": false,
+          "visitCompleted": false,
+          "handoffStatus": null
+        },
+        {
+          "householdId": "H032",
+          "status": "before",
+          "lastChangedAt": "2026-10-09T11:00:00+09:00",
+          "note": "합성 시나리오 상태; 실제 연락·안전 확인 아님",
+          "attemptCount": 0,
+          "acked": false,
+          "visitCompleted": false,
+          "handoffStatus": null
+        },
+        {
+          "householdId": "H033",
+          "status": "before",
+          "lastChangedAt": "2026-10-09T11:00:00+09:00",
+          "note": "합성 시나리오 상태; 실제 연락·안전 확인 아님",
+          "attemptCount": 0,
+          "acked": false,
+          "visitCompleted": false,
+          "handoffStatus": null
+        },
+        {
+          "householdId": "H034",
+          "status": "visit",
+          "lastChangedAt": "2026-10-09T11:00:00+09:00",
+          "note": "합성 시나리오 상태; 실제 연락·안전 확인 아님",
+          "attemptCount": 0,
+          "acked": false,
+          "visitCompleted": false,
+          "handoffStatus": null
+        },
+        {
+          "householdId": "H035",
+          "status": "before",
+          "lastChangedAt": "2026-10-09T11:00:00+09:00",
+          "note": "합성 시나리오 상태; 실제 연락·안전 확인 아님",
+          "attemptCount": 0,
+          "acked": false,
+          "visitCompleted": false,
+          "handoffStatus": null
+        },
+        {
+          "householdId": "H036",
+          "status": "before",
+          "lastChangedAt": "2026-10-09T11:00:00+09:00",
+          "note": "합성 시나리오 상태; 실제 연락·안전 확인 아님",
+          "attemptCount": 0,
+          "acked": false,
+          "visitCompleted": false,
+          "handoffStatus": null
+        },
+        {
+          "householdId": "H037",
+          "status": "before",
+          "lastChangedAt": "2026-10-09T11:00:00+09:00",
+          "note": "합성 시나리오 상태; 실제 연락·안전 확인 아님",
+          "attemptCount": 0,
+          "acked": false,
+          "visitCompleted": false,
+          "handoffStatus": null
+        },
+        {
+          "householdId": "H038",
+          "status": "before",
+          "lastChangedAt": "2026-10-09T11:00:00+09:00",
+          "note": "합성 시나리오 상태; 실제 연락·안전 확인 아님",
+          "attemptCount": 0,
+          "acked": false,
+          "visitCompleted": false,
+          "handoffStatus": null
+        },
+        {
+          "householdId": "H039",
+          "status": "before",
+          "lastChangedAt": "2026-10-09T11:00:00+09:00",
+          "note": "합성 시나리오 상태; 실제 연락·안전 확인 아님",
+          "attemptCount": 0,
+          "acked": false,
+          "visitCompleted": false,
+          "handoffStatus": null
+        },
+        {
+          "householdId": "H040",
+          "status": "before",
+          "lastChangedAt": "2026-10-09T11:00:00+09:00",
+          "note": "합성 시나리오 상태; 실제 연락·안전 확인 아님",
+          "attemptCount": 0,
+          "acked": false,
+          "visitCompleted": false,
+          "handoffStatus": null
+        },
+        {
+          "householdId": "H041",
+          "status": "before",
+          "lastChangedAt": "2026-10-09T11:00:00+09:00",
+          "note": "합성 시나리오 상태; 실제 연락·안전 확인 아님",
+          "attemptCount": 0,
+          "acked": false,
+          "visitCompleted": false,
+          "handoffStatus": null
+        },
+        {
+          "householdId": "H042",
+          "status": "before",
+          "lastChangedAt": "2026-10-09T11:00:00+09:00",
+          "note": "합성 시나리오 상태; 실제 연락·안전 확인 아님",
+          "attemptCount": 0,
+          "acked": false,
+          "visitCompleted": false,
+          "handoffStatus": null
+        },
+        {
+          "householdId": "H043",
+          "status": "before",
+          "lastChangedAt": "2026-10-09T11:00:00+09:00",
+          "note": "합성 시나리오 상태; 실제 연락·안전 확인 아님",
+          "attemptCount": 0,
+          "acked": false,
+          "visitCompleted": false,
+          "handoffStatus": null
+        },
+        {
+          "householdId": "H044",
+          "status": "before",
+          "lastChangedAt": "2026-10-09T11:00:00+09:00",
+          "note": "합성 시나리오 상태; 실제 연락·안전 확인 아님",
+          "attemptCount": 0,
+          "acked": false,
+          "visitCompleted": false,
+          "handoffStatus": null
+        },
+        {
+          "householdId": "H045",
+          "status": "before",
+          "lastChangedAt": "2026-10-09T11:00:00+09:00",
+          "note": "합성 시나리오 상태; 실제 연락·안전 확인 아님",
+          "attemptCount": 0,
+          "acked": false,
+          "visitCompleted": false,
+          "handoffStatus": null
+        },
+        {
+          "householdId": "H046",
+          "status": "before",
+          "lastChangedAt": "2026-10-09T11:00:00+09:00",
+          "note": "합성 시나리오 상태; 실제 연락·안전 확인 아님",
+          "attemptCount": 0,
+          "acked": false,
+          "visitCompleted": false,
+          "handoffStatus": null
+        },
+        {
+          "householdId": "H047",
+          "status": "before",
+          "lastChangedAt": "2026-10-09T11:00:00+09:00",
+          "note": "합성 시나리오 상태; 실제 연락·안전 확인 아님",
+          "attemptCount": 0,
+          "acked": false,
+          "visitCompleted": false,
+          "handoffStatus": null
+        },
+        {
+          "householdId": "H048",
+          "status": "before",
+          "lastChangedAt": "2026-10-09T11:00:00+09:00",
+          "note": "합성 시나리오 상태; 실제 연락·안전 확인 아님",
+          "attemptCount": 0,
+          "acked": false,
+          "visitCompleted": false,
+          "handoffStatus": null
+        }
+      ],
+      "counts": {
+        "total": 48,
+        "eligible": 45,
+        "act": 0,
+        "prog": 0,
+        "safe": 0,
+        "visit": 3,
+        "before": 45,
+        "temporarilyExcluded": 0
+      },
+      "pendingReviewIds": [],
+      "resourceStatuses": [
+        {
+          "vehicleId": "V01",
+          "status": "free",
+          "householdId": null
+        },
+        {
+          "vehicleId": "V02",
+          "status": "free",
+          "householdId": null
+        },
+        {
+          "vehicleId": "V03",
+          "status": "free",
+          "householdId": null
+        },
+        {
+          "vehicleId": "V04",
+          "status": "free",
+          "householdId": null
+        },
+        {
+          "vehicleId": "V05",
+          "status": "free",
+          "householdId": null
+        },
+        {
+          "vehicleId": "V06",
+          "status": "free",
+          "householdId": null
+        },
+        {
+          "vehicleId": "V07",
+          "status": "free",
+          "householdId": null
+        },
+        {
+          "vehicleId": "V08",
+          "status": "free",
+          "householdId": null
+        },
+        {
+          "vehicleId": "V09",
+          "status": "free",
+          "householdId": null
+        },
+        {
+          "vehicleId": "V10",
+          "status": "unavailable",
+          "householdId": null
+        }
+      ],
+      "sourceStatuses": [
+        {
+          "sourceId": "SRC01",
+          "status": "pending",
+          "mode": "synthetic",
+          "observedAt": "2026-10-09T11:00:00+09:00",
+          "summary": "북서 가상 능선 산불 시나리오"
+        },
+        {
+          "sourceId": "SRC02",
+          "status": "pending",
+          "mode": "synthetic",
+          "observedAt": "2026-10-09T11:00:00+09:00",
+          "summary": "온빛 마을 모의 대피 지시"
+        },
+        {
+          "sourceId": "SRC03",
+          "status": "pending",
+          "mode": "synthetic",
+          "observedAt": "2026-10-09T11:00:00+09:00",
+          "summary": "시연 지수 58"
+        },
+        {
+          "sourceId": "SRC04",
+          "status": "pending",
+          "mode": "synthetic",
+          "observedAt": "2026-10-09T11:00:00+09:00",
+          "summary": "건조 조건 모의 표시"
+        },
+        {
+          "sourceId": "SRC05",
+          "status": "pending",
+          "mode": "synthetic",
+          "observedAt": "2026-10-09T11:00:00+09:00",
+          "summary": "서풍 9 m/s 시연 값"
+        },
+        {
+          "sourceId": "SRC06",
+          "status": "pending",
+          "mode": "synthetic",
+          "observedAt": "2026-10-09T11:00:00+09:00",
+          "summary": "강수 없음 시연 값"
+        },
+        {
+          "sourceId": "SRC07",
+          "status": "pending",
+          "mode": "synthetic",
+          "observedAt": "2026-10-09T11:00:00+09:00",
+          "summary": "수위 관심 미만 시연 값"
+        },
+        {
+          "sourceId": "SRC08",
+          "status": "pending",
+          "mode": "synthetic",
+          "observedAt": "2026-10-09T11:00:00+09:00",
+          "summary": "가상 대피소 3곳"
+        }
+      ],
+      "synthetic": true
+    },
+    {
+      "id": "watch",
+      "label": "감시",
+      "displayTime": "2026-10-09T11:05:00+09:00",
+      "mode": "watch",
+      "householdStatuses": [
+        {
+          "householdId": "H001",
+          "status": "before",
+          "lastChangedAt": "2026-10-09T11:05:00+09:00",
+          "note": "합성 시나리오 상태; 실제 연락·안전 확인 아님",
+          "attemptCount": 0,
+          "acked": false,
+          "visitCompleted": false,
+          "handoffStatus": null
+        },
+        {
+          "householdId": "H002",
+          "status": "before",
+          "lastChangedAt": "2026-10-09T11:05:00+09:00",
+          "note": "합성 시나리오 상태; 실제 연락·안전 확인 아님",
+          "attemptCount": 0,
+          "acked": false,
+          "visitCompleted": false,
+          "handoffStatus": null
+        },
+        {
+          "householdId": "H003",
+          "status": "before",
+          "lastChangedAt": "2026-10-09T11:05:00+09:00",
+          "note": "합성 시나리오 상태; 실제 연락·안전 확인 아님",
+          "attemptCount": 0,
+          "acked": false,
+          "visitCompleted": false,
+          "handoffStatus": null
+        },
+        {
+          "householdId": "H004",
+          "status": "visit",
+          "lastChangedAt": "2026-10-09T11:05:00+09:00",
+          "note": "합성 시나리오 상태; 실제 연락·안전 확인 아님",
+          "attemptCount": 0,
+          "acked": false,
+          "visitCompleted": false,
+          "handoffStatus": null
+        },
+        {
+          "householdId": "H005",
+          "status": "before",
+          "lastChangedAt": "2026-10-09T11:05:00+09:00",
+          "note": "합성 시나리오 상태; 실제 연락·안전 확인 아님",
+          "attemptCount": 0,
+          "acked": false,
+          "visitCompleted": false,
+          "handoffStatus": null
+        },
+        {
+          "householdId": "H006",
+          "status": "before",
+          "lastChangedAt": "2026-10-09T11:05:00+09:00",
+          "note": "합성 시나리오 상태; 실제 연락·안전 확인 아님",
+          "attemptCount": 0,
+          "acked": false,
+          "visitCompleted": false,
+          "handoffStatus": null
+        },
+        {
+          "householdId": "H007",
+          "status": "before",
+          "lastChangedAt": "2026-10-09T11:05:00+09:00",
+          "note": "합성 시나리오 상태; 실제 연락·안전 확인 아님",
+          "attemptCount": 0,
+          "acked": false,
+          "visitCompleted": false,
+          "handoffStatus": null
+        },
+        {
+          "householdId": "H008",
+          "status": "before",
+          "lastChangedAt": "2026-10-09T11:05:00+09:00",
+          "note": "합성 시나리오 상태; 실제 연락·안전 확인 아님",
+          "attemptCount": 0,
+          "acked": false,
+          "visitCompleted": false,
+          "handoffStatus": null
+        },
+        {
+          "householdId": "H009",
+          "status": "before",
+          "lastChangedAt": "2026-10-09T11:05:00+09:00",
+          "note": "합성 시나리오 상태; 실제 연락·안전 확인 아님",
+          "attemptCount": 0,
+          "acked": false,
+          "visitCompleted": false,
+          "handoffStatus": null
+        },
+        {
+          "householdId": "H010",
+          "status": "before",
+          "lastChangedAt": "2026-10-09T11:05:00+09:00",
+          "note": "합성 시나리오 상태; 실제 연락·안전 확인 아님",
+          "attemptCount": 0,
+          "acked": false,
+          "visitCompleted": false,
+          "handoffStatus": null
+        },
+        {
+          "householdId": "H011",
+          "status": "before",
+          "lastChangedAt": "2026-10-09T11:05:00+09:00",
+          "note": "합성 시나리오 상태; 실제 연락·안전 확인 아님",
+          "attemptCount": 0,
+          "acked": false,
+          "visitCompleted": false,
+          "handoffStatus": null
+        },
+        {
+          "householdId": "H012",
+          "status": "before",
+          "lastChangedAt": "2026-10-09T11:05:00+09:00",
+          "note": "합성 시나리오 상태; 실제 연락·안전 확인 아님",
+          "attemptCount": 0,
+          "acked": false,
+          "visitCompleted": false,
+          "handoffStatus": null
+        },
+        {
+          "householdId": "H013",
+          "status": "before",
+          "lastChangedAt": "2026-10-09T11:05:00+09:00",
+          "note": "합성 시나리오 상태; 실제 연락·안전 확인 아님",
+          "attemptCount": 0,
+          "acked": false,
+          "visitCompleted": false,
+          "handoffStatus": null
+        },
+        {
+          "householdId": "H014",
+          "status": "before",
+          "lastChangedAt": "2026-10-09T11:05:00+09:00",
+          "note": "합성 시나리오 상태; 실제 연락·안전 확인 아님",
+          "attemptCount": 0,
+          "acked": false,
+          "visitCompleted": false,
+          "handoffStatus": null
+        },
+        {
+          "householdId": "H015",
+          "status": "before",
+          "lastChangedAt": "2026-10-09T11:05:00+09:00",
+          "note": "합성 시나리오 상태; 실제 연락·안전 확인 아님",
+          "attemptCount": 0,
+          "acked": false,
+          "visitCompleted": false,
+          "handoffStatus": null
+        },
+        {
+          "householdId": "H016",
+          "status": "before",
+          "lastChangedAt": "2026-10-09T11:05:00+09:00",
+          "note": "합성 시나리오 상태; 실제 연락·안전 확인 아님",
+          "attemptCount": 0,
+          "acked": false,
+          "visitCompleted": false,
+          "handoffStatus": null
+        },
+        {
+          "householdId": "H017",
+          "status": "before",
+          "lastChangedAt": "2026-10-09T11:05:00+09:00",
+          "note": "합성 시나리오 상태; 실제 연락·안전 확인 아님",
+          "attemptCount": 0,
+          "acked": false,
+          "visitCompleted": false,
+          "handoffStatus": null
+        },
+        {
+          "householdId": "H018",
+          "status": "before",
+          "lastChangedAt": "2026-10-09T11:05:00+09:00",
+          "note": "합성 시나리오 상태; 실제 연락·안전 확인 아님",
+          "attemptCount": 0,
+          "acked": false,
+          "visitCompleted": false,
+          "handoffStatus": null
+        },
+        {
+          "householdId": "H019",
+          "status": "before",
+          "lastChangedAt": "2026-10-09T11:05:00+09:00",
+          "note": "합성 시나리오 상태; 실제 연락·안전 확인 아님",
+          "attemptCount": 0,
+          "acked": false,
+          "visitCompleted": false,
+          "handoffStatus": null
+        },
+        {
+          "householdId": "H020",
+          "status": "before",
+          "lastChangedAt": "2026-10-09T11:05:00+09:00",
+          "note": "합성 시나리오 상태; 실제 연락·안전 확인 아님",
+          "attemptCount": 0,
+          "acked": false,
+          "visitCompleted": false,
+          "handoffStatus": null
+        },
+        {
+          "householdId": "H021",
+          "status": "before",
+          "lastChangedAt": "2026-10-09T11:05:00+09:00",
+          "note": "합성 시나리오 상태; 실제 연락·안전 확인 아님",
+          "attemptCount": 0,
+          "acked": false,
+          "visitCompleted": false,
+          "handoffStatus": null
+        },
+        {
+          "householdId": "H022",
+          "status": "before",
+          "lastChangedAt": "2026-10-09T11:05:00+09:00",
+          "note": "합성 시나리오 상태; 실제 연락·안전 확인 아님",
+          "attemptCount": 0,
+          "acked": false,
+          "visitCompleted": false,
+          "handoffStatus": null
+        },
+        {
+          "householdId": "H023",
+          "status": "before",
+          "lastChangedAt": "2026-10-09T11:05:00+09:00",
+          "note": "합성 시나리오 상태; 실제 연락·안전 확인 아님",
+          "attemptCount": 0,
+          "acked": false,
+          "visitCompleted": false,
+          "handoffStatus": null
+        },
+        {
+          "householdId": "H024",
+          "status": "before",
+          "lastChangedAt": "2026-10-09T11:05:00+09:00",
+          "note": "합성 시나리오 상태; 실제 연락·안전 확인 아님",
+          "attemptCount": 0,
+          "acked": false,
+          "visitCompleted": false,
+          "handoffStatus": null
+        },
+        {
+          "householdId": "H025",
+          "status": "before",
+          "lastChangedAt": "2026-10-09T11:05:00+09:00",
+          "note": "합성 시나리오 상태; 실제 연락·안전 확인 아님",
+          "attemptCount": 0,
+          "acked": false,
+          "visitCompleted": false,
+          "handoffStatus": null
+        },
+        {
+          "householdId": "H026",
+          "status": "before",
+          "lastChangedAt": "2026-10-09T11:05:00+09:00",
+          "note": "합성 시나리오 상태; 실제 연락·안전 확인 아님",
+          "attemptCount": 0,
+          "acked": false,
+          "visitCompleted": false,
+          "handoffStatus": null
+        },
+        {
+          "householdId": "H027",
+          "status": "visit",
+          "lastChangedAt": "2026-10-09T11:05:00+09:00",
+          "note": "합성 시나리오 상태; 실제 연락·안전 확인 아님",
+          "attemptCount": 0,
+          "acked": false,
+          "visitCompleted": false,
+          "handoffStatus": null
+        },
+        {
+          "householdId": "H028",
+          "status": "before",
+          "lastChangedAt": "2026-10-09T11:05:00+09:00",
+          "note": "합성 시나리오 상태; 실제 연락·안전 확인 아님",
+          "attemptCount": 0,
+          "acked": false,
+          "visitCompleted": false,
+          "handoffStatus": null
+        },
+        {
+          "householdId": "H029",
+          "status": "before",
+          "lastChangedAt": "2026-10-09T11:05:00+09:00",
+          "note": "합성 시나리오 상태; 실제 연락·안전 확인 아님",
+          "attemptCount": 0,
+          "acked": false,
+          "visitCompleted": false,
+          "handoffStatus": null
+        },
+        {
+          "householdId": "H030",
+          "status": "before",
+          "lastChangedAt": "2026-10-09T11:05:00+09:00",
+          "note": "합성 시나리오 상태; 실제 연락·안전 확인 아님",
+          "attemptCount": 0,
+          "acked": false,
+          "visitCompleted": false,
+          "handoffStatus": null
+        },
+        {
+          "householdId": "H031",
+          "status": "before",
+          "lastChangedAt": "2026-10-09T11:05:00+09:00",
+          "note": "합성 시나리오 상태; 실제 연락·안전 확인 아님",
+          "attemptCount": 0,
+          "acked": false,
+          "visitCompleted": false,
+          "handoffStatus": null
+        },
+        {
+          "householdId": "H032",
+          "status": "before",
+          "lastChangedAt": "2026-10-09T11:05:00+09:00",
+          "note": "합성 시나리오 상태; 실제 연락·안전 확인 아님",
+          "attemptCount": 0,
+          "acked": false,
+          "visitCompleted": false,
+          "handoffStatus": null
+        },
+        {
+          "householdId": "H033",
+          "status": "before",
+          "lastChangedAt": "2026-10-09T11:05:00+09:00",
+          "note": "합성 시나리오 상태; 실제 연락·안전 확인 아님",
+          "attemptCount": 0,
+          "acked": false,
+          "visitCompleted": false,
+          "handoffStatus": null
+        },
+        {
+          "householdId": "H034",
+          "status": "visit",
+          "lastChangedAt": "2026-10-09T11:05:00+09:00",
+          "note": "합성 시나리오 상태; 실제 연락·안전 확인 아님",
+          "attemptCount": 0,
+          "acked": false,
+          "visitCompleted": false,
+          "handoffStatus": null
+        },
+        {
+          "householdId": "H035",
+          "status": "before",
+          "lastChangedAt": "2026-10-09T11:05:00+09:00",
+          "note": "합성 시나리오 상태; 실제 연락·안전 확인 아님",
+          "attemptCount": 0,
+          "acked": false,
+          "visitCompleted": false,
+          "handoffStatus": null
+        },
+        {
+          "householdId": "H036",
+          "status": "before",
+          "lastChangedAt": "2026-10-09T11:05:00+09:00",
+          "note": "합성 시나리오 상태; 실제 연락·안전 확인 아님",
+          "attemptCount": 0,
+          "acked": false,
+          "visitCompleted": false,
+          "handoffStatus": null
+        },
+        {
+          "householdId": "H037",
+          "status": "before",
+          "lastChangedAt": "2026-10-09T11:05:00+09:00",
+          "note": "합성 시나리오 상태; 실제 연락·안전 확인 아님",
+          "attemptCount": 0,
+          "acked": false,
+          "visitCompleted": false,
+          "handoffStatus": null
+        },
+        {
+          "householdId": "H038",
+          "status": "before",
+          "lastChangedAt": "2026-10-09T11:05:00+09:00",
+          "note": "합성 시나리오 상태; 실제 연락·안전 확인 아님",
+          "attemptCount": 0,
+          "acked": false,
+          "visitCompleted": false,
+          "handoffStatus": null
+        },
+        {
+          "householdId": "H039",
+          "status": "before",
+          "lastChangedAt": "2026-10-09T11:05:00+09:00",
+          "note": "합성 시나리오 상태; 실제 연락·안전 확인 아님",
+          "attemptCount": 0,
+          "acked": false,
+          "visitCompleted": false,
+          "handoffStatus": null
+        },
+        {
+          "householdId": "H040",
+          "status": "before",
+          "lastChangedAt": "2026-10-09T11:05:00+09:00",
+          "note": "합성 시나리오 상태; 실제 연락·안전 확인 아님",
+          "attemptCount": 0,
+          "acked": false,
+          "visitCompleted": false,
+          "handoffStatus": null
+        },
+        {
+          "householdId": "H041",
+          "status": "before",
+          "lastChangedAt": "2026-10-09T11:05:00+09:00",
+          "note": "합성 시나리오 상태; 실제 연락·안전 확인 아님",
+          "attemptCount": 0,
+          "acked": false,
+          "visitCompleted": false,
+          "handoffStatus": null
+        },
+        {
+          "householdId": "H042",
+          "status": "before",
+          "lastChangedAt": "2026-10-09T11:05:00+09:00",
+          "note": "합성 시나리오 상태; 실제 연락·안전 확인 아님",
+          "attemptCount": 0,
+          "acked": false,
+          "visitCompleted": false,
+          "handoffStatus": null
+        },
+        {
+          "householdId": "H043",
+          "status": "before",
+          "lastChangedAt": "2026-10-09T11:05:00+09:00",
+          "note": "합성 시나리오 상태; 실제 연락·안전 확인 아님",
+          "attemptCount": 0,
+          "acked": false,
+          "visitCompleted": false,
+          "handoffStatus": null
+        },
+        {
+          "householdId": "H044",
+          "status": "before",
+          "lastChangedAt": "2026-10-09T11:05:00+09:00",
+          "note": "합성 시나리오 상태; 실제 연락·안전 확인 아님",
+          "attemptCount": 0,
+          "acked": false,
+          "visitCompleted": false,
+          "handoffStatus": null
+        },
+        {
+          "householdId": "H045",
+          "status": "before",
+          "lastChangedAt": "2026-10-09T11:05:00+09:00",
+          "note": "합성 시나리오 상태; 실제 연락·안전 확인 아님",
+          "attemptCount": 0,
+          "acked": false,
+          "visitCompleted": false,
+          "handoffStatus": null
+        },
+        {
+          "householdId": "H046",
+          "status": "before",
+          "lastChangedAt": "2026-10-09T11:05:00+09:00",
+          "note": "합성 시나리오 상태; 실제 연락·안전 확인 아님",
+          "attemptCount": 0,
+          "acked": false,
+          "visitCompleted": false,
+          "handoffStatus": null
+        },
+        {
+          "householdId": "H047",
+          "status": "before",
+          "lastChangedAt": "2026-10-09T11:05:00+09:00",
+          "note": "합성 시나리오 상태; 실제 연락·안전 확인 아님",
+          "attemptCount": 0,
+          "acked": false,
+          "visitCompleted": false,
+          "handoffStatus": null
+        },
+        {
+          "householdId": "H048",
+          "status": "before",
+          "lastChangedAt": "2026-10-09T11:05:00+09:00",
+          "note": "합성 시나리오 상태; 실제 연락·안전 확인 아님",
+          "attemptCount": 0,
+          "acked": false,
+          "visitCompleted": false,
+          "handoffStatus": null
+        }
+      ],
+      "counts": {
+        "total": 48,
+        "eligible": 45,
+        "act": 0,
+        "prog": 0,
+        "safe": 0,
+        "visit": 3,
+        "before": 45,
+        "temporarilyExcluded": 0
+      },
+      "pendingReviewIds": [],
+      "resourceStatuses": [
+        {
+          "vehicleId": "V01",
+          "status": "free",
+          "householdId": null
+        },
+        {
+          "vehicleId": "V02",
+          "status": "free",
+          "householdId": null
+        },
+        {
+          "vehicleId": "V03",
+          "status": "free",
+          "householdId": null
+        },
+        {
+          "vehicleId": "V04",
+          "status": "free",
+          "householdId": null
+        },
+        {
+          "vehicleId": "V05",
+          "status": "free",
+          "householdId": null
+        },
+        {
+          "vehicleId": "V06",
+          "status": "free",
+          "householdId": null
+        },
+        {
+          "vehicleId": "V07",
+          "status": "free",
+          "householdId": null
+        },
+        {
+          "vehicleId": "V08",
+          "status": "free",
+          "householdId": null
+        },
+        {
+          "vehicleId": "V09",
+          "status": "free",
+          "householdId": null
+        },
+        {
+          "vehicleId": "V10",
+          "status": "unavailable",
+          "householdId": null
+        }
+      ],
+      "sourceStatuses": [
+        {
+          "sourceId": "SRC01",
+          "status": "ok",
+          "mode": "synthetic",
+          "observedAt": "2026-10-09T11:05:00+09:00",
+          "summary": "북서 가상 능선 산불 시나리오"
+        },
+        {
+          "sourceId": "SRC02",
+          "status": "ok",
+          "mode": "synthetic",
+          "observedAt": "2026-10-09T11:05:00+09:00",
+          "summary": "온빛 마을 모의 대피 지시"
+        },
+        {
+          "sourceId": "SRC03",
+          "status": "ok",
+          "mode": "synthetic",
+          "observedAt": "2026-10-09T11:05:00+09:00",
+          "summary": "시연 지수 58"
+        },
+        {
+          "sourceId": "SRC04",
+          "status": "ok",
+          "mode": "synthetic",
+          "observedAt": "2026-10-09T11:05:00+09:00",
+          "summary": "건조 조건 모의 표시"
+        },
+        {
+          "sourceId": "SRC05",
+          "status": "ok",
+          "mode": "synthetic",
+          "observedAt": "2026-10-09T11:05:00+09:00",
+          "summary": "서풍 9 m/s 시연 값"
+        },
+        {
+          "sourceId": "SRC06",
+          "status": "ok",
+          "mode": "synthetic",
+          "observedAt": "2026-10-09T11:05:00+09:00",
+          "summary": "강수 없음 시연 값"
+        },
+        {
+          "sourceId": "SRC07",
+          "status": "ok",
+          "mode": "synthetic",
+          "observedAt": "2026-10-09T11:05:00+09:00",
+          "summary": "수위 관심 미만 시연 값"
+        },
+        {
+          "sourceId": "SRC08",
+          "status": "ok",
+          "mode": "synthetic",
+          "observedAt": "2026-10-09T11:05:00+09:00",
+          "summary": "가상 대피소 3곳"
+        }
+      ],
+      "synthetic": true
+    },
+    {
+      "id": "review",
+      "label": "확정 대기",
+      "displayTime": "2026-10-09T11:08:00+09:00",
+      "mode": "event",
+      "householdStatuses": [
+        {
+          "householdId": "H001",
+          "status": "before",
+          "lastChangedAt": "2026-10-09T11:08:00+09:00",
+          "note": "합성 시나리오 상태; 실제 연락·안전 확인 아님",
+          "attemptCount": 0,
+          "acked": false,
+          "visitCompleted": false,
+          "handoffStatus": null
+        },
+        {
+          "householdId": "H002",
+          "status": "before",
+          "lastChangedAt": "2026-10-09T11:08:00+09:00",
+          "note": "합성 시나리오 상태; 실제 연락·안전 확인 아님",
+          "attemptCount": 0,
+          "acked": false,
+          "visitCompleted": false,
+          "handoffStatus": null
+        },
+        {
+          "householdId": "H003",
+          "status": "before",
+          "lastChangedAt": "2026-10-09T11:08:00+09:00",
+          "note": "합성 시나리오 상태; 실제 연락·안전 확인 아님",
+          "attemptCount": 0,
+          "acked": false,
+          "visitCompleted": false,
+          "handoffStatus": null
+        },
+        {
+          "householdId": "H004",
+          "status": "visit",
+          "lastChangedAt": "2026-10-09T11:08:00+09:00",
+          "note": "합성 시나리오 상태; 실제 연락·안전 확인 아님",
+          "attemptCount": 0,
+          "acked": false,
+          "visitCompleted": false,
+          "handoffStatus": null
+        },
+        {
+          "householdId": "H005",
+          "status": "before",
+          "lastChangedAt": "2026-10-09T11:08:00+09:00",
+          "note": "합성 시나리오 상태; 실제 연락·안전 확인 아님",
+          "attemptCount": 0,
+          "acked": false,
+          "visitCompleted": false,
+          "handoffStatus": null
+        },
+        {
+          "householdId": "H006",
+          "status": "before",
+          "lastChangedAt": "2026-10-09T11:08:00+09:00",
+          "note": "합성 시나리오 상태; 실제 연락·안전 확인 아님",
+          "attemptCount": 0,
+          "acked": false,
+          "visitCompleted": false,
+          "handoffStatus": null
+        },
+        {
+          "householdId": "H007",
+          "status": "before",
+          "lastChangedAt": "2026-10-09T11:08:00+09:00",
+          "note": "합성 시나리오 상태; 실제 연락·안전 확인 아님",
+          "attemptCount": 0,
+          "acked": false,
+          "visitCompleted": false,
+          "handoffStatus": null
+        },
+        {
+          "householdId": "H008",
+          "status": "before",
+          "lastChangedAt": "2026-10-09T11:08:00+09:00",
+          "note": "합성 시나리오 상태; 실제 연락·안전 확인 아님",
+          "attemptCount": 0,
+          "acked": false,
+          "visitCompleted": false,
+          "handoffStatus": null
+        },
+        {
+          "householdId": "H009",
+          "status": "before",
+          "lastChangedAt": "2026-10-09T11:08:00+09:00",
+          "note": "합성 시나리오 상태; 실제 연락·안전 확인 아님",
+          "attemptCount": 0,
+          "acked": false,
+          "visitCompleted": false,
+          "handoffStatus": null
+        },
+        {
+          "householdId": "H010",
+          "status": "before",
+          "lastChangedAt": "2026-10-09T11:08:00+09:00",
+          "note": "합성 시나리오 상태; 실제 연락·안전 확인 아님",
+          "attemptCount": 0,
+          "acked": false,
+          "visitCompleted": false,
+          "handoffStatus": null
+        },
+        {
+          "householdId": "H011",
+          "status": "before",
+          "lastChangedAt": "2026-10-09T11:08:00+09:00",
+          "note": "합성 시나리오 상태; 실제 연락·안전 확인 아님",
+          "attemptCount": 0,
+          "acked": false,
+          "visitCompleted": false,
+          "handoffStatus": null
+        },
+        {
+          "householdId": "H012",
+          "status": "before",
+          "lastChangedAt": "2026-10-09T11:08:00+09:00",
+          "note": "합성 시나리오 상태; 실제 연락·안전 확인 아님",
+          "attemptCount": 0,
+          "acked": false,
+          "visitCompleted": false,
+          "handoffStatus": null
+        },
+        {
+          "householdId": "H013",
+          "status": "before",
+          "lastChangedAt": "2026-10-09T11:08:00+09:00",
+          "note": "합성 시나리오 상태; 실제 연락·안전 확인 아님",
+          "attemptCount": 0,
+          "acked": false,
+          "visitCompleted": false,
+          "handoffStatus": null
+        },
+        {
+          "householdId": "H014",
+          "status": "before",
+          "lastChangedAt": "2026-10-09T11:08:00+09:00",
+          "note": "합성 시나리오 상태; 실제 연락·안전 확인 아님",
+          "attemptCount": 0,
+          "acked": false,
+          "visitCompleted": false,
+          "handoffStatus": null
+        },
+        {
+          "householdId": "H015",
+          "status": "before",
+          "lastChangedAt": "2026-10-09T11:08:00+09:00",
+          "note": "합성 시나리오 상태; 실제 연락·안전 확인 아님",
+          "attemptCount": 0,
+          "acked": false,
+          "visitCompleted": false,
+          "handoffStatus": null
+        },
+        {
+          "householdId": "H016",
+          "status": "before",
+          "lastChangedAt": "2026-10-09T11:08:00+09:00",
+          "note": "합성 시나리오 상태; 실제 연락·안전 확인 아님",
+          "attemptCount": 0,
+          "acked": false,
+          "visitCompleted": false,
+          "handoffStatus": null
+        },
+        {
+          "householdId": "H017",
+          "status": "before",
+          "lastChangedAt": "2026-10-09T11:08:00+09:00",
+          "note": "합성 시나리오 상태; 실제 연락·안전 확인 아님",
+          "attemptCount": 0,
+          "acked": false,
+          "visitCompleted": false,
+          "handoffStatus": null
+        },
+        {
+          "householdId": "H018",
+          "status": "before",
+          "lastChangedAt": "2026-10-09T11:08:00+09:00",
+          "note": "합성 시나리오 상태; 실제 연락·안전 확인 아님",
+          "attemptCount": 0,
+          "acked": false,
+          "visitCompleted": false,
+          "handoffStatus": null
+        },
+        {
+          "householdId": "H019",
+          "status": "before",
+          "lastChangedAt": "2026-10-09T11:08:00+09:00",
+          "note": "합성 시나리오 상태; 실제 연락·안전 확인 아님",
+          "attemptCount": 0,
+          "acked": false,
+          "visitCompleted": false,
+          "handoffStatus": null
+        },
+        {
+          "householdId": "H020",
+          "status": "before",
+          "lastChangedAt": "2026-10-09T11:08:00+09:00",
+          "note": "합성 시나리오 상태; 실제 연락·안전 확인 아님",
+          "attemptCount": 0,
+          "acked": false,
+          "visitCompleted": false,
+          "handoffStatus": null
+        },
+        {
+          "householdId": "H021",
+          "status": "before",
+          "lastChangedAt": "2026-10-09T11:08:00+09:00",
+          "note": "합성 시나리오 상태; 실제 연락·안전 확인 아님",
+          "attemptCount": 0,
+          "acked": false,
+          "visitCompleted": false,
+          "handoffStatus": null
+        },
+        {
+          "householdId": "H022",
+          "status": "before",
+          "lastChangedAt": "2026-10-09T11:08:00+09:00",
+          "note": "합성 시나리오 상태; 실제 연락·안전 확인 아님",
+          "attemptCount": 0,
+          "acked": false,
+          "visitCompleted": false,
+          "handoffStatus": null
+        },
+        {
+          "householdId": "H023",
+          "status": "before",
+          "lastChangedAt": "2026-10-09T11:08:00+09:00",
+          "note": "합성 시나리오 상태; 실제 연락·안전 확인 아님",
+          "attemptCount": 0,
+          "acked": false,
+          "visitCompleted": false,
+          "handoffStatus": null
+        },
+        {
+          "householdId": "H024",
+          "status": "before",
+          "lastChangedAt": "2026-10-09T11:08:00+09:00",
+          "note": "합성 시나리오 상태; 실제 연락·안전 확인 아님",
+          "attemptCount": 0,
+          "acked": false,
+          "visitCompleted": false,
+          "handoffStatus": null
+        },
+        {
+          "householdId": "H025",
+          "status": "before",
+          "lastChangedAt": "2026-10-09T11:08:00+09:00",
+          "note": "합성 시나리오 상태; 실제 연락·안전 확인 아님",
+          "attemptCount": 0,
+          "acked": false,
+          "visitCompleted": false,
+          "handoffStatus": null
+        },
+        {
+          "householdId": "H026",
+          "status": "before",
+          "lastChangedAt": "2026-10-09T11:08:00+09:00",
+          "note": "합성 시나리오 상태; 실제 연락·안전 확인 아님",
+          "attemptCount": 0,
+          "acked": false,
+          "visitCompleted": false,
+          "handoffStatus": null
+        },
+        {
+          "householdId": "H027",
+          "status": "visit",
+          "lastChangedAt": "2026-10-09T11:08:00+09:00",
+          "note": "합성 시나리오 상태; 실제 연락·안전 확인 아님",
+          "attemptCount": 0,
+          "acked": false,
+          "visitCompleted": false,
+          "handoffStatus": null
+        },
+        {
+          "householdId": "H028",
+          "status": "before",
+          "lastChangedAt": "2026-10-09T11:08:00+09:00",
+          "note": "합성 시나리오 상태; 실제 연락·안전 확인 아님",
+          "attemptCount": 0,
+          "acked": false,
+          "visitCompleted": false,
+          "handoffStatus": null
+        },
+        {
+          "householdId": "H029",
+          "status": "before",
+          "lastChangedAt": "2026-10-09T11:08:00+09:00",
+          "note": "합성 시나리오 상태; 실제 연락·안전 확인 아님",
+          "attemptCount": 0,
+          "acked": false,
+          "visitCompleted": false,
+          "handoffStatus": null
+        },
+        {
+          "householdId": "H030",
+          "status": "before",
+          "lastChangedAt": "2026-10-09T11:08:00+09:00",
+          "note": "합성 시나리오 상태; 실제 연락·안전 확인 아님",
+          "attemptCount": 0,
+          "acked": false,
+          "visitCompleted": false,
+          "handoffStatus": null
+        },
+        {
+          "householdId": "H031",
+          "status": "before",
+          "lastChangedAt": "2026-10-09T11:08:00+09:00",
+          "note": "합성 시나리오 상태; 실제 연락·안전 확인 아님",
+          "attemptCount": 0,
+          "acked": false,
+          "visitCompleted": false,
+          "handoffStatus": null
+        },
+        {
+          "householdId": "H032",
+          "status": "before",
+          "lastChangedAt": "2026-10-09T11:08:00+09:00",
+          "note": "합성 시나리오 상태; 실제 연락·안전 확인 아님",
+          "attemptCount": 0,
+          "acked": false,
+          "visitCompleted": false,
+          "handoffStatus": null
+        },
+        {
+          "householdId": "H033",
+          "status": "before",
+          "lastChangedAt": "2026-10-09T11:08:00+09:00",
+          "note": "합성 시나리오 상태; 실제 연락·안전 확인 아님",
+          "attemptCount": 0,
+          "acked": false,
+          "visitCompleted": false,
+          "handoffStatus": null
+        },
+        {
+          "householdId": "H034",
+          "status": "visit",
+          "lastChangedAt": "2026-10-09T11:08:00+09:00",
+          "note": "합성 시나리오 상태; 실제 연락·안전 확인 아님",
+          "attemptCount": 0,
+          "acked": false,
+          "visitCompleted": false,
+          "handoffStatus": null
+        },
+        {
+          "householdId": "H035",
+          "status": "before",
+          "lastChangedAt": "2026-10-09T11:08:00+09:00",
+          "note": "합성 시나리오 상태; 실제 연락·안전 확인 아님",
+          "attemptCount": 0,
+          "acked": false,
+          "visitCompleted": false,
+          "handoffStatus": null
+        },
+        {
+          "householdId": "H036",
+          "status": "before",
+          "lastChangedAt": "2026-10-09T11:08:00+09:00",
+          "note": "합성 시나리오 상태; 실제 연락·안전 확인 아님",
+          "attemptCount": 0,
+          "acked": false,
+          "visitCompleted": false,
+          "handoffStatus": null
+        },
+        {
+          "householdId": "H037",
+          "status": "before",
+          "lastChangedAt": "2026-10-09T11:08:00+09:00",
+          "note": "합성 시나리오 상태; 실제 연락·안전 확인 아님",
+          "attemptCount": 0,
+          "acked": false,
+          "visitCompleted": false,
+          "handoffStatus": null
+        },
+        {
+          "householdId": "H038",
+          "status": "before",
+          "lastChangedAt": "2026-10-09T11:08:00+09:00",
+          "note": "합성 시나리오 상태; 실제 연락·안전 확인 아님",
+          "attemptCount": 0,
+          "acked": false,
+          "visitCompleted": false,
+          "handoffStatus": null
+        },
+        {
+          "householdId": "H039",
+          "status": "before",
+          "lastChangedAt": "2026-10-09T11:08:00+09:00",
+          "note": "합성 시나리오 상태; 실제 연락·안전 확인 아님",
+          "attemptCount": 0,
+          "acked": false,
+          "visitCompleted": false,
+          "handoffStatus": null
+        },
+        {
+          "householdId": "H040",
+          "status": "before",
+          "lastChangedAt": "2026-10-09T11:08:00+09:00",
+          "note": "합성 시나리오 상태; 실제 연락·안전 확인 아님",
+          "attemptCount": 0,
+          "acked": false,
+          "visitCompleted": false,
+          "handoffStatus": null
+        },
+        {
+          "householdId": "H041",
+          "status": "before",
+          "lastChangedAt": "2026-10-09T11:08:00+09:00",
+          "note": "합성 시나리오 상태; 실제 연락·안전 확인 아님",
+          "attemptCount": 0,
+          "acked": false,
+          "visitCompleted": false,
+          "handoffStatus": null
+        },
+        {
+          "householdId": "H042",
+          "status": "before",
+          "lastChangedAt": "2026-10-09T11:08:00+09:00",
+          "note": "합성 시나리오 상태; 실제 연락·안전 확인 아님",
+          "attemptCount": 0,
+          "acked": false,
+          "visitCompleted": false,
+          "handoffStatus": null
+        },
+        {
+          "householdId": "H043",
+          "status": "before",
+          "lastChangedAt": "2026-10-09T11:08:00+09:00",
+          "note": "합성 시나리오 상태; 실제 연락·안전 확인 아님",
+          "attemptCount": 0,
+          "acked": false,
+          "visitCompleted": false,
+          "handoffStatus": null
+        },
+        {
+          "householdId": "H044",
+          "status": "before",
+          "lastChangedAt": "2026-10-09T11:08:00+09:00",
+          "note": "합성 시나리오 상태; 실제 연락·안전 확인 아님",
+          "attemptCount": 0,
+          "acked": false,
+          "visitCompleted": false,
+          "handoffStatus": null
+        },
+        {
+          "householdId": "H045",
+          "status": "before",
+          "lastChangedAt": "2026-10-09T11:08:00+09:00",
+          "note": "합성 시나리오 상태; 실제 연락·안전 확인 아님",
+          "attemptCount": 0,
+          "acked": false,
+          "visitCompleted": false,
+          "handoffStatus": null
+        },
+        {
+          "householdId": "H046",
+          "status": "before",
+          "lastChangedAt": "2026-10-09T11:08:00+09:00",
+          "note": "합성 시나리오 상태; 실제 연락·안전 확인 아님",
+          "attemptCount": 0,
+          "acked": false,
+          "visitCompleted": false,
+          "handoffStatus": null
+        },
+        {
+          "householdId": "H047",
+          "status": "before",
+          "lastChangedAt": "2026-10-09T11:08:00+09:00",
+          "note": "합성 시나리오 상태; 실제 연락·안전 확인 아님",
+          "attemptCount": 0,
+          "acked": false,
+          "visitCompleted": false,
+          "handoffStatus": null
+        },
+        {
+          "householdId": "H048",
+          "status": "before",
+          "lastChangedAt": "2026-10-09T11:08:00+09:00",
+          "note": "합성 시나리오 상태; 실제 연락·안전 확인 아님",
+          "attemptCount": 0,
+          "acked": false,
+          "visitCompleted": false,
+          "handoffStatus": null
+        }
+      ],
+      "counts": {
+        "total": 48,
+        "eligible": 45,
+        "act": 0,
+        "prog": 0,
+        "safe": 0,
+        "visit": 3,
+        "before": 45,
+        "temporarilyExcluded": 0
+      },
+      "pendingReviewIds": [],
+      "resourceStatuses": [
+        {
+          "vehicleId": "V01",
+          "status": "free",
+          "householdId": null
+        },
+        {
+          "vehicleId": "V02",
+          "status": "free",
+          "householdId": null
+        },
+        {
+          "vehicleId": "V03",
+          "status": "free",
+          "householdId": null
+        },
+        {
+          "vehicleId": "V04",
+          "status": "free",
+          "householdId": null
+        },
+        {
+          "vehicleId": "V05",
+          "status": "free",
+          "householdId": null
+        },
+        {
+          "vehicleId": "V06",
+          "status": "free",
+          "householdId": null
+        },
+        {
+          "vehicleId": "V07",
+          "status": "free",
+          "householdId": null
+        },
+        {
+          "vehicleId": "V08",
+          "status": "free",
+          "householdId": null
+        },
+        {
+          "vehicleId": "V09",
+          "status": "free",
+          "householdId": null
+        },
+        {
+          "vehicleId": "V10",
+          "status": "unavailable",
+          "householdId": null
+        }
+      ],
+      "sourceStatuses": [
+        {
+          "sourceId": "SRC01",
+          "status": "ok",
+          "mode": "synthetic",
+          "observedAt": "2026-10-09T11:08:00+09:00",
+          "summary": "북서 가상 능선 산불 시나리오"
+        },
+        {
+          "sourceId": "SRC02",
+          "status": "ok",
+          "mode": "synthetic",
+          "observedAt": "2026-10-09T11:08:00+09:00",
+          "summary": "온빛 마을 모의 대피 지시"
+        },
+        {
+          "sourceId": "SRC03",
+          "status": "ok",
+          "mode": "synthetic",
+          "observedAt": "2026-10-09T11:08:00+09:00",
+          "summary": "시연 지수 58"
+        },
+        {
+          "sourceId": "SRC04",
+          "status": "ok",
+          "mode": "synthetic",
+          "observedAt": "2026-10-09T11:08:00+09:00",
+          "summary": "건조 조건 모의 표시"
+        },
+        {
+          "sourceId": "SRC05",
+          "status": "ok",
+          "mode": "synthetic",
+          "observedAt": "2026-10-09T11:08:00+09:00",
+          "summary": "서풍 9 m/s 시연 값"
+        },
+        {
+          "sourceId": "SRC06",
+          "status": "ok",
+          "mode": "synthetic",
+          "observedAt": "2026-10-09T11:08:00+09:00",
+          "summary": "강수 없음 시연 값"
+        },
+        {
+          "sourceId": "SRC07",
+          "status": "ok",
+          "mode": "synthetic",
+          "observedAt": "2026-10-09T11:08:00+09:00",
+          "summary": "수위 관심 미만 시연 값"
+        },
+        {
+          "sourceId": "SRC08",
+          "status": "ok",
+          "mode": "synthetic",
+          "observedAt": "2026-10-09T11:08:00+09:00",
+          "summary": "가상 대피소 3곳"
+        }
+      ],
+      "synthetic": true
+    },
+    {
+      "id": "active",
+      "label": "진행 중",
+      "displayTime": "2026-10-09T11:16:00+09:00",
+      "mode": "event",
+      "householdStatuses": [
+        {
+          "householdId": "H001",
+          "status": "e119",
+          "lastChangedAt": "2026-10-09T11:16:00+09:00",
+          "note": "합성 시나리오 상태; 실제 연락·안전 확인 아님",
+          "attemptCount": 1,
+          "acked": false,
+          "visitCompleted": false,
+          "handoffStatus": "mockRecorded"
+        },
+        {
+          "householdId": "H002",
+          "status": "help",
+          "lastChangedAt": "2026-10-09T11:16:00+09:00",
+          "note": "합성 시나리오 상태; 실제 연락·안전 확인 아님",
+          "attemptCount": 1,
+          "acked": false,
+          "visitCompleted": false,
+          "handoffStatus": null
+        },
+        {
+          "householdId": "H003",
+          "status": "help",
+          "lastChangedAt": "2026-10-09T11:16:00+09:00",
+          "note": "합성 시나리오 상태; 실제 연락·안전 확인 아님",
+          "attemptCount": 1,
+          "acked": false,
+          "visitCompleted": false,
+          "handoffStatus": null
+        },
+        {
+          "householdId": "H004",
+          "status": "visit",
+          "lastChangedAt": "2026-10-09T11:16:00+09:00",
+          "note": "합성 시나리오 상태; 실제 연락·안전 확인 아님",
+          "attemptCount": 0,
+          "acked": false,
+          "visitCompleted": false,
+          "handoffStatus": null
+        },
+        {
+          "householdId": "H005",
+          "status": "refuse",
+          "lastChangedAt": "2026-10-09T11:16:00+09:00",
+          "note": "합성 시나리오 상태; 실제 연락·안전 확인 아님",
+          "attemptCount": 1,
+          "acked": false,
+          "visitCompleted": false,
+          "handoffStatus": null
+        },
+        {
+          "householdId": "H006",
+          "status": "visiting",
+          "lastChangedAt": "2026-10-09T11:16:00+09:00",
+          "note": "합성 시나리오 상태; 실제 연락·안전 확인 아님",
+          "attemptCount": 1,
+          "acked": false,
+          "visitCompleted": false,
+          "handoffStatus": null
+        },
+        {
+          "householdId": "H007",
+          "status": "noanswer",
+          "lastChangedAt": "2026-10-09T11:16:00+09:00",
+          "note": "합성 시나리오 상태; 실제 연락·안전 확인 아님",
+          "attemptCount": 2,
+          "acked": false,
+          "visitCompleted": false,
+          "handoffStatus": null
+        },
+        {
+          "householdId": "H008",
+          "status": "noanswer",
+          "lastChangedAt": "2026-10-09T11:16:00+09:00",
+          "note": "합성 시나리오 상태; 실제 연락·안전 확인 아님",
+          "attemptCount": 2,
+          "acked": false,
+          "visitCompleted": false,
+          "handoffStatus": null
+        },
+        {
+          "householdId": "H009",
+          "status": "unclear",
+          "lastChangedAt": "2026-10-09T11:16:00+09:00",
+          "note": "합성 시나리오 상태; 실제 연락·안전 확인 아님",
+          "attemptCount": 1,
+          "acked": false,
+          "visitCompleted": false,
+          "handoffStatus": null
+        },
+        {
+          "householdId": "H010",
+          "status": "help",
+          "lastChangedAt": "2026-10-09T11:16:00+09:00",
+          "note": "합성 시나리오 상태; 실제 연락·안전 확인 아님",
+          "attemptCount": 1,
+          "acked": false,
+          "visitCompleted": false,
+          "handoffStatus": null
+        },
+        {
+          "householdId": "H011",
+          "status": "refuse",
+          "lastChangedAt": "2026-10-09T11:16:00+09:00",
+          "note": "합성 시나리오 상태; 실제 연락·안전 확인 아님",
+          "attemptCount": 1,
+          "acked": false,
+          "visitCompleted": false,
+          "handoffStatus": null
+        },
+        {
+          "householdId": "H012",
+          "status": "unclear",
+          "lastChangedAt": "2026-10-09T11:16:00+09:00",
+          "note": "합성 시나리오 상태; 실제 연락·안전 확인 아님",
+          "attemptCount": 1,
+          "acked": false,
+          "visitCompleted": false,
+          "handoffStatus": null
+        },
+        {
+          "householdId": "H013",
+          "status": "calling",
+          "lastChangedAt": "2026-10-09T11:16:00+09:00",
+          "note": "합성 시나리오 상태; 실제 연락·안전 확인 아님",
+          "attemptCount": 1,
+          "acked": false,
+          "visitCompleted": false,
+          "handoffStatus": null
+        },
+        {
+          "householdId": "H014",
+          "status": "calling",
+          "lastChangedAt": "2026-10-09T11:16:00+09:00",
+          "note": "합성 시나리오 상태; 실제 연락·안전 확인 아님",
+          "attemptCount": 1,
+          "acked": false,
+          "visitCompleted": false,
+          "handoffStatus": null
+        },
+        {
+          "householdId": "H015",
+          "status": "calling",
+          "lastChangedAt": "2026-10-09T11:16:00+09:00",
+          "note": "합성 시나리오 상태; 실제 연락·안전 확인 아님",
+          "attemptCount": 1,
+          "acked": false,
+          "visitCompleted": false,
+          "handoffStatus": null
+        },
+        {
+          "householdId": "H016",
+          "status": "calling",
+          "lastChangedAt": "2026-10-09T11:16:00+09:00",
+          "note": "합성 시나리오 상태; 실제 연락·안전 확인 아님",
+          "attemptCount": 1,
+          "acked": false,
+          "visitCompleted": false,
+          "handoffStatus": null
+        },
+        {
+          "householdId": "H017",
+          "status": "calling",
+          "lastChangedAt": "2026-10-09T11:16:00+09:00",
+          "note": "합성 시나리오 상태; 실제 연락·안전 확인 아님",
+          "attemptCount": 1,
+          "acked": false,
+          "visitCompleted": false,
+          "handoffStatus": null
+        },
+        {
+          "householdId": "H018",
+          "status": "calling",
+          "lastChangedAt": "2026-10-09T11:16:00+09:00",
+          "note": "합성 시나리오 상태; 실제 연락·안전 확인 아님",
+          "attemptCount": 1,
+          "acked": false,
+          "visitCompleted": false,
+          "handoffStatus": null
+        },
+        {
+          "householdId": "H019",
+          "status": "queued",
+          "lastChangedAt": "2026-10-09T11:16:00+09:00",
+          "note": "합성 시나리오 상태; 실제 연락·안전 확인 아님",
+          "attemptCount": 1,
+          "acked": false,
+          "visitCompleted": false,
+          "handoffStatus": null
+        },
+        {
+          "householdId": "H020",
+          "status": "queued",
+          "lastChangedAt": "2026-10-09T11:16:00+09:00",
+          "note": "합성 시나리오 상태; 실제 연락·안전 확인 아님",
+          "attemptCount": 1,
+          "acked": false,
+          "visitCompleted": false,
+          "handoffStatus": null
+        },
+        {
+          "householdId": "H021",
+          "status": "queued",
+          "lastChangedAt": "2026-10-09T11:16:00+09:00",
+          "note": "합성 시나리오 상태; 실제 연락·안전 확인 아님",
+          "attemptCount": 1,
+          "acked": false,
+          "visitCompleted": false,
+          "handoffStatus": null
+        },
+        {
+          "householdId": "H022",
+          "status": "queued",
+          "lastChangedAt": "2026-10-09T11:16:00+09:00",
+          "note": "합성 시나리오 상태; 실제 연락·안전 확인 아님",
+          "attemptCount": 1,
+          "acked": false,
+          "visitCompleted": false,
+          "handoffStatus": null
+        },
+        {
+          "householdId": "H023",
+          "status": "queued",
+          "lastChangedAt": "2026-10-09T11:16:00+09:00",
+          "note": "합성 시나리오 상태; 실제 연락·안전 확인 아님",
+          "attemptCount": 1,
+          "acked": false,
+          "visitCompleted": false,
+          "handoffStatus": null
+        },
+        {
+          "householdId": "H024",
+          "status": "queued",
+          "lastChangedAt": "2026-10-09T11:16:00+09:00",
+          "note": "합성 시나리오 상태; 실제 연락·안전 확인 아님",
+          "attemptCount": 1,
+          "acked": false,
+          "visitCompleted": false,
+          "handoffStatus": null
+        },
+        {
+          "householdId": "H025",
+          "status": "queued",
+          "lastChangedAt": "2026-10-09T11:16:00+09:00",
+          "note": "합성 시나리오 상태; 실제 연락·안전 확인 아님",
+          "attemptCount": 1,
+          "acked": false,
+          "visitCompleted": false,
+          "handoffStatus": null
+        },
+        {
+          "householdId": "H026",
+          "status": "queued",
+          "lastChangedAt": "2026-10-09T11:16:00+09:00",
+          "note": "합성 시나리오 상태; 실제 연락·안전 확인 아님",
+          "attemptCount": 1,
+          "acked": false,
+          "visitCompleted": false,
+          "handoffStatus": null
+        },
+        {
+          "householdId": "H027",
+          "status": "visit",
+          "lastChangedAt": "2026-10-09T11:16:00+09:00",
+          "note": "합성 시나리오 상태; 실제 연락·안전 확인 아님",
+          "attemptCount": 0,
+          "acked": false,
+          "visitCompleted": false,
+          "handoffStatus": null
+        },
+        {
+          "householdId": "H028",
+          "status": "moving",
+          "lastChangedAt": "2026-10-09T11:16:00+09:00",
+          "note": "합성 시나리오 상태; 실제 연락·안전 확인 아님",
+          "attemptCount": 1,
+          "acked": true,
+          "visitCompleted": false,
+          "handoffStatus": null
+        },
+        {
+          "householdId": "H029",
+          "status": "moving",
+          "lastChangedAt": "2026-10-09T11:16:00+09:00",
+          "note": "합성 시나리오 상태; 실제 연락·안전 확인 아님",
+          "attemptCount": 1,
+          "acked": true,
+          "visitCompleted": false,
+          "handoffStatus": null
+        },
+        {
+          "householdId": "H030",
+          "status": "moving",
+          "lastChangedAt": "2026-10-09T11:16:00+09:00",
+          "note": "합성 시나리오 상태; 실제 연락·안전 확인 아님",
+          "attemptCount": 1,
+          "acked": true,
+          "visitCompleted": false,
+          "handoffStatus": null
+        },
+        {
+          "householdId": "H031",
+          "status": "moving",
+          "lastChangedAt": "2026-10-09T11:16:00+09:00",
+          "note": "합성 시나리오 상태; 실제 연락·안전 확인 아님",
+          "attemptCount": 1,
+          "acked": true,
+          "visitCompleted": false,
+          "handoffStatus": null
+        },
+        {
+          "householdId": "H032",
+          "status": "moving",
+          "lastChangedAt": "2026-10-09T11:16:00+09:00",
+          "note": "합성 시나리오 상태; 실제 연락·안전 확인 아님",
+          "attemptCount": 1,
+          "acked": true,
+          "visitCompleted": false,
+          "handoffStatus": null
+        },
+        {
+          "householdId": "H033",
+          "status": "moving",
+          "lastChangedAt": "2026-10-09T11:16:00+09:00",
+          "note": "합성 시나리오 상태; 실제 연락·안전 확인 아님",
+          "attemptCount": 1,
+          "acked": true,
+          "visitCompleted": false,
+          "handoffStatus": null
+        },
+        {
+          "householdId": "H034",
+          "status": "visit",
+          "lastChangedAt": "2026-10-09T11:16:00+09:00",
+          "note": "합성 시나리오 상태; 실제 연락·안전 확인 아님",
+          "attemptCount": 0,
+          "acked": false,
+          "visitCompleted": false,
+          "handoffStatus": null
+        },
+        {
+          "householdId": "H035",
+          "status": "moving",
+          "lastChangedAt": "2026-10-09T11:16:00+09:00",
+          "note": "합성 시나리오 상태; 실제 연락·안전 확인 아님",
+          "attemptCount": 1,
+          "acked": true,
+          "visitCompleted": false,
+          "handoffStatus": null
+        },
+        {
+          "householdId": "H036",
+          "status": "moving",
+          "lastChangedAt": "2026-10-09T11:16:00+09:00",
+          "note": "합성 시나리오 상태; 실제 연락·안전 확인 아님",
+          "attemptCount": 1,
+          "acked": true,
+          "visitCompleted": false,
+          "handoffStatus": null
+        },
+        {
+          "householdId": "H037",
+          "status": "moving",
+          "lastChangedAt": "2026-10-09T11:16:00+09:00",
+          "note": "합성 시나리오 상태; 실제 연락·안전 확인 아님",
+          "attemptCount": 1,
+          "acked": true,
+          "visitCompleted": false,
+          "handoffStatus": null
+        },
+        {
+          "householdId": "H038",
+          "status": "moving",
+          "lastChangedAt": "2026-10-09T11:16:00+09:00",
+          "note": "합성 시나리오 상태; 실제 연락·안전 확인 아님",
+          "attemptCount": 1,
+          "acked": true,
+          "visitCompleted": false,
+          "handoffStatus": null
+        },
+        {
+          "householdId": "H039",
+          "status": "dispatched",
+          "lastChangedAt": "2026-10-09T11:16:00+09:00",
+          "note": "합성 시나리오 상태; 실제 연락·안전 확인 아님",
+          "attemptCount": 1,
+          "acked": false,
+          "visitCompleted": false,
+          "handoffStatus": null
+        },
+        {
+          "householdId": "H040",
+          "status": "dispatched",
+          "lastChangedAt": "2026-10-09T11:16:00+09:00",
+          "note": "합성 시나리오 상태; 실제 연락·안전 확인 아님",
+          "attemptCount": 1,
+          "acked": false,
+          "visitCompleted": false,
+          "handoffStatus": null
+        },
+        {
+          "householdId": "H041",
+          "status": "dispatched",
+          "lastChangedAt": "2026-10-09T11:16:00+09:00",
+          "note": "합성 시나리오 상태; 실제 연락·안전 확인 아님",
+          "attemptCount": 1,
+          "acked": false,
+          "visitCompleted": false,
+          "handoffStatus": null
+        },
+        {
+          "householdId": "H042",
+          "status": "dispatched",
+          "lastChangedAt": "2026-10-09T11:16:00+09:00",
+          "note": "합성 시나리오 상태; 실제 연락·안전 확인 아님",
+          "attemptCount": 1,
+          "acked": false,
+          "visitCompleted": false,
+          "handoffStatus": null
+        },
+        {
+          "householdId": "H043",
+          "status": "dispatched",
+          "lastChangedAt": "2026-10-09T11:16:00+09:00",
+          "note": "합성 시나리오 상태; 실제 연락·안전 확인 아님",
+          "attemptCount": 1,
+          "acked": false,
+          "visitCompleted": false,
+          "handoffStatus": null
+        },
+        {
+          "householdId": "H044",
+          "status": "dispatched",
+          "lastChangedAt": "2026-10-09T11:16:00+09:00",
+          "note": "합성 시나리오 상태; 실제 연락·안전 확인 아님",
+          "attemptCount": 1,
+          "acked": false,
+          "visitCompleted": false,
+          "handoffStatus": null
+        },
+        {
+          "householdId": "H045",
+          "status": "guided",
+          "lastChangedAt": "2026-10-09T11:16:00+09:00",
+          "note": "합성 시나리오 상태; 실제 연락·안전 확인 아님",
+          "attemptCount": 1,
+          "acked": true,
+          "visitCompleted": false,
+          "handoffStatus": null
+        },
+        {
+          "householdId": "H046",
+          "status": "safe",
+          "lastChangedAt": "2026-10-09T11:16:00+09:00",
+          "note": "합성 시나리오 상태; 실제 연락·안전 확인 아님",
+          "attemptCount": 1,
+          "acked": true,
+          "visitCompleted": false,
+          "handoffStatus": null
+        },
+        {
+          "householdId": "H047",
+          "status": "safe",
+          "lastChangedAt": "2026-10-09T11:16:00+09:00",
+          "note": "합성 시나리오 상태; 실제 연락·안전 확인 아님",
+          "attemptCount": 1,
+          "acked": true,
+          "visitCompleted": false,
+          "handoffStatus": null
+        },
+        {
+          "householdId": "H048",
+          "status": "rescued",
+          "lastChangedAt": "2026-10-09T11:16:00+09:00",
+          "note": "합성 시나리오 상태; 실제 연락·안전 확인 아님",
+          "attemptCount": 1,
+          "acked": true,
+          "visitCompleted": false,
+          "handoffStatus": null
+        }
+      ],
+      "counts": {
+        "total": 48,
+        "eligible": 45,
+        "act": 11,
+        "prog": 31,
+        "safe": 3,
+        "visit": 3,
+        "before": 0,
+        "temporarilyExcluded": 0
+      },
+      "pendingReviewIds": [
+        "H001",
+        "H005",
+        "H006",
+        "H011"
+      ],
+      "resourceStatuses": [
+        {
+          "vehicleId": "V01",
+          "status": "enroute",
+          "householdId": "H001"
+        },
+        {
+          "vehicleId": "V02",
+          "status": "free",
+          "householdId": null
+        },
+        {
+          "vehicleId": "V03",
+          "status": "free",
+          "householdId": null
+        },
+        {
+          "vehicleId": "V04",
+          "status": "free",
+          "householdId": null
+        },
+        {
+          "vehicleId": "V05",
+          "status": "enroute",
+          "householdId": "H003"
+        },
+        {
+          "vehicleId": "V06",
+          "status": "free",
+          "householdId": null
+        },
+        {
+          "vehicleId": "V07",
+          "status": "free",
+          "householdId": null
+        },
+        {
+          "vehicleId": "V08",
+          "status": "free",
+          "householdId": null
+        },
+        {
+          "vehicleId": "V09",
+          "status": "free",
+          "householdId": null
+        },
+        {
+          "vehicleId": "V10",
+          "status": "unavailable",
+          "householdId": null
+        }
+      ],
+      "sourceStatuses": [
+        {
+          "sourceId": "SRC01",
+          "status": "ok",
+          "mode": "synthetic",
+          "observedAt": "2026-10-09T11:16:00+09:00",
+          "summary": "북서 가상 능선 산불 시나리오"
+        },
+        {
+          "sourceId": "SRC02",
+          "status": "ok",
+          "mode": "synthetic",
+          "observedAt": "2026-10-09T11:16:00+09:00",
+          "summary": "온빛 마을 모의 대피 지시"
+        },
+        {
+          "sourceId": "SRC03",
+          "status": "ok",
+          "mode": "synthetic",
+          "observedAt": "2026-10-09T11:16:00+09:00",
+          "summary": "시연 지수 58"
+        },
+        {
+          "sourceId": "SRC04",
+          "status": "ok",
+          "mode": "synthetic",
+          "observedAt": "2026-10-09T11:16:00+09:00",
+          "summary": "건조 조건 모의 표시"
+        },
+        {
+          "sourceId": "SRC05",
+          "status": "ok",
+          "mode": "synthetic",
+          "observedAt": "2026-10-09T11:16:00+09:00",
+          "summary": "서풍 9 m/s 시연 값"
+        },
+        {
+          "sourceId": "SRC06",
+          "status": "ok",
+          "mode": "synthetic",
+          "observedAt": "2026-10-09T11:16:00+09:00",
+          "summary": "강수 없음 시연 값"
+        },
+        {
+          "sourceId": "SRC07",
+          "status": "ok",
+          "mode": "synthetic",
+          "observedAt": "2026-10-09T11:16:00+09:00",
+          "summary": "수위 관심 미만 시연 값"
+        },
+        {
+          "sourceId": "SRC08",
+          "status": "ok",
+          "mode": "synthetic",
+          "observedAt": "2026-10-09T11:16:00+09:00",
+          "summary": "가상 대피소 3곳"
+        }
+      ],
+      "synthetic": true
+    },
+    {
+      "id": "late",
+      "label": "진행 후반",
+      "displayTime": "2026-10-09T11:35:00+09:00",
+      "mode": "event",
+      "householdStatuses": [
+        {
+          "householdId": "H001",
+          "status": "e119",
+          "lastChangedAt": "2026-10-09T11:35:00+09:00",
+          "note": "합성 시나리오 상태; 실제 연락·안전 확인 아님",
+          "attemptCount": 1,
+          "acked": false,
+          "visitCompleted": false,
+          "handoffStatus": "mockRecorded"
+        },
+        {
+          "householdId": "H002",
+          "status": "noanswer",
+          "lastChangedAt": "2026-10-09T11:35:00+09:00",
+          "note": "합성 시나리오 상태; 실제 연락·안전 확인 아님",
+          "attemptCount": 2,
+          "acked": false,
+          "visitCompleted": false,
+          "handoffStatus": null
+        },
+        {
+          "householdId": "H003",
+          "status": "refuse",
+          "lastChangedAt": "2026-10-09T11:35:00+09:00",
+          "note": "합성 시나리오 상태; 실제 연락·안전 확인 아님",
+          "attemptCount": 1,
+          "acked": false,
+          "visitCompleted": false,
+          "handoffStatus": null
+        },
+        {
+          "householdId": "H004",
+          "status": "visit",
+          "lastChangedAt": "2026-10-09T11:35:00+09:00",
+          "note": "합성 시나리오 상태; 실제 연락·안전 확인 아님",
+          "attemptCount": 0,
+          "acked": false,
+          "visitCompleted": false,
+          "handoffStatus": null
+        },
+        {
+          "householdId": "H005",
+          "status": "dispatched",
+          "lastChangedAt": "2026-10-09T11:35:00+09:00",
+          "note": "합성 시나리오 상태; 실제 연락·안전 확인 아님",
+          "attemptCount": 1,
+          "acked": false,
+          "visitCompleted": false,
+          "handoffStatus": null
+        },
+        {
+          "householdId": "H006",
+          "status": "moving",
+          "lastChangedAt": "2026-10-09T11:35:00+09:00",
+          "note": "합성 시나리오 상태; 실제 연락·안전 확인 아님",
+          "attemptCount": 1,
+          "acked": true,
+          "visitCompleted": false,
+          "handoffStatus": null
+        },
+        {
+          "householdId": "H007",
+          "status": "safe",
+          "lastChangedAt": "2026-10-09T11:35:00+09:00",
+          "note": "합성 시나리오 상태; 실제 연락·안전 확인 아님",
+          "attemptCount": 1,
+          "acked": true,
+          "visitCompleted": false,
+          "handoffStatus": null
+        },
+        {
+          "householdId": "H008",
+          "status": "safe",
+          "lastChangedAt": "2026-10-09T11:35:00+09:00",
+          "note": "합성 시나리오 상태; 실제 연락·안전 확인 아님",
+          "attemptCount": 1,
+          "acked": true,
+          "visitCompleted": false,
+          "handoffStatus": null
+        },
+        {
+          "householdId": "H009",
+          "status": "safe",
+          "lastChangedAt": "2026-10-09T11:35:00+09:00",
+          "note": "합성 시나리오 상태; 실제 연락·안전 확인 아님",
+          "attemptCount": 1,
+          "acked": true,
+          "visitCompleted": false,
+          "handoffStatus": null
+        },
+        {
+          "householdId": "H010",
+          "status": "safe",
+          "lastChangedAt": "2026-10-09T11:35:00+09:00",
+          "note": "합성 시나리오 상태; 실제 연락·안전 확인 아님",
+          "attemptCount": 1,
+          "acked": true,
+          "visitCompleted": false,
+          "handoffStatus": null
+        },
+        {
+          "householdId": "H011",
+          "status": "safe",
+          "lastChangedAt": "2026-10-09T11:35:00+09:00",
+          "note": "합성 시나리오 상태; 실제 연락·안전 확인 아님",
+          "attemptCount": 1,
+          "acked": true,
+          "visitCompleted": false,
+          "handoffStatus": null
+        },
+        {
+          "householdId": "H012",
+          "status": "safe",
+          "lastChangedAt": "2026-10-09T11:35:00+09:00",
+          "note": "합성 시나리오 상태; 실제 연락·안전 확인 아님",
+          "attemptCount": 1,
+          "acked": true,
+          "visitCompleted": false,
+          "handoffStatus": null
+        },
+        {
+          "householdId": "H013",
+          "status": "safe",
+          "lastChangedAt": "2026-10-09T11:35:00+09:00",
+          "note": "합성 시나리오 상태; 실제 연락·안전 확인 아님",
+          "attemptCount": 1,
+          "acked": true,
+          "visitCompleted": false,
+          "handoffStatus": null
+        },
+        {
+          "householdId": "H014",
+          "status": "safe",
+          "lastChangedAt": "2026-10-09T11:35:00+09:00",
+          "note": "합성 시나리오 상태; 실제 연락·안전 확인 아님",
+          "attemptCount": 1,
+          "acked": true,
+          "visitCompleted": false,
+          "handoffStatus": null
+        },
+        {
+          "householdId": "H015",
+          "status": "safe",
+          "lastChangedAt": "2026-10-09T11:35:00+09:00",
+          "note": "합성 시나리오 상태; 실제 연락·안전 확인 아님",
+          "attemptCount": 1,
+          "acked": true,
+          "visitCompleted": false,
+          "handoffStatus": null
+        },
+        {
+          "householdId": "H016",
+          "status": "safe",
+          "lastChangedAt": "2026-10-09T11:35:00+09:00",
+          "note": "합성 시나리오 상태; 실제 연락·안전 확인 아님",
+          "attemptCount": 1,
+          "acked": true,
+          "visitCompleted": false,
+          "handoffStatus": null
+        },
+        {
+          "householdId": "H017",
+          "status": "safe",
+          "lastChangedAt": "2026-10-09T11:35:00+09:00",
+          "note": "합성 시나리오 상태; 실제 연락·안전 확인 아님",
+          "attemptCount": 1,
+          "acked": true,
+          "visitCompleted": false,
+          "handoffStatus": null
+        },
+        {
+          "householdId": "H018",
+          "status": "safe",
+          "lastChangedAt": "2026-10-09T11:35:00+09:00",
+          "note": "합성 시나리오 상태; 실제 연락·안전 확인 아님",
+          "attemptCount": 1,
+          "acked": true,
+          "visitCompleted": false,
+          "handoffStatus": null
+        },
+        {
+          "householdId": "H019",
+          "status": "safe",
+          "lastChangedAt": "2026-10-09T11:35:00+09:00",
+          "note": "합성 시나리오 상태; 실제 연락·안전 확인 아님",
+          "attemptCount": 1,
+          "acked": true,
+          "visitCompleted": false,
+          "handoffStatus": null
+        },
+        {
+          "householdId": "H020",
+          "status": "safe",
+          "lastChangedAt": "2026-10-09T11:35:00+09:00",
+          "note": "합성 시나리오 상태; 실제 연락·안전 확인 아님",
+          "attemptCount": 1,
+          "acked": true,
+          "visitCompleted": false,
+          "handoffStatus": null
+        },
+        {
+          "householdId": "H021",
+          "status": "safe",
+          "lastChangedAt": "2026-10-09T11:35:00+09:00",
+          "note": "합성 시나리오 상태; 실제 연락·안전 확인 아님",
+          "attemptCount": 1,
+          "acked": true,
+          "visitCompleted": false,
+          "handoffStatus": null
+        },
+        {
+          "householdId": "H022",
+          "status": "safe",
+          "lastChangedAt": "2026-10-09T11:35:00+09:00",
+          "note": "합성 시나리오 상태; 실제 연락·안전 확인 아님",
+          "attemptCount": 1,
+          "acked": true,
+          "visitCompleted": false,
+          "handoffStatus": null
+        },
+        {
+          "householdId": "H023",
+          "status": "safe",
+          "lastChangedAt": "2026-10-09T11:35:00+09:00",
+          "note": "합성 시나리오 상태; 실제 연락·안전 확인 아님",
+          "attemptCount": 1,
+          "acked": true,
+          "visitCompleted": false,
+          "handoffStatus": null
+        },
+        {
+          "householdId": "H024",
+          "status": "safe",
+          "lastChangedAt": "2026-10-09T11:35:00+09:00",
+          "note": "합성 시나리오 상태; 실제 연락·안전 확인 아님",
+          "attemptCount": 1,
+          "acked": true,
+          "visitCompleted": false,
+          "handoffStatus": null
+        },
+        {
+          "householdId": "H025",
+          "status": "safe",
+          "lastChangedAt": "2026-10-09T11:35:00+09:00",
+          "note": "합성 시나리오 상태; 실제 연락·안전 확인 아님",
+          "attemptCount": 1,
+          "acked": true,
+          "visitCompleted": false,
+          "handoffStatus": null
+        },
+        {
+          "householdId": "H026",
+          "status": "safe",
+          "lastChangedAt": "2026-10-09T11:35:00+09:00",
+          "note": "합성 시나리오 상태; 실제 연락·안전 확인 아님",
+          "attemptCount": 1,
+          "acked": true,
+          "visitCompleted": false,
+          "handoffStatus": null
+        },
+        {
+          "householdId": "H027",
+          "status": "visit",
+          "lastChangedAt": "2026-10-09T11:35:00+09:00",
+          "note": "합성 시나리오 상태; 실제 연락·안전 확인 아님",
+          "attemptCount": 0,
+          "acked": false,
+          "visitCompleted": false,
+          "handoffStatus": null
+        },
+        {
+          "householdId": "H028",
+          "status": "safe",
+          "lastChangedAt": "2026-10-09T11:35:00+09:00",
+          "note": "합성 시나리오 상태; 실제 연락·안전 확인 아님",
+          "attemptCount": 1,
+          "acked": true,
+          "visitCompleted": false,
+          "handoffStatus": null
+        },
+        {
+          "householdId": "H029",
+          "status": "safe",
+          "lastChangedAt": "2026-10-09T11:35:00+09:00",
+          "note": "합성 시나리오 상태; 실제 연락·안전 확인 아님",
+          "attemptCount": 1,
+          "acked": true,
+          "visitCompleted": false,
+          "handoffStatus": null
+        },
+        {
+          "householdId": "H030",
+          "status": "safe",
+          "lastChangedAt": "2026-10-09T11:35:00+09:00",
+          "note": "합성 시나리오 상태; 실제 연락·안전 확인 아님",
+          "attemptCount": 1,
+          "acked": true,
+          "visitCompleted": false,
+          "handoffStatus": null
+        },
+        {
+          "householdId": "H031",
+          "status": "safe",
+          "lastChangedAt": "2026-10-09T11:35:00+09:00",
+          "note": "합성 시나리오 상태; 실제 연락·안전 확인 아님",
+          "attemptCount": 1,
+          "acked": true,
+          "visitCompleted": false,
+          "handoffStatus": null
+        },
+        {
+          "householdId": "H032",
+          "status": "safe",
+          "lastChangedAt": "2026-10-09T11:35:00+09:00",
+          "note": "합성 시나리오 상태; 실제 연락·안전 확인 아님",
+          "attemptCount": 1,
+          "acked": true,
+          "visitCompleted": false,
+          "handoffStatus": null
+        },
+        {
+          "householdId": "H033",
+          "status": "rescued",
+          "lastChangedAt": "2026-10-09T11:35:00+09:00",
+          "note": "합성 시나리오 상태; 실제 연락·안전 확인 아님",
+          "attemptCount": 1,
+          "acked": true,
+          "visitCompleted": false,
+          "handoffStatus": null
+        },
+        {
+          "householdId": "H034",
+          "status": "visit",
+          "lastChangedAt": "2026-10-09T11:35:00+09:00",
+          "note": "합성 시나리오 상태; 실제 연락·안전 확인 아님",
+          "attemptCount": 0,
+          "acked": false,
+          "visitCompleted": false,
+          "handoffStatus": null
+        },
+        {
+          "householdId": "H035",
+          "status": "rescued",
+          "lastChangedAt": "2026-10-09T11:35:00+09:00",
+          "note": "합성 시나리오 상태; 실제 연락·안전 확인 아님",
+          "attemptCount": 1,
+          "acked": true,
+          "visitCompleted": false,
+          "handoffStatus": null
+        },
+        {
+          "householdId": "H036",
+          "status": "rescued",
+          "lastChangedAt": "2026-10-09T11:35:00+09:00",
+          "note": "합성 시나리오 상태; 실제 연락·안전 확인 아님",
+          "attemptCount": 1,
+          "acked": true,
+          "visitCompleted": false,
+          "handoffStatus": null
+        },
+        {
+          "householdId": "H037",
+          "status": "rescued",
+          "lastChangedAt": "2026-10-09T11:35:00+09:00",
+          "note": "합성 시나리오 상태; 실제 연락·안전 확인 아님",
+          "attemptCount": 1,
+          "acked": true,
+          "visitCompleted": false,
+          "handoffStatus": null
+        },
+        {
+          "householdId": "H038",
+          "status": "rescued",
+          "lastChangedAt": "2026-10-09T11:35:00+09:00",
+          "note": "합성 시나리오 상태; 실제 연락·안전 확인 아님",
+          "attemptCount": 1,
+          "acked": true,
+          "visitCompleted": false,
+          "handoffStatus": null
+        },
+        {
+          "householdId": "H039",
+          "status": "rescued",
+          "lastChangedAt": "2026-10-09T11:35:00+09:00",
+          "note": "합성 시나리오 상태; 실제 연락·안전 확인 아님",
+          "attemptCount": 1,
+          "acked": true,
+          "visitCompleted": false,
+          "handoffStatus": null
+        },
+        {
+          "householdId": "H040",
+          "status": "rescued",
+          "lastChangedAt": "2026-10-09T11:35:00+09:00",
+          "note": "합성 시나리오 상태; 실제 연락·안전 확인 아님",
+          "attemptCount": 1,
+          "acked": true,
+          "visitCompleted": false,
+          "handoffStatus": null
+        },
+        {
+          "householdId": "H041",
+          "status": "rescued",
+          "lastChangedAt": "2026-10-09T11:35:00+09:00",
+          "note": "합성 시나리오 상태; 실제 연락·안전 확인 아님",
+          "attemptCount": 1,
+          "acked": true,
+          "visitCompleted": false,
+          "handoffStatus": null
+        },
+        {
+          "householdId": "H042",
+          "status": "rescued",
+          "lastChangedAt": "2026-10-09T11:35:00+09:00",
+          "note": "합성 시나리오 상태; 실제 연락·안전 확인 아님",
+          "attemptCount": 1,
+          "acked": true,
+          "visitCompleted": false,
+          "handoffStatus": null
+        },
+        {
+          "householdId": "H043",
+          "status": "rescued",
+          "lastChangedAt": "2026-10-09T11:35:00+09:00",
+          "note": "합성 시나리오 상태; 실제 연락·안전 확인 아님",
+          "attemptCount": 1,
+          "acked": true,
+          "visitCompleted": false,
+          "handoffStatus": null
+        },
+        {
+          "householdId": "H044",
+          "status": "rescued",
+          "lastChangedAt": "2026-10-09T11:35:00+09:00",
+          "note": "합성 시나리오 상태; 실제 연락·안전 확인 아님",
+          "attemptCount": 1,
+          "acked": true,
+          "visitCompleted": false,
+          "handoffStatus": null
+        },
+        {
+          "householdId": "H045",
+          "status": "rescued",
+          "lastChangedAt": "2026-10-09T11:35:00+09:00",
+          "note": "합성 시나리오 상태; 실제 연락·안전 확인 아님",
+          "attemptCount": 1,
+          "acked": true,
+          "visitCompleted": false,
+          "handoffStatus": null
+        },
+        {
+          "householdId": "H046",
+          "status": "rescued",
+          "lastChangedAt": "2026-10-09T11:35:00+09:00",
+          "note": "합성 시나리오 상태; 실제 연락·안전 확인 아님",
+          "attemptCount": 1,
+          "acked": true,
+          "visitCompleted": false,
+          "handoffStatus": null
+        },
+        {
+          "householdId": "H047",
+          "status": "rescued",
+          "lastChangedAt": "2026-10-09T11:35:00+09:00",
+          "note": "합성 시나리오 상태; 실제 연락·안전 확인 아님",
+          "attemptCount": 1,
+          "acked": true,
+          "visitCompleted": false,
+          "handoffStatus": null
+        },
+        {
+          "householdId": "H048",
+          "status": "rescued",
+          "lastChangedAt": "2026-10-09T11:35:00+09:00",
+          "note": "합성 시나리오 상태; 실제 연락·안전 확인 아님",
+          "attemptCount": 1,
+          "acked": true,
+          "visitCompleted": false,
+          "handoffStatus": null
+        }
+      ],
+      "counts": {
+        "total": 48,
+        "eligible": 45,
+        "act": 3,
+        "prog": 2,
+        "safe": 40,
+        "visit": 3,
+        "before": 0,
+        "temporarilyExcluded": 0
+      },
+      "pendingReviewIds": [
+        "H001",
+        "H003"
+      ],
+      "resourceStatuses": [
+        {
+          "vehicleId": "V01",
+          "status": "enroute",
+          "householdId": "H001"
+        },
+        {
+          "vehicleId": "V02",
+          "status": "free",
+          "householdId": null
+        },
+        {
+          "vehicleId": "V03",
+          "status": "free",
+          "householdId": null
+        },
+        {
+          "vehicleId": "V04",
+          "status": "free",
+          "householdId": null
+        },
+        {
+          "vehicleId": "V05",
+          "status": "enroute",
+          "householdId": "H003"
+        },
+        {
+          "vehicleId": "V06",
+          "status": "free",
+          "householdId": null
+        },
+        {
+          "vehicleId": "V07",
+          "status": "free",
+          "householdId": null
+        },
+        {
+          "vehicleId": "V08",
+          "status": "free",
+          "householdId": null
+        },
+        {
+          "vehicleId": "V09",
+          "status": "free",
+          "householdId": null
+        },
+        {
+          "vehicleId": "V10",
+          "status": "unavailable",
+          "householdId": null
+        }
+      ],
+      "sourceStatuses": [
+        {
+          "sourceId": "SRC01",
+          "status": "ok",
+          "mode": "synthetic",
+          "observedAt": "2026-10-09T11:35:00+09:00",
+          "summary": "북서 가상 능선 산불 시나리오"
+        },
+        {
+          "sourceId": "SRC02",
+          "status": "ok",
+          "mode": "synthetic",
+          "observedAt": "2026-10-09T11:35:00+09:00",
+          "summary": "온빛 마을 모의 대피 지시"
+        },
+        {
+          "sourceId": "SRC03",
+          "status": "ok",
+          "mode": "synthetic",
+          "observedAt": "2026-10-09T11:35:00+09:00",
+          "summary": "시연 지수 58"
+        },
+        {
+          "sourceId": "SRC04",
+          "status": "ok",
+          "mode": "synthetic",
+          "observedAt": "2026-10-09T11:35:00+09:00",
+          "summary": "건조 조건 모의 표시"
+        },
+        {
+          "sourceId": "SRC05",
+          "status": "ok",
+          "mode": "synthetic",
+          "observedAt": "2026-10-09T11:35:00+09:00",
+          "summary": "서풍 9 m/s 시연 값"
+        },
+        {
+          "sourceId": "SRC06",
+          "status": "ok",
+          "mode": "synthetic",
+          "observedAt": "2026-10-09T11:35:00+09:00",
+          "summary": "강수 없음 시연 값"
+        },
+        {
+          "sourceId": "SRC07",
+          "status": "ok",
+          "mode": "synthetic",
+          "observedAt": "2026-10-09T11:35:00+09:00",
+          "summary": "수위 관심 미만 시연 값"
+        },
+        {
+          "sourceId": "SRC08",
+          "status": "ok",
+          "mode": "synthetic",
+          "observedAt": "2026-10-09T11:35:00+09:00",
+          "summary": "가상 대피소 3곳"
+        }
+      ],
+      "synthetic": true
+    }
+  ],
+  "callTranscripts": [
+    {
+      "id": "TX-active-H001",
+      "householdId": "H001",
+      "scenarioId": "active",
+      "turns": [
+        {
+          "sequence": 1,
+          "speaker": "assistant",
+          "text": "온빛 마을 화면 시연을 위한 모의 대화입니다. 현재 상태를 말해 주세요.",
+          "offsetSeconds": 0
+        },
+        {
+          "sequence": 2,
+          "speaker": "resident",
+          "text": "숨쉬기 힘들다는 모의 발화예요.",
+          "offsetSeconds": 8
+        }
+      ],
+      "synthetic": true
+    },
+    {
+      "id": "TX-active-H002",
+      "householdId": "H002",
+      "scenarioId": "active",
+      "turns": [
+        {
+          "sequence": 1,
+          "speaker": "assistant",
+          "text": "온빛 마을 화면 시연을 위한 모의 대화입니다. 현재 상태를 말해 주세요.",
+          "offsetSeconds": 0
+        },
+        {
+          "sequence": 2,
+          "speaker": "resident",
+          "text": "혼자 차에 타기 어려워요.",
+          "offsetSeconds": 8
+        }
+      ],
+      "synthetic": true
+    },
+    {
+      "id": "TX-active-H003",
+      "householdId": "H003",
+      "scenarioId": "active",
+      "turns": [
+        {
+          "sequence": 1,
+          "speaker": "assistant",
+          "text": "온빛 마을 화면 시연을 위한 모의 대화입니다. 현재 상태를 말해 주세요.",
+          "offsetSeconds": 0
+        },
+        {
+          "sequence": 2,
+          "speaker": "resident",
+          "text": "혼자 차에 타기 어려워요.",
+          "offsetSeconds": 8
+        }
+      ],
+      "synthetic": true
+    },
+    {
+      "id": "TX-active-H005",
+      "householdId": "H005",
+      "scenarioId": "active",
+      "turns": [
+        {
+          "sequence": 1,
+          "speaker": "assistant",
+          "text": "온빛 마을 화면 시연을 위한 모의 대화입니다. 현재 상태를 말해 주세요.",
+          "offsetSeconds": 0
+        },
+        {
+          "sequence": 2,
+          "speaker": "resident",
+          "text": "지금은 밖에 나가고 싶지 않아요.",
+          "offsetSeconds": 8
+        }
+      ],
+      "synthetic": true
+    },
+    {
+      "id": "TX-active-H006",
+      "householdId": "H006",
+      "scenarioId": "active",
+      "turns": [
+        {
+          "sequence": 1,
+          "speaker": "assistant",
+          "text": "온빛 마을 화면 시연을 위한 모의 대화입니다. 현재 상태를 말해 주세요.",
+          "offsetSeconds": 0
+        },
+        {
+          "sequence": 2,
+          "speaker": "resident",
+          "text": "조금 더 천천히 말씀해 주세요.",
+          "offsetSeconds": 8
+        }
+      ],
+      "synthetic": true
+    },
+    {
+      "id": "TX-late-H001",
+      "householdId": "H001",
+      "scenarioId": "late",
+      "turns": [
+        {
+          "sequence": 1,
+          "speaker": "assistant",
+          "text": "온빛 마을 화면 시연을 위한 모의 대화입니다. 현재 상태를 말해 주세요.",
+          "offsetSeconds": 0
+        },
+        {
+          "sequence": 2,
+          "speaker": "resident",
+          "text": "숨쉬기 힘들다는 모의 발화예요.",
+          "offsetSeconds": 8
+        }
+      ],
+      "synthetic": true
+    },
+    {
+      "id": "TX-late-H002",
+      "householdId": "H002",
+      "scenarioId": "late",
+      "turns": [
+        {
+          "sequence": 1,
+          "speaker": "assistant",
+          "text": "온빛 마을 화면 시연을 위한 모의 대화입니다. 현재 상태를 말해 주세요.",
+          "offsetSeconds": 0
+        },
+        {
+          "sequence": 2,
+          "speaker": "resident",
+          "text": "혼자 차에 타기 어려워요.",
+          "offsetSeconds": 8
+        }
+      ],
+      "synthetic": true
+    },
+    {
+      "id": "TX-late-H003",
+      "householdId": "H003",
+      "scenarioId": "late",
+      "turns": [
+        {
+          "sequence": 1,
+          "speaker": "assistant",
+          "text": "온빛 마을 화면 시연을 위한 모의 대화입니다. 현재 상태를 말해 주세요.",
+          "offsetSeconds": 0
+        },
+        {
+          "sequence": 2,
+          "speaker": "resident",
+          "text": "혼자 차에 타기 어려워요.",
+          "offsetSeconds": 8
+        }
+      ],
+      "synthetic": true
+    },
+    {
+      "id": "TX-late-H005",
+      "householdId": "H005",
+      "scenarioId": "late",
+      "turns": [
+        {
+          "sequence": 1,
+          "speaker": "assistant",
+          "text": "온빛 마을 화면 시연을 위한 모의 대화입니다. 현재 상태를 말해 주세요.",
+          "offsetSeconds": 0
+        },
+        {
+          "sequence": 2,
+          "speaker": "resident",
+          "text": "지금은 밖에 나가고 싶지 않아요.",
+          "offsetSeconds": 8
+        }
+      ],
+      "synthetic": true
+    },
+    {
+      "id": "TX-late-H006",
+      "householdId": "H006",
+      "scenarioId": "late",
+      "turns": [
+        {
+          "sequence": 1,
+          "speaker": "assistant",
+          "text": "온빛 마을 화면 시연을 위한 모의 대화입니다. 현재 상태를 말해 주세요.",
+          "offsetSeconds": 0
+        },
+        {
+          "sequence": 2,
+          "speaker": "resident",
+          "text": "조금 더 천천히 말씀해 주세요.",
+          "offsetSeconds": 8
+        }
+      ],
+      "synthetic": true
+    }
+  ],
+  "eventLogs": [
+    {
+      "id": "LOG-idle-01",
+      "scenarioId": "idle",
+      "timestamp": "2026-10-09T11:00:00+09:00",
+      "actorType": "system",
+      "label": "평시 합성 명단 준비",
+      "synthetic": true
+    },
+    {
+      "id": "LOG-watch-01",
+      "scenarioId": "watch",
+      "timestamp": "2026-10-09T11:05:00+09:00",
+      "actorType": "human",
+      "label": "감시 시작 모의 확인",
+      "synthetic": true
+    },
+    {
+      "id": "LOG-review-01",
+      "scenarioId": "review",
+      "timestamp": "2026-10-09T11:08:00+09:00",
+      "actorType": "human",
+      "label": "발령 검토 시작 모의 확인",
+      "synthetic": true
+    },
+    {
+      "id": "LOG-active-01",
+      "scenarioId": "active",
+      "timestamp": "2026-10-09T11:16:00+09:00",
+      "actorType": "system",
+      "label": "전화·자원 진행 상태 모의 기록",
+      "synthetic": true
+    },
+    {
+      "id": "LOG-late-01",
+      "scenarioId": "late",
+      "timestamp": "2026-10-09T11:35:00+09:00",
+      "actorType": "system",
+      "label": "미완료 대상 모의 인계 기록",
+      "synthetic": true
+    }
+  ],
+  "checkLogs": [
+    {
+      "id": "CHECK-H001-1",
+      "householdId": "H001",
+      "sourceType": "가족",
+      "checkedAt": "2026-09-28",
+      "checkedFields": [
+        "mobility",
+        "contactRef"
+      ],
+      "changed": null,
+      "operatorLabel": "모의 확인 담당자",
+      "evidence": "합성 확인 이력",
+      "synthetic": true
+    },
+    {
+      "id": "CHECK-H001-2",
+      "householdId": "H001",
+      "sourceType": "생활지원사",
+      "checkedAt": "2026-10-05",
+      "checkedFields": [
+        "mobility",
+        "contactRef"
+      ],
+      "changed": null,
+      "operatorLabel": "모의 확인 담당자",
+      "evidence": "합성 확인 이력",
+      "synthetic": true
+    },
+    {
+      "id": "CHECK-H002-1",
+      "householdId": "H002",
+      "sourceType": "가족",
+      "checkedAt": "2026-09-27",
+      "checkedFields": [
+        "mobility",
+        "contactRef"
+      ],
+      "changed": null,
+      "operatorLabel": "모의 확인 담당자",
+      "evidence": "합성 확인 이력",
+      "synthetic": true
+    },
+    {
+      "id": "CHECK-H002-2",
+      "householdId": "H002",
+      "sourceType": "생활지원사",
+      "checkedAt": "2026-10-04",
+      "checkedFields": [
+        "mobility",
+        "contactRef"
+      ],
+      "changed": null,
+      "operatorLabel": "모의 확인 담당자",
+      "evidence": "합성 확인 이력",
+      "synthetic": true
+    },
+    {
+      "id": "CHECK-H003-1",
+      "householdId": "H003",
+      "sourceType": "가족",
+      "checkedAt": "2026-09-26",
+      "checkedFields": [
+        "mobility",
+        "contactRef"
+      ],
+      "changed": null,
+      "operatorLabel": "모의 확인 담당자",
+      "evidence": "합성 확인 이력",
+      "synthetic": true
+    },
+    {
+      "id": "CHECK-H003-2",
+      "householdId": "H003",
+      "sourceType": "생활지원사",
+      "checkedAt": "2026-10-03",
+      "checkedFields": [
+        "mobility",
+        "contactRef"
+      ],
+      "changed": null,
+      "operatorLabel": "모의 확인 담당자",
+      "evidence": "합성 확인 이력",
+      "synthetic": true
+    },
+    {
+      "id": "CHECK-H004-1",
+      "householdId": "H004",
+      "sourceType": "가족",
+      "checkedAt": "2026-09-25",
+      "checkedFields": [
+        "mobility",
+        "contactRef"
+      ],
+      "changed": null,
+      "operatorLabel": "모의 확인 담당자",
+      "evidence": "합성 확인 이력",
+      "synthetic": true
+    },
+    {
+      "id": "CHECK-H004-2",
+      "householdId": "H004",
+      "sourceType": "생활지원사",
+      "checkedAt": "2026-10-02",
+      "checkedFields": [
+        "mobility",
+        "contactRef"
+      ],
+      "changed": null,
+      "operatorLabel": "모의 확인 담당자",
+      "evidence": "합성 확인 이력",
+      "synthetic": true
+    },
+    {
+      "id": "CHECK-H005-1",
+      "householdId": "H005",
+      "sourceType": "가족",
+      "checkedAt": "2026-09-24",
+      "checkedFields": [
+        "mobility",
+        "contactRef"
+      ],
+      "changed": null,
+      "operatorLabel": "모의 확인 담당자",
+      "evidence": "합성 확인 이력",
+      "synthetic": true
+    },
+    {
+      "id": "CHECK-H005-2",
+      "householdId": "H005",
+      "sourceType": "생활지원사",
+      "checkedAt": "2026-10-01",
+      "checkedFields": [
+        "mobility",
+        "contactRef"
+      ],
+      "changed": null,
+      "operatorLabel": "모의 확인 담당자",
+      "evidence": "합성 확인 이력",
+      "synthetic": true
+    },
+    {
+      "id": "CHECK-H006-1",
+      "householdId": "H006",
+      "sourceType": "가족",
+      "checkedAt": "2026-07-04",
+      "checkedFields": [
+        "mobility",
+        "contactRef"
+      ],
+      "changed": null,
+      "operatorLabel": "모의 확인 담당자",
+      "evidence": "합성 확인 이력",
+      "synthetic": true
+    },
+    {
+      "id": "CHECK-H006-2",
+      "householdId": "H006",
+      "sourceType": "생활지원사",
+      "checkedAt": "2026-07-11",
+      "checkedFields": [
+        "mobility",
+        "contactRef"
+      ],
+      "changed": null,
+      "operatorLabel": "모의 확인 담당자",
+      "evidence": "합성 확인 이력",
+      "synthetic": true
+    },
+    {
+      "id": "CHECK-H007-1",
+      "householdId": "H007",
+      "sourceType": "가족",
+      "checkedAt": "2026-09-22",
+      "checkedFields": [
+        "mobility",
+        "contactRef"
+      ],
+      "changed": null,
+      "operatorLabel": "모의 확인 담당자",
+      "evidence": "합성 확인 이력",
+      "synthetic": true
+    },
+    {
+      "id": "CHECK-H007-2",
+      "householdId": "H007",
+      "sourceType": "생활지원사",
+      "checkedAt": "2026-09-29",
+      "checkedFields": [
+        "mobility",
+        "contactRef"
+      ],
+      "changed": null,
+      "operatorLabel": "모의 확인 담당자",
+      "evidence": "합성 확인 이력",
+      "synthetic": true
+    },
+    {
+      "id": "CHECK-H008-1",
+      "householdId": "H008",
+      "sourceType": "가족",
+      "checkedAt": "2026-09-21",
+      "checkedFields": [
+        "mobility",
+        "contactRef"
+      ],
+      "changed": null,
+      "operatorLabel": "모의 확인 담당자",
+      "evidence": "합성 확인 이력",
+      "synthetic": true
+    },
+    {
+      "id": "CHECK-H008-2",
+      "householdId": "H008",
+      "sourceType": "생활지원사",
+      "checkedAt": "2026-09-28",
+      "checkedFields": [
+        "mobility",
+        "contactRef"
+      ],
+      "changed": null,
+      "operatorLabel": "모의 확인 담당자",
+      "evidence": "합성 확인 이력",
+      "synthetic": true
+    },
+    {
+      "id": "CHECK-H009-1",
+      "householdId": "H009",
+      "sourceType": "가족",
+      "checkedAt": "2026-07-03",
+      "checkedFields": [
+        "mobility",
+        "contactRef"
+      ],
+      "changed": null,
+      "operatorLabel": "모의 확인 담당자",
+      "evidence": "합성 확인 이력",
+      "synthetic": true
+    },
+    {
+      "id": "CHECK-H009-2",
+      "householdId": "H009",
+      "sourceType": "생활지원사",
+      "checkedAt": "2026-07-10",
+      "checkedFields": [
+        "mobility",
+        "contactRef"
+      ],
+      "changed": null,
+      "operatorLabel": "모의 확인 담당자",
+      "evidence": "합성 확인 이력",
+      "synthetic": true
+    },
+    {
+      "id": "CHECK-H010-1",
+      "householdId": "H010",
+      "sourceType": "가족",
+      "checkedAt": "2026-09-19",
+      "checkedFields": [
+        "mobility",
+        "contactRef"
+      ],
+      "changed": null,
+      "operatorLabel": "모의 확인 담당자",
+      "evidence": "합성 확인 이력",
+      "synthetic": true
+    },
+    {
+      "id": "CHECK-H010-2",
+      "householdId": "H010",
+      "sourceType": "생활지원사",
+      "checkedAt": "2026-09-26",
+      "checkedFields": [
+        "mobility",
+        "contactRef"
+      ],
+      "changed": null,
+      "operatorLabel": "모의 확인 담당자",
+      "evidence": "합성 확인 이력",
+      "synthetic": true
+    },
+    {
+      "id": "CHECK-H011-1",
+      "householdId": "H011",
+      "sourceType": "가족",
+      "checkedAt": "2026-09-18",
+      "checkedFields": [
+        "mobility",
+        "contactRef"
+      ],
+      "changed": null,
+      "operatorLabel": "모의 확인 담당자",
+      "evidence": "합성 확인 이력",
+      "synthetic": true
+    },
+    {
+      "id": "CHECK-H011-2",
+      "householdId": "H011",
+      "sourceType": "생활지원사",
+      "checkedAt": "2026-09-25",
+      "checkedFields": [
+        "mobility",
+        "contactRef"
+      ],
+      "changed": null,
+      "operatorLabel": "모의 확인 담당자",
+      "evidence": "합성 확인 이력",
+      "synthetic": true
+    },
+    {
+      "id": "CHECK-H012-1",
+      "householdId": "H012",
+      "sourceType": "가족",
+      "checkedAt": "2026-09-17",
+      "checkedFields": [
+        "mobility",
+        "contactRef"
+      ],
+      "changed": null,
+      "operatorLabel": "모의 확인 담당자",
+      "evidence": "합성 확인 이력",
+      "synthetic": true
+    },
+    {
+      "id": "CHECK-H012-2",
+      "householdId": "H012",
+      "sourceType": "생활지원사",
+      "checkedAt": "2026-09-24",
+      "checkedFields": [
+        "mobility",
+        "contactRef"
+      ],
+      "changed": null,
+      "operatorLabel": "모의 확인 담당자",
+      "evidence": "합성 확인 이력",
+      "synthetic": true
+    },
+    {
+      "id": "CHECK-H013-1",
+      "householdId": "H013",
+      "sourceType": "가족",
+      "checkedAt": "2026-09-16",
+      "checkedFields": [
+        "mobility",
+        "contactRef"
+      ],
+      "changed": null,
+      "operatorLabel": "모의 확인 담당자",
+      "evidence": "합성 확인 이력",
+      "synthetic": true
+    },
+    {
+      "id": "CHECK-H013-2",
+      "householdId": "H013",
+      "sourceType": "생활지원사",
+      "checkedAt": "2026-09-23",
+      "checkedFields": [
+        "mobility",
+        "contactRef"
+      ],
+      "changed": null,
+      "operatorLabel": "모의 확인 담당자",
+      "evidence": "합성 확인 이력",
+      "synthetic": true
+    },
+    {
+      "id": "CHECK-H014-1",
+      "householdId": "H014",
+      "sourceType": "가족",
+      "checkedAt": "2026-09-15",
+      "checkedFields": [
+        "mobility",
+        "contactRef"
+      ],
+      "changed": null,
+      "operatorLabel": "모의 확인 담당자",
+      "evidence": "합성 확인 이력",
+      "synthetic": true
+    },
+    {
+      "id": "CHECK-H014-2",
+      "householdId": "H014",
+      "sourceType": "생활지원사",
+      "checkedAt": "2026-09-22",
+      "checkedFields": [
+        "mobility",
+        "contactRef"
+      ],
+      "changed": null,
+      "operatorLabel": "모의 확인 담당자",
+      "evidence": "합성 확인 이력",
+      "synthetic": true
+    },
+    {
+      "id": "CHECK-H015-1",
+      "householdId": "H015",
+      "sourceType": "가족",
+      "checkedAt": "2026-09-14",
+      "checkedFields": [
+        "mobility",
+        "contactRef"
+      ],
+      "changed": null,
+      "operatorLabel": "모의 확인 담당자",
+      "evidence": "합성 확인 이력",
+      "synthetic": true
+    },
+    {
+      "id": "CHECK-H015-2",
+      "householdId": "H015",
+      "sourceType": "생활지원사",
+      "checkedAt": "2026-09-21",
+      "checkedFields": [
+        "mobility",
+        "contactRef"
+      ],
+      "changed": null,
+      "operatorLabel": "모의 확인 담당자",
+      "evidence": "합성 확인 이력",
+      "synthetic": true
+    },
+    {
+      "id": "CHECK-H016-1",
+      "householdId": "H016",
+      "sourceType": "가족",
+      "checkedAt": "2026-09-13",
+      "checkedFields": [
+        "mobility",
+        "contactRef"
+      ],
+      "changed": null,
+      "operatorLabel": "모의 확인 담당자",
+      "evidence": "합성 확인 이력",
+      "synthetic": true
+    },
+    {
+      "id": "CHECK-H016-2",
+      "householdId": "H016",
+      "sourceType": "이장",
+      "checkedAt": "2026-09-20",
+      "checkedFields": [
+        "mobility",
+        "contactRef"
+      ],
+      "changed": null,
+      "operatorLabel": "모의 확인 담당자",
+      "evidence": "합성 확인 이력",
+      "synthetic": true
+    },
+    {
+      "id": "CHECK-H017-1",
+      "householdId": "H017",
+      "sourceType": "가족",
+      "checkedAt": "2026-09-12",
+      "checkedFields": [
+        "mobility",
+        "contactRef"
+      ],
+      "changed": null,
+      "operatorLabel": "모의 확인 담당자",
+      "evidence": "합성 확인 이력",
+      "synthetic": true
+    },
+    {
+      "id": "CHECK-H017-2",
+      "householdId": "H017",
+      "sourceType": "이장",
+      "checkedAt": "2026-09-19",
+      "checkedFields": [
+        "mobility",
+        "contactRef"
+      ],
+      "changed": null,
+      "operatorLabel": "모의 확인 담당자",
+      "evidence": "합성 확인 이력",
+      "synthetic": true
+    },
+    {
+      "id": "CHECK-H018-1",
+      "householdId": "H018",
+      "sourceType": "가족",
+      "checkedAt": "2026-09-11",
+      "checkedFields": [
+        "mobility",
+        "contactRef"
+      ],
+      "changed": null,
+      "operatorLabel": "모의 확인 담당자",
+      "evidence": "합성 확인 이력",
+      "synthetic": true
+    },
+    {
+      "id": "CHECK-H018-2",
+      "householdId": "H018",
+      "sourceType": "이장",
+      "checkedAt": "2026-09-18",
+      "checkedFields": [
+        "mobility",
+        "contactRef"
+      ],
+      "changed": null,
+      "operatorLabel": "모의 확인 담당자",
+      "evidence": "합성 확인 이력",
+      "synthetic": true
+    },
+    {
+      "id": "CHECK-H019-1",
+      "householdId": "H019",
+      "sourceType": "가족",
+      "checkedAt": "2026-09-10",
+      "checkedFields": [
+        "mobility",
+        "contactRef"
+      ],
+      "changed": null,
+      "operatorLabel": "모의 확인 담당자",
+      "evidence": "합성 확인 이력",
+      "synthetic": true
+    },
+    {
+      "id": "CHECK-H019-2",
+      "householdId": "H019",
+      "sourceType": "이장",
+      "checkedAt": "2026-09-17",
+      "checkedFields": [
+        "mobility",
+        "contactRef"
+      ],
+      "changed": null,
+      "operatorLabel": "모의 확인 담당자",
+      "evidence": "합성 확인 이력",
+      "synthetic": true
+    },
+    {
+      "id": "CHECK-H020-1",
+      "householdId": "H020",
+      "sourceType": "가족",
+      "checkedAt": "2026-09-09",
+      "checkedFields": [
+        "mobility",
+        "contactRef"
+      ],
+      "changed": null,
+      "operatorLabel": "모의 확인 담당자",
+      "evidence": "합성 확인 이력",
+      "synthetic": true
+    },
+    {
+      "id": "CHECK-H020-2",
+      "householdId": "H020",
+      "sourceType": "이장",
+      "checkedAt": "2026-09-16",
+      "checkedFields": [
+        "mobility",
+        "contactRef"
+      ],
+      "changed": null,
+      "operatorLabel": "모의 확인 담당자",
+      "evidence": "합성 확인 이력",
+      "synthetic": true
+    },
+    {
+      "id": "CHECK-H021-1",
+      "householdId": "H021",
+      "sourceType": "가족",
+      "checkedAt": "2026-07-03",
+      "checkedFields": [
+        "mobility",
+        "contactRef"
+      ],
+      "changed": null,
+      "operatorLabel": "모의 확인 담당자",
+      "evidence": "합성 확인 이력",
+      "synthetic": true
+    },
+    {
+      "id": "CHECK-H021-2",
+      "householdId": "H021",
+      "sourceType": "이장",
+      "checkedAt": "2026-07-10",
+      "checkedFields": [
+        "mobility",
+        "contactRef"
+      ],
+      "changed": null,
+      "operatorLabel": "모의 확인 담당자",
+      "evidence": "합성 확인 이력",
+      "synthetic": true
+    },
+    {
+      "id": "CHECK-H022-1",
+      "householdId": "H022",
+      "sourceType": "가족",
+      "checkedAt": "2026-09-07",
+      "checkedFields": [
+        "mobility",
+        "contactRef"
+      ],
+      "changed": null,
+      "operatorLabel": "모의 확인 담당자",
+      "evidence": "합성 확인 이력",
+      "synthetic": true
+    },
+    {
+      "id": "CHECK-H022-2",
+      "householdId": "H022",
+      "sourceType": "이장",
+      "checkedAt": "2026-09-14",
+      "checkedFields": [
+        "mobility",
+        "contactRef"
+      ],
+      "changed": null,
+      "operatorLabel": "모의 확인 담당자",
+      "evidence": "합성 확인 이력",
+      "synthetic": true
+    },
+    {
+      "id": "CHECK-H023-1",
+      "householdId": "H023",
+      "sourceType": "가족",
+      "checkedAt": "2026-09-06",
+      "checkedFields": [
+        "mobility",
+        "contactRef"
+      ],
+      "changed": null,
+      "operatorLabel": "모의 확인 담당자",
+      "evidence": "합성 확인 이력",
+      "synthetic": true
+    },
+    {
+      "id": "CHECK-H023-2",
+      "householdId": "H023",
+      "sourceType": "이장",
+      "checkedAt": "2026-09-13",
+      "checkedFields": [
+        "mobility",
+        "contactRef"
+      ],
+      "changed": null,
+      "operatorLabel": "모의 확인 담당자",
+      "evidence": "합성 확인 이력",
+      "synthetic": true
+    },
+    {
+      "id": "CHECK-H024-1",
+      "householdId": "H024",
+      "sourceType": "가족",
+      "checkedAt": "2026-09-05",
+      "checkedFields": [
+        "mobility",
+        "contactRef"
+      ],
+      "changed": null,
+      "operatorLabel": "모의 확인 담당자",
+      "evidence": "합성 확인 이력",
+      "synthetic": true
+    },
+    {
+      "id": "CHECK-H024-2",
+      "householdId": "H024",
+      "sourceType": "이장",
+      "checkedAt": "2026-09-12",
+      "checkedFields": [
+        "mobility",
+        "contactRef"
+      ],
+      "changed": null,
+      "operatorLabel": "모의 확인 담당자",
+      "evidence": "합성 확인 이력",
+      "synthetic": true
+    },
+    {
+      "id": "CHECK-H025-1",
+      "householdId": "H025",
+      "sourceType": "가족",
+      "checkedAt": "2026-09-04",
+      "checkedFields": [
+        "mobility",
+        "contactRef"
+      ],
+      "changed": null,
+      "operatorLabel": "모의 확인 담당자",
+      "evidence": "합성 확인 이력",
+      "synthetic": true
+    },
+    {
+      "id": "CHECK-H025-2",
+      "householdId": "H025",
+      "sourceType": "이장",
+      "checkedAt": "2026-09-11",
+      "checkedFields": [
+        "mobility",
+        "contactRef"
+      ],
+      "changed": null,
+      "operatorLabel": "모의 확인 담당자",
+      "evidence": "합성 확인 이력",
+      "synthetic": true
+    },
+    {
+      "id": "CHECK-H026-1",
+      "householdId": "H026",
+      "sourceType": "가족",
+      "checkedAt": "2026-09-03",
+      "checkedFields": [
+        "mobility",
+        "contactRef"
+      ],
+      "changed": null,
+      "operatorLabel": "모의 확인 담당자",
+      "evidence": "합성 확인 이력",
+      "synthetic": true
+    },
+    {
+      "id": "CHECK-H026-2",
+      "householdId": "H026",
+      "sourceType": "보건지소",
+      "checkedAt": "2026-09-10",
+      "checkedFields": [
+        "mobility",
+        "contactRef"
+      ],
+      "changed": null,
+      "operatorLabel": "모의 확인 담당자",
+      "evidence": "합성 확인 이력",
+      "synthetic": true
+    },
+    {
+      "id": "CHECK-H027-1",
+      "householdId": "H027",
+      "sourceType": "가족",
+      "checkedAt": "2026-09-02",
+      "checkedFields": [
+        "mobility",
+        "contactRef"
+      ],
+      "changed": null,
+      "operatorLabel": "모의 확인 담당자",
+      "evidence": "합성 확인 이력",
+      "synthetic": true
+    },
+    {
+      "id": "CHECK-H027-2",
+      "householdId": "H027",
+      "sourceType": "보건지소",
+      "checkedAt": "2026-09-09",
+      "checkedFields": [
+        "mobility",
+        "contactRef"
+      ],
+      "changed": null,
+      "operatorLabel": "모의 확인 담당자",
+      "evidence": "합성 확인 이력",
+      "synthetic": true
+    },
+    {
+      "id": "CHECK-H028-1",
+      "householdId": "H028",
+      "sourceType": "가족",
+      "checkedAt": "2026-09-01",
+      "checkedFields": [
+        "mobility",
+        "contactRef"
+      ],
+      "changed": null,
+      "operatorLabel": "모의 확인 담당자",
+      "evidence": "합성 확인 이력",
+      "synthetic": true
+    },
+    {
+      "id": "CHECK-H028-2",
+      "householdId": "H028",
+      "sourceType": "보건지소",
+      "checkedAt": "2026-09-08",
+      "checkedFields": [
+        "mobility",
+        "contactRef"
+      ],
+      "changed": null,
+      "operatorLabel": "모의 확인 담당자",
+      "evidence": "합성 확인 이력",
+      "synthetic": true
+    },
+    {
+      "id": "CHECK-H029-1",
+      "householdId": "H029",
+      "sourceType": "가족",
+      "checkedAt": "2026-08-31",
+      "checkedFields": [
+        "mobility",
+        "contactRef"
+      ],
+      "changed": null,
+      "operatorLabel": "모의 확인 담당자",
+      "evidence": "합성 확인 이력",
+      "synthetic": true
+    },
+    {
+      "id": "CHECK-H029-2",
+      "householdId": "H029",
+      "sourceType": "보건지소",
+      "checkedAt": "2026-09-07",
+      "checkedFields": [
+        "mobility",
+        "contactRef"
+      ],
+      "changed": null,
+      "operatorLabel": "모의 확인 담당자",
+      "evidence": "합성 확인 이력",
+      "synthetic": true
+    },
+    {
+      "id": "CHECK-H030-1",
+      "householdId": "H030",
+      "sourceType": "가족",
+      "checkedAt": "2026-09-29",
+      "checkedFields": [
+        "mobility",
+        "contactRef"
+      ],
+      "changed": null,
+      "operatorLabel": "모의 확인 담당자",
+      "evidence": "합성 확인 이력",
+      "synthetic": true
+    },
+    {
+      "id": "CHECK-H030-2",
+      "householdId": "H030",
+      "sourceType": "보건지소",
+      "checkedAt": "2026-10-06",
+      "checkedFields": [
+        "mobility",
+        "contactRef"
+      ],
+      "changed": null,
+      "operatorLabel": "모의 확인 담당자",
+      "evidence": "합성 확인 이력",
+      "synthetic": true
+    },
+    {
+      "id": "CHECK-H031-1",
+      "householdId": "H031",
+      "sourceType": "가족",
+      "checkedAt": "2026-09-28",
+      "checkedFields": [
+        "mobility",
+        "contactRef"
+      ],
+      "changed": null,
+      "operatorLabel": "모의 확인 담당자",
+      "evidence": "합성 확인 이력",
+      "synthetic": true
+    },
+    {
+      "id": "CHECK-H031-2",
+      "householdId": "H031",
+      "sourceType": "보건지소",
+      "checkedAt": "2026-10-05",
+      "checkedFields": [
+        "mobility",
+        "contactRef"
+      ],
+      "changed": null,
+      "operatorLabel": "모의 확인 담당자",
+      "evidence": "합성 확인 이력",
+      "synthetic": true
+    },
+    {
+      "id": "CHECK-H032-1",
+      "householdId": "H032",
+      "sourceType": "가족",
+      "checkedAt": "2026-09-27",
+      "checkedFields": [
+        "mobility",
+        "contactRef"
+      ],
+      "changed": null,
+      "operatorLabel": "모의 확인 담당자",
+      "evidence": "합성 확인 이력",
+      "synthetic": true
+    },
+    {
+      "id": "CHECK-H032-2",
+      "householdId": "H032",
+      "sourceType": "보건지소",
+      "checkedAt": "2026-10-04",
+      "checkedFields": [
+        "mobility",
+        "contactRef"
+      ],
+      "changed": null,
+      "operatorLabel": "모의 확인 담당자",
+      "evidence": "합성 확인 이력",
+      "synthetic": true
+    },
+    {
+      "id": "CHECK-H033-1",
+      "householdId": "H033",
+      "sourceType": "가족",
+      "checkedAt": "2026-09-26",
+      "checkedFields": [
+        "mobility",
+        "contactRef"
+      ],
+      "changed": null,
+      "operatorLabel": "모의 확인 담당자",
+      "evidence": "합성 확인 이력",
+      "synthetic": true
+    },
+    {
+      "id": "CHECK-H033-2",
+      "householdId": "H033",
+      "sourceType": "보건지소",
+      "checkedAt": "2026-10-03",
+      "checkedFields": [
+        "mobility",
+        "contactRef"
+      ],
+      "changed": null,
+      "operatorLabel": "모의 확인 담당자",
+      "evidence": "합성 확인 이력",
+      "synthetic": true
+    },
+    {
+      "id": "CHECK-H034-1",
+      "householdId": "H034",
+      "sourceType": "가족",
+      "checkedAt": "2026-09-25",
+      "checkedFields": [
+        "mobility",
+        "contactRef"
+      ],
+      "changed": null,
+      "operatorLabel": "모의 확인 담당자",
+      "evidence": "합성 확인 이력",
+      "synthetic": true
+    },
+    {
+      "id": "CHECK-H034-2",
+      "householdId": "H034",
+      "sourceType": "보건지소",
+      "checkedAt": "2026-10-02",
+      "checkedFields": [
+        "mobility",
+        "contactRef"
+      ],
+      "changed": null,
+      "operatorLabel": "모의 확인 담당자",
+      "evidence": "합성 확인 이력",
+      "synthetic": true
+    },
+    {
+      "id": "CHECK-H035-1",
+      "householdId": "H035",
+      "sourceType": "가족",
+      "checkedAt": "2026-09-24",
+      "checkedFields": [
+        "mobility",
+        "contactRef"
+      ],
+      "changed": null,
+      "operatorLabel": "모의 확인 담당자",
+      "evidence": "합성 확인 이력",
+      "synthetic": true
+    },
+    {
+      "id": "CHECK-H035-2",
+      "householdId": "H035",
+      "sourceType": "보건지소",
+      "checkedAt": "2026-10-01",
+      "checkedFields": [
+        "mobility",
+        "contactRef"
+      ],
+      "changed": null,
+      "operatorLabel": "모의 확인 담당자",
+      "evidence": "합성 확인 이력",
+      "synthetic": true
+    },
+    {
+      "id": "CHECK-H036-1",
+      "householdId": "H036",
+      "sourceType": "가족",
+      "checkedAt": "2026-09-23",
+      "checkedFields": [
+        "mobility",
+        "contactRef"
+      ],
+      "changed": null,
+      "operatorLabel": "모의 확인 담당자",
+      "evidence": "합성 확인 이력",
+      "synthetic": true
+    },
+    {
+      "id": "CHECK-H036-2",
+      "householdId": "H036",
+      "sourceType": "보건지소",
+      "checkedAt": "2026-09-30",
+      "checkedFields": [
+        "mobility",
+        "contactRef"
+      ],
+      "changed": null,
+      "operatorLabel": "모의 확인 담당자",
+      "evidence": "합성 확인 이력",
+      "synthetic": true
+    },
+    {
+      "id": "CHECK-H037-1",
+      "householdId": "H037",
+      "sourceType": "가족",
+      "checkedAt": "2026-09-22",
+      "checkedFields": [
+        "mobility",
+        "contactRef"
+      ],
+      "changed": null,
+      "operatorLabel": "모의 확인 담당자",
+      "evidence": "합성 확인 이력",
+      "synthetic": true
+    },
+    {
+      "id": "CHECK-H037-2",
+      "householdId": "H037",
+      "sourceType": "보건지소",
+      "checkedAt": "2026-09-29",
+      "checkedFields": [
+        "mobility",
+        "contactRef"
+      ],
+      "changed": null,
+      "operatorLabel": "모의 확인 담당자",
+      "evidence": "합성 확인 이력",
+      "synthetic": true
+    },
+    {
+      "id": "CHECK-H038-1",
+      "householdId": "H038",
+      "sourceType": "가족",
+      "checkedAt": "2026-09-21",
+      "checkedFields": [
+        "mobility",
+        "contactRef"
+      ],
+      "changed": null,
+      "operatorLabel": "모의 확인 담당자",
+      "evidence": "합성 확인 이력",
+      "synthetic": true
+    },
+    {
+      "id": "CHECK-H038-2",
+      "householdId": "H038",
+      "sourceType": "가족",
+      "checkedAt": "2026-09-28",
+      "checkedFields": [
+        "mobility",
+        "contactRef"
+      ],
+      "changed": null,
+      "operatorLabel": "모의 확인 담당자",
+      "evidence": "합성 확인 이력",
+      "synthetic": true
+    },
+    {
+      "id": "CHECK-H039-1",
+      "householdId": "H039",
+      "sourceType": "가족",
+      "checkedAt": "2026-09-20",
+      "checkedFields": [
+        "mobility",
+        "contactRef"
+      ],
+      "changed": null,
+      "operatorLabel": "모의 확인 담당자",
+      "evidence": "합성 확인 이력",
+      "synthetic": true
+    },
+    {
+      "id": "CHECK-H039-2",
+      "householdId": "H039",
+      "sourceType": "가족",
+      "checkedAt": "2026-09-27",
+      "checkedFields": [
+        "mobility",
+        "contactRef"
+      ],
+      "changed": null,
+      "operatorLabel": "모의 확인 담당자",
+      "evidence": "합성 확인 이력",
+      "synthetic": true
+    },
+    {
+      "id": "CHECK-H040-1",
+      "householdId": "H040",
+      "sourceType": "가족",
+      "checkedAt": "2026-07-02",
+      "checkedFields": [
+        "mobility",
+        "contactRef"
+      ],
+      "changed": null,
+      "operatorLabel": "모의 확인 담당자",
+      "evidence": "합성 확인 이력",
+      "synthetic": true
+    },
+    {
+      "id": "CHECK-H040-2",
+      "householdId": "H040",
+      "sourceType": "가족",
+      "checkedAt": "2026-07-09",
+      "checkedFields": [
+        "mobility",
+        "contactRef"
+      ],
+      "changed": null,
+      "operatorLabel": "모의 확인 담당자",
+      "evidence": "합성 확인 이력",
+      "synthetic": true
+    },
+    {
+      "id": "CHECK-H041-1",
+      "householdId": "H041",
+      "sourceType": "가족",
+      "checkedAt": "2026-09-18",
+      "checkedFields": [
+        "mobility",
+        "contactRef"
+      ],
+      "changed": null,
+      "operatorLabel": "모의 확인 담당자",
+      "evidence": "합성 확인 이력",
+      "synthetic": true
+    },
+    {
+      "id": "CHECK-H041-2",
+      "householdId": "H041",
+      "sourceType": "가족",
+      "checkedAt": "2026-09-25",
+      "checkedFields": [
+        "mobility",
+        "contactRef"
+      ],
+      "changed": null,
+      "operatorLabel": "모의 확인 담당자",
+      "evidence": "합성 확인 이력",
+      "synthetic": true
+    },
+    {
+      "id": "CHECK-H042-1",
+      "householdId": "H042",
+      "sourceType": "가족",
+      "checkedAt": "2026-09-17",
+      "checkedFields": [
+        "mobility",
+        "contactRef"
+      ],
+      "changed": null,
+      "operatorLabel": "모의 확인 담당자",
+      "evidence": "합성 확인 이력",
+      "synthetic": true
+    },
+    {
+      "id": "CHECK-H042-2",
+      "householdId": "H042",
+      "sourceType": "가족",
+      "checkedAt": "2026-09-24",
+      "checkedFields": [
+        "mobility",
+        "contactRef"
+      ],
+      "changed": null,
+      "operatorLabel": "모의 확인 담당자",
+      "evidence": "합성 확인 이력",
+      "synthetic": true
+    },
+    {
+      "id": "CHECK-H043-1",
+      "householdId": "H043",
+      "sourceType": "가족",
+      "checkedAt": "2026-09-16",
+      "checkedFields": [
+        "mobility",
+        "contactRef"
+      ],
+      "changed": null,
+      "operatorLabel": "모의 확인 담당자",
+      "evidence": "합성 확인 이력",
+      "synthetic": true
+    },
+    {
+      "id": "CHECK-H043-2",
+      "householdId": "H043",
+      "sourceType": "통화",
+      "checkedAt": "2026-09-23",
+      "checkedFields": [
+        "mobility",
+        "contactRef"
+      ],
+      "changed": null,
+      "operatorLabel": "모의 확인 담당자",
+      "evidence": "합성 확인 이력",
+      "synthetic": true
+    },
+    {
+      "id": "CHECK-H044-1",
+      "householdId": "H044",
+      "sourceType": "가족",
+      "checkedAt": "2026-09-15",
+      "checkedFields": [
+        "mobility",
+        "contactRef"
+      ],
+      "changed": null,
+      "operatorLabel": "모의 확인 담당자",
+      "evidence": "합성 확인 이력",
+      "synthetic": true
+    },
+    {
+      "id": "CHECK-H044-2",
+      "householdId": "H044",
+      "sourceType": "통화",
+      "checkedAt": "2026-09-22",
+      "checkedFields": [
+        "mobility",
+        "contactRef"
+      ],
+      "changed": null,
+      "operatorLabel": "모의 확인 담당자",
+      "evidence": "합성 확인 이력",
+      "synthetic": true
+    },
+    {
+      "id": "CHECK-H045-1",
+      "householdId": "H045",
+      "sourceType": "가족",
+      "checkedAt": "2026-09-14",
+      "checkedFields": [
+        "mobility",
+        "contactRef"
+      ],
+      "changed": null,
+      "operatorLabel": "모의 확인 담당자",
+      "evidence": "합성 확인 이력",
+      "synthetic": true
+    },
+    {
+      "id": "CHECK-H045-2",
+      "householdId": "H045",
+      "sourceType": "통화",
+      "checkedAt": "2026-09-21",
+      "checkedFields": [
+        "mobility",
+        "contactRef"
+      ],
+      "changed": null,
+      "operatorLabel": "모의 확인 담당자",
+      "evidence": "합성 확인 이력",
+      "synthetic": true
+    },
+    {
+      "id": "CHECK-H046-1",
+      "householdId": "H046",
+      "sourceType": "가족",
+      "checkedAt": "2026-09-13",
+      "checkedFields": [
+        "mobility",
+        "contactRef"
+      ],
+      "changed": null,
+      "operatorLabel": "모의 확인 담당자",
+      "evidence": "합성 확인 이력",
+      "synthetic": true
+    },
+    {
+      "id": "CHECK-H046-2",
+      "householdId": "H046",
+      "sourceType": "통화",
+      "checkedAt": "2026-09-20",
+      "checkedFields": [
+        "mobility",
+        "contactRef"
+      ],
+      "changed": null,
+      "operatorLabel": "모의 확인 담당자",
+      "evidence": "합성 확인 이력",
+      "synthetic": true
+    },
+    {
+      "id": "CHECK-H047-1",
+      "householdId": "H047",
+      "sourceType": "가족",
+      "checkedAt": "2026-09-12",
+      "checkedFields": [
+        "mobility",
+        "contactRef"
+      ],
+      "changed": null,
+      "operatorLabel": "모의 확인 담당자",
+      "evidence": "합성 확인 이력",
+      "synthetic": true
+    },
+    {
+      "id": "CHECK-H047-2",
+      "householdId": "H047",
+      "sourceType": "통화",
+      "checkedAt": "2026-09-19",
+      "checkedFields": [
+        "mobility",
+        "contactRef"
+      ],
+      "changed": null,
+      "operatorLabel": "모의 확인 담당자",
+      "evidence": "합성 확인 이력",
+      "synthetic": true
+    },
+    {
+      "id": "CHECK-H048-1",
+      "householdId": "H048",
+      "sourceType": "가족",
+      "checkedAt": "2026-09-11",
+      "checkedFields": [
+        "mobility",
+        "contactRef"
+      ],
+      "changed": null,
+      "operatorLabel": "모의 확인 담당자",
+      "evidence": "합성 확인 이력",
+      "synthetic": true
+    },
+    {
+      "id": "CHECK-H048-2",
+      "householdId": "H048",
+      "sourceType": "통화",
+      "checkedAt": "2026-09-18",
+      "checkedFields": [
+        "mobility",
+        "contactRef"
+      ],
+      "changed": null,
+      "operatorLabel": "모의 확인 담당자",
+      "evidence": "합성 확인 이력",
+      "synthetic": true
+    }
+  ],
+  "map": {
+    "width": 1200,
+    "height": 760,
+    "metersPerPixel": 2,
+    "ignition": {
+      "x": 120,
+      "y": 60
+    },
+    "office": {
+      "x": 660,
+      "y": 640
+    },
+    "wind": {
+      "direction": 280,
+      "speedMps": 9
+    },
+    "roads": [
+      {
+        "id": "ROAD1",
+        "label": "북측 임도",
+        "blocked": true,
+        "points": [
+          [
+            150,
+            70
+          ],
+          [
+            300,
+            120
+          ],
+          [
+            800,
+            180
+          ]
+        ]
+      },
+      {
+        "id": "ROAD2",
+        "label": "모의 연결도로 2",
+        "blocked": false,
+        "points": [
+          [
+            180,
+            350
+          ],
+          [
+            370,
+            360
+          ],
+          [
+            740,
+            390
+          ],
+          [
+            1030,
+            360
+          ]
+        ]
+      },
+      {
+        "id": "ROAD3",
+        "label": "모의 연결도로 3",
+        "blocked": false,
+        "points": [
+          [
+            370,
+            360
+          ],
+          [
+            370,
+            620
+          ],
+          [
+            660,
+            640
+          ]
+        ]
+      },
+      {
+        "id": "ROAD4",
+        "label": "모의 연결도로 4",
+        "blocked": false,
+        "points": [
+          [
+            740,
+            390
+          ],
+          [
+            660,
+            640
+          ],
+          [
+            660,
+            720
+          ]
+        ]
+      },
+      {
+        "id": "ROAD5",
+        "label": "모의 연결도로 5",
+        "blocked": false,
+        "points": [
+          [
+            430,
+            200
+          ],
+          [
+            460,
+            360
+          ],
+          [
+            740,
+            390
+          ]
+        ]
+      },
+      {
+        "id": "ROAD6",
+        "label": "모의 연결도로 6",
+        "blocked": false,
+        "points": [
+          [
+            1030,
+            360
+          ],
+          [
+            1030,
+            580
+          ],
+          [
+            660,
+            640
+          ]
+        ]
+      }
+    ],
+    "river": [
+      [
+        50,
+        700
+      ],
+      [
+        300,
+        690
+      ],
+      [
+        570,
+        670
+      ],
+      [
+        900,
+        690
+      ],
+      [
+        1170,
+        710
+      ]
+    ],
+    "synthetic": true
+  }
+}

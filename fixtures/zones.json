@@ -1,0 +1,62 @@
+[
+  {
+    "id": "W",
+    "label": "서 구역",
+    "teamId": "TW",
+    "shelterId": "S1",
+    "householdCount": 10,
+    "predictedArrivalMinutes": 38,
+    "demoBounds": {
+      "x1": 120,
+      "y1": 270,
+      "x2": 360,
+      "y2": 670
+    },
+    "synthetic": true
+  },
+  {
+    "id": "N",
+    "label": "북 구역",
+    "teamId": "TN",
+    "shelterId": "S2",
+    "householdCount": 15,
+    "predictedArrivalMinutes": 23,
+    "demoBounds": {
+      "x1": 280,
+      "y1": 100,
+      "x2": 860,
+      "y2": 260
+    },
+    "synthetic": true
+  },
+  {
+    "id": "E",
+    "label": "동 구역",
+    "teamId": "TE",
+    "shelterId": "S2",
+    "householdCount": 13,
+    "predictedArrivalMinutes": 42,
+    "demoBounds": {
+      "x1": 890,
+      "y1": 280,
+      "x2": 1130,
+      "y2": 660
+    },
+    "synthetic": true
+  },
+  {
+    "id": "S",
+    "label": "남 구역",
+    "teamId": "TS",
+    "shelterId": "S3",
+    "householdCount": 10,
+    "predictedArrivalMinutes": 61,
+    "demoBounds": {
+      "x1": 400,
+      "y1": 450,
+      "x2": 820,
+      "y2": 700
+    },
+    "synthetic": true
+  }
+]

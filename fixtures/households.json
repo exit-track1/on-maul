@@ -1,0 +1,1571 @@
+[
+  {
+    "id": "H001",
+    "name": "문윤○",
+    "age": 82,
+    "gender": "여",
+    "priorityGrade": 2,
+    "mobility": "자력",
+    "healthNotes": [
+      "특이사항 기록 없음"
+    ],
+    "zoneId": "W",
+    "addressLabel": "DEMO-W-가구-001",
+    "phoneKind": "휴대",
+    "contactRef": "DEMO-CONTACT-H001",
+    "guardian": null,
+    "consentToCall": true,
+    "callEligible": true,
+    "exclusionReason": null,
+    "sourceType": "생활지원사",
+    "lastCheckedAt": "2026-10-05",
+    "originalNote": "모의 방문 메모: 자력 / 특이사항 기록 없음",
+    "demoPosition": {
+      "x": 145,
+      "y": 292
+    },
+    "teamId": "TW",
+    "shelterId": "S1",
+    "cohabitant": "가족 동거",
+    "devices": [],
+    "synthetic": true
+  },
+  {
+    "id": "H002",
+    "name": "한정○",
+    "age": 66,
+    "gender": "남",
+    "priorityGrade": 3,
+    "mobility": "보조",
+    "healthNotes": [
+      "보행 보조 필요"
+    ],
+    "zoneId": "W",
+    "addressLabel": "DEMO-W-가구-002",
+    "phoneKind": "휴대",
+    "contactRef": "DEMO-CONTACT-H002",
+    "guardian": null,
+    "consentToCall": true,
+    "callEligible": true,
+    "exclusionReason": null,
+    "sourceType": "생활지원사",
+    "lastCheckedAt": "2026-10-04",
+    "originalNote": "모의 방문 메모: 보조 / 보행 보조 필요",
+    "demoPosition": {
+      "x": 192,
+      "y": 292
+    },
+    "teamId": "TW",
+    "shelterId": "S1",
+    "cohabitant": "가족 동거",
+    "devices": [
+      "휠체어"
+    ],
+    "synthetic": true
+  },
+  {
+    "id": "H003",
+    "name": "서민○",
+    "age": 67,
+    "gender": "여",
+    "priorityGrade": 1,
+    "mobility": "자력",
+    "healthNotes": [
+      "특이사항 기록 없음"
+    ],
+    "zoneId": "W",
+    "addressLabel": "DEMO-W-가구-003",
+    "phoneKind": "휴대",
+    "contactRef": "DEMO-CONTACT-H003",
+    "guardian": {
+      "relationship": "가족",
+      "name": "가족○",
+      "contactRef": "DEMO-CONTACT-G003"
+    },
+    "consentToCall": true,
+    "callEligible": true,
+    "exclusionReason": null,
+    "sourceType": "생활지원사",
+    "lastCheckedAt": "2026-10-03",
+    "originalNote": "모의 방문 메모: 자력 / 특이사항 기록 없음",
+    "demoPosition": {
+      "x": 240,
+      "y": 292
+    },
+    "teamId": "TW",
+    "shelterId": "S1",
+    "cohabitant": "가족 동거",
+    "devices": [],
+    "synthetic": true
+  },
+  {
+    "id": "H004",
+    "name": "도선○",
+    "age": 88,
+    "gender": "남",
+    "priorityGrade": 3,
+    "mobility": "자력",
+    "healthNotes": [
+      "특이사항 기록 없음"
+    ],
+    "zoneId": "W",
+    "addressLabel": "DEMO-W-가구-004",
+    "phoneKind": "유선",
+    "contactRef": "DEMO-CONTACT-H004",
+    "guardian": null,
+    "consentToCall": false,
+    "callEligible": false,
+    "exclusionReason": "모의 발신 동의 없음",
+    "sourceType": "생활지원사",
+    "lastCheckedAt": "2026-10-02",
+    "originalNote": "모의 방문 메모: 자력 / 특이사항 기록 없음",
+    "demoPosition": {
+      "x": 288,
+      "y": 292
+    },
+    "teamId": "TW",
+    "shelterId": "S1",
+    "cohabitant": "독거",
+    "devices": [],
+    "synthetic": true
+  },
+  {
+    "id": "H005",
+    "name": "정하○",
+    "age": 69,
+    "gender": "여",
+    "priorityGrade": 1,
+    "mobility": "자력",
+    "healthNotes": [
+      "특이사항 기록 없음"
+    ],
+    "zoneId": "W",
+    "addressLabel": "DEMO-W-가구-005",
+    "phoneKind": "휴대",
+    "contactRef": "DEMO-CONTACT-H005",
+    "guardian": null,
+    "consentToCall": true,
+    "callEligible": true,
+    "exclusionReason": null,
+    "sourceType": "생활지원사",
+    "lastCheckedAt": "2026-10-01",
+    "originalNote": "모의 방문 메모: 자력 / 특이사항 기록 없음",
+    "demoPosition": {
+      "x": 335,
+      "y": 292
+    },
+    "teamId": "TW",
+    "shelterId": "S1",
+    "cohabitant": "가족 동거",
+    "devices": [],
+    "synthetic": true
+  },
+  {
+    "id": "H006",
+    "name": "김윤○",
+    "age": 81,
+    "gender": "남",
+    "priorityGrade": 2,
+    "mobility": "자력",
+    "healthNotes": [
+      "특이사항 기록 없음"
+    ],
+    "zoneId": "W",
+    "addressLabel": "DEMO-W-가구-006",
+    "phoneKind": "휴대",
+    "contactRef": "DEMO-CONTACT-H006",
+    "guardian": {
+      "relationship": "가족",
+      "name": "가족○",
+      "contactRef": "DEMO-CONTACT-G006"
+    },
+    "consentToCall": true,
+    "callEligible": true,
+    "exclusionReason": null,
+    "sourceType": "생활지원사",
+    "lastCheckedAt": "2026-07-11",
+    "originalNote": "모의 방문 메모: 자력 / 특이사항 기록 없음",
+    "demoPosition": {
+      "x": 145,
+      "y": 648
+    },
+    "teamId": "TW",
+    "shelterId": "S1",
+    "cohabitant": "가족 동거",
+    "devices": [],
+    "synthetic": true
+  },
+  {
+    "id": "H007",
+    "name": "문정○",
+    "age": 71,
+    "gender": "여",
+    "priorityGrade": 1,
+    "mobility": "자력",
+    "healthNotes": [
+      "특이사항 기록 없음"
+    ],
+    "zoneId": "W",
+    "addressLabel": "DEMO-W-가구-007",
+    "phoneKind": "휴대",
+    "contactRef": "DEMO-CONTACT-H007",
+    "guardian": null,
+    "consentToCall": true,
+    "callEligible": true,
+    "exclusionReason": null,
+    "sourceType": "생활지원사",
+    "lastCheckedAt": "2026-09-29",
+    "originalNote": "모의 방문 메모: 자력 / 특이사항 기록 없음",
+    "demoPosition": {
+      "x": 192,
+      "y": 648
+    },
+    "teamId": "TW",
+    "shelterId": "S1",
+    "cohabitant": "가족 동거",
+    "devices": [],
+    "synthetic": true
+  },
+  {
+    "id": "H008",
+    "name": "한민○",
+    "age": 83,
+    "gender": "남",
+    "priorityGrade": 2,
+    "mobility": "자력",
+    "healthNotes": [
+      "특이사항 기록 없음"
+    ],
+    "zoneId": "W",
+    "addressLabel": "DEMO-W-가구-008",
+    "phoneKind": "유선",
+    "contactRef": "DEMO-CONTACT-H008",
+    "guardian": null,
+    "consentToCall": true,
+    "callEligible": true,
+    "exclusionReason": null,
+    "sourceType": "생활지원사",
+    "lastCheckedAt": "2026-09-28",
+    "originalNote": "모의 방문 메모: 자력 / 특이사항 기록 없음",
+    "demoPosition": {
+      "x": 240,
+      "y": 648
+    },
+    "teamId": "TW",
+    "shelterId": "S1",
+    "cohabitant": "가족 동거",
+    "devices": [],
+    "synthetic": true
+  },
+  {
+    "id": "H009",
+    "name": "서선○",
+    "age": 73,
+    "gender": "여",
+    "priorityGrade": 3,
+    "mobility": "보조",
+    "healthNotes": [
+      "보행 보조 필요"
+    ],
+    "zoneId": "W",
+    "addressLabel": "DEMO-W-가구-009",
+    "phoneKind": "휴대",
+    "contactRef": "DEMO-CONTACT-H009",
+    "guardian": {
+      "relationship": "가족",
+      "name": "가족○",
+      "contactRef": "DEMO-CONTACT-G009"
+    },
+    "consentToCall": true,
+    "callEligible": true,
+    "exclusionReason": null,
+    "sourceType": "생활지원사",
+    "lastCheckedAt": "2026-07-10",
+    "originalNote": "모의 방문 메모: 보조 / 보행 보조 필요",
+    "demoPosition": {
+      "x": 288,
+      "y": 648
+    },
+    "teamId": "TW",
+    "shelterId": "S1",
+    "cohabitant": "가족 동거",
+    "devices": [
+      "휠체어"
+    ],
+    "synthetic": true
+  },
+  {
+    "id": "H010",
+    "name": "도하○",
+    "age": 74,
+    "gender": "남",
+    "priorityGrade": 1,
+    "mobility": "자력",
+    "healthNotes": [
+      "특이사항 기록 없음"
+    ],
+    "zoneId": "W",
+    "addressLabel": "DEMO-W-가구-010",
+    "phoneKind": "휴대",
+    "contactRef": "DEMO-CONTACT-H010",
+    "guardian": null,
+    "consentToCall": true,
+    "callEligible": true,
+    "exclusionReason": null,
+    "sourceType": "생활지원사",
+    "lastCheckedAt": "2026-09-26",
+    "originalNote": "모의 방문 메모: 자력 / 특이사항 기록 없음",
+    "demoPosition": {
+      "x": 335,
+      "y": 648
+    },
+    "teamId": "TW",
+    "shelterId": "S1",
+    "cohabitant": "가족 동거",
+    "devices": [],
+    "synthetic": true
+  },
+  {
+    "id": "H011",
+    "name": "정윤○",
+    "age": 85,
+    "gender": "여",
+    "priorityGrade": 3,
+    "mobility": "자력",
+    "healthNotes": [
+      "특이사항 기록 없음"
+    ],
+    "zoneId": "N",
+    "addressLabel": "DEMO-N-가구-011",
+    "phoneKind": "휴대",
+    "contactRef": "DEMO-CONTACT-H011",
+    "guardian": null,
+    "consentToCall": true,
+    "callEligible": true,
+    "exclusionReason": null,
+    "sourceType": "생활지원사",
+    "lastCheckedAt": "2026-09-25",
+    "originalNote": "모의 방문 메모: 자력 / 특이사항 기록 없음",
+    "demoPosition": {
+      "x": 305,
+      "y": 122
+    },
+    "teamId": "TN",
+    "shelterId": "S2",
+    "cohabitant": "독거",
+    "devices": [],
+    "synthetic": true
+  },
+  {
+    "id": "H012",
+    "name": "김정○",
+    "age": 76,
+    "gender": "남",
+    "priorityGrade": 4,
+    "mobility": "와상",
+    "healthNotes": [
+      "산소 장비 사용"
+    ],
+    "zoneId": "N",
+    "addressLabel": "DEMO-N-가구-012",
+    "phoneKind": "유선",
+    "contactRef": "DEMO-CONTACT-H012",
+    "guardian": {
+      "relationship": "가족",
+      "name": "가족○",
+      "contactRef": "DEMO-CONTACT-G012"
+    },
+    "consentToCall": true,
+    "callEligible": true,
+    "exclusionReason": null,
+    "sourceType": "생활지원사",
+    "lastCheckedAt": "2026-09-24",
+    "originalNote": "모의 방문 메모: 와상 / 산소 장비 사용",
+    "demoPosition": {
+      "x": 438,
+      "y": 122
+    },
+    "teamId": "TN",
+    "shelterId": "S2",
+    "cohabitant": "가족 동거",
+    "devices": [
+      "산소",
+      "들것"
+    ],
+    "synthetic": true
+  },
+  {
+    "id": "H013",
+    "name": "문민○",
+    "age": 77,
+    "gender": "여",
+    "priorityGrade": 1,
+    "mobility": "자력",
+    "healthNotes": [
+      "특이사항 기록 없음"
+    ],
+    "zoneId": "N",
+    "addressLabel": "DEMO-N-가구-013",
+    "phoneKind": "휴대",
+    "contactRef": "DEMO-CONTACT-H013",
+    "guardian": null,
+    "consentToCall": true,
+    "callEligible": true,
+    "exclusionReason": null,
+    "sourceType": "생활지원사",
+    "lastCheckedAt": "2026-09-23",
+    "originalNote": "모의 방문 메모: 자력 / 특이사항 기록 없음",
+    "demoPosition": {
+      "x": 570,
+      "y": 122
+    },
+    "teamId": "TN",
+    "shelterId": "S2",
+    "cohabitant": "가족 동거",
+    "devices": [],
+    "synthetic": true
+  },
+  {
+    "id": "H014",
+    "name": "한선○",
+    "age": 83,
+    "gender": "남",
+    "priorityGrade": 2,
+    "mobility": "자력",
+    "healthNotes": [
+      "특이사항 기록 없음"
+    ],
+    "zoneId": "N",
+    "addressLabel": "DEMO-N-가구-014",
+    "phoneKind": "휴대",
+    "contactRef": "DEMO-CONTACT-H014",
+    "guardian": null,
+    "consentToCall": true,
+    "callEligible": true,
+    "exclusionReason": null,
+    "sourceType": "생활지원사",
+    "lastCheckedAt": "2026-09-22",
+    "originalNote": "모의 방문 메모: 자력 / 특이사항 기록 없음",
+    "demoPosition": {
+      "x": 702,
+      "y": 122
+    },
+    "teamId": "TN",
+    "shelterId": "S2",
+    "cohabitant": "가족 동거",
+    "devices": [],
+    "synthetic": true
+  },
+  {
+    "id": "H015",
+    "name": "서하○",
+    "age": 64,
+    "gender": "여",
+    "priorityGrade": 3,
+    "mobility": "보조",
+    "healthNotes": [
+      "보행 보조 필요"
+    ],
+    "zoneId": "N",
+    "addressLabel": "DEMO-N-가구-015",
+    "phoneKind": "휴대",
+    "contactRef": "DEMO-CONTACT-H015",
+    "guardian": {
+      "relationship": "가족",
+      "name": "가족○",
+      "contactRef": "DEMO-CONTACT-G015"
+    },
+    "consentToCall": true,
+    "callEligible": true,
+    "exclusionReason": null,
+    "sourceType": "생활지원사",
+    "lastCheckedAt": "2026-09-21",
+    "originalNote": "모의 방문 메모: 보조 / 보행 보조 필요",
+    "demoPosition": {
+      "x": 835,
+      "y": 122
+    },
+    "teamId": "TN",
+    "shelterId": "S2",
+    "cohabitant": "가족 동거",
+    "devices": [
+      "휠체어"
+    ],
+    "synthetic": true
+  },
+  {
+    "id": "H016",
+    "name": "도윤○",
+    "age": 65,
+    "gender": "남",
+    "priorityGrade": 1,
+    "mobility": "자력",
+    "healthNotes": [
+      "특이사항 기록 없음"
+    ],
+    "zoneId": "N",
+    "addressLabel": "DEMO-N-가구-016",
+    "phoneKind": "유선",
+    "contactRef": "DEMO-CONTACT-H016",
+    "guardian": null,
+    "consentToCall": true,
+    "callEligible": true,
+    "exclusionReason": null,
+    "sourceType": "이장",
+    "lastCheckedAt": "2026-09-20",
+    "originalNote": "모의 방문 메모: 자력 / 특이사항 기록 없음",
+    "demoPosition": {
+      "x": 305,
+      "y": 180
+    },
+    "teamId": "TN",
+    "shelterId": "S2",
+    "cohabitant": "가족 동거",
+    "devices": [],
+    "synthetic": true
+  },
+  {
+    "id": "H017",
+    "name": "정정○",
+    "age": 66,
+    "gender": "여",
+    "priorityGrade": 1,
+    "mobility": "자력",
+    "healthNotes": [
+      "특이사항 기록 없음"
+    ],
+    "zoneId": "N",
+    "addressLabel": "DEMO-N-가구-017",
+    "phoneKind": "휴대",
+    "contactRef": "DEMO-CONTACT-H017",
+    "guardian": null,
+    "consentToCall": true,
+    "callEligible": true,
+    "exclusionReason": null,
+    "sourceType": "이장",
+    "lastCheckedAt": "2026-09-19",
+    "originalNote": "모의 방문 메모: 자력 / 특이사항 기록 없음",
+    "demoPosition": {
+      "x": 438,
+      "y": 180
+    },
+    "teamId": "TN",
+    "shelterId": "S2",
+    "cohabitant": "가족 동거",
+    "devices": [],
+    "synthetic": true
+  },
+  {
+    "id": "H018",
+    "name": "김민○",
+    "age": 67,
+    "gender": "남",
+    "priorityGrade": 4,
+    "mobility": "자력",
+    "healthNotes": [
+      "산소 장비 사용"
+    ],
+    "zoneId": "N",
+    "addressLabel": "DEMO-N-가구-018",
+    "phoneKind": "휴대",
+    "contactRef": "DEMO-CONTACT-H018",
+    "guardian": {
+      "relationship": "가족",
+      "name": "가족○",
+      "contactRef": "DEMO-CONTACT-G018"
+    },
+    "consentToCall": true,
+    "callEligible": true,
+    "exclusionReason": null,
+    "sourceType": "이장",
+    "lastCheckedAt": "2026-09-18",
+    "originalNote": "모의 방문 메모: 자력 / 산소 장비 사용",
+    "demoPosition": {
+      "x": 570,
+      "y": 180
+    },
+    "teamId": "TN",
+    "shelterId": "S2",
+    "cohabitant": "가족 동거",
+    "devices": [
+      "산소"
+    ],
+    "synthetic": true
+  },
+  {
+    "id": "H019",
+    "name": "문선○",
+    "age": 68,
+    "gender": "여",
+    "priorityGrade": 1,
+    "mobility": "자력",
+    "healthNotes": [
+      "특이사항 기록 없음"
+    ],
+    "zoneId": "N",
+    "addressLabel": "DEMO-N-가구-019",
+    "phoneKind": "휴대",
+    "contactRef": "DEMO-CONTACT-H019",
+    "guardian": null,
+    "consentToCall": true,
+    "callEligible": true,
+    "exclusionReason": null,
+    "sourceType": "이장",
+    "lastCheckedAt": "2026-09-17",
+    "originalNote": "모의 방문 메모: 자력 / 특이사항 기록 없음",
+    "demoPosition": {
+      "x": 702,
+      "y": 180
+    },
+    "teamId": "TN",
+    "shelterId": "S2",
+    "cohabitant": "가족 동거",
+    "devices": [],
+    "synthetic": true
+  },
+  {
+    "id": "H020",
+    "name": "한하○",
+    "age": 83,
+    "gender": "남",
+    "priorityGrade": 2,
+    "mobility": "자력",
+    "healthNotes": [
+      "특이사항 기록 없음"
+    ],
+    "zoneId": "N",
+    "addressLabel": "DEMO-N-가구-020",
+    "phoneKind": "유선",
+    "contactRef": "DEMO-CONTACT-H020",
+    "guardian": null,
+    "consentToCall": true,
+    "callEligible": true,
+    "exclusionReason": null,
+    "sourceType": "이장",
+    "lastCheckedAt": "2026-09-16",
+    "originalNote": "모의 방문 메모: 자력 / 특이사항 기록 없음",
+    "demoPosition": {
+      "x": 835,
+      "y": 180
+    },
+    "teamId": "TN",
+    "shelterId": "S2",
+    "cohabitant": "가족 동거",
+    "devices": [],
+    "synthetic": true
+  },
+  {
+    "id": "H021",
+    "name": "서윤○",
+    "age": 85,
+    "gender": "여",
+    "priorityGrade": 3,
+    "mobility": "자력",
+    "healthNotes": [
+      "특이사항 기록 없음"
+    ],
+    "zoneId": "N",
+    "addressLabel": "DEMO-N-가구-021",
+    "phoneKind": "휴대",
+    "contactRef": "DEMO-CONTACT-H021",
+    "guardian": {
+      "relationship": "가족",
+      "name": "가족○",
+      "contactRef": "DEMO-CONTACT-G021"
+    },
+    "consentToCall": true,
+    "callEligible": true,
+    "exclusionReason": null,
+    "sourceType": "이장",
+    "lastCheckedAt": "2026-07-10",
+    "originalNote": "모의 방문 메모: 자력 / 특이사항 기록 없음",
+    "demoPosition": {
+      "x": 305,
+      "y": 238
+    },
+    "teamId": "TN",
+    "shelterId": "S2",
+    "cohabitant": "독거",
+    "devices": [],
+    "synthetic": true
+  },
+  {
+    "id": "H022",
+    "name": "도정○",
+    "age": 71,
+    "gender": "남",
+    "priorityGrade": 1,
+    "mobility": "자력",
+    "healthNotes": [
+      "특이사항 기록 없음"
+    ],
+    "zoneId": "N",
+    "addressLabel": "DEMO-N-가구-022",
+    "phoneKind": "휴대",
+    "contactRef": "DEMO-CONTACT-H022",
+    "guardian": null,
+    "consentToCall": true,
+    "callEligible": true,
+    "exclusionReason": null,
+    "sourceType": "이장",
+    "lastCheckedAt": "2026-09-14",
+    "originalNote": "모의 방문 메모: 자력 / 특이사항 기록 없음",
+    "demoPosition": {
+      "x": 438,
+      "y": 238
+    },
+    "teamId": "TN",
+    "shelterId": "S2",
+    "cohabitant": "가족 동거",
+    "devices": [],
+    "synthetic": true
+  },
+  {
+    "id": "H023",
+    "name": "정민○",
+    "age": 72,
+    "gender": "여",
+    "priorityGrade": 1,
+    "mobility": "자력",
+    "healthNotes": [
+      "특이사항 기록 없음"
+    ],
+    "zoneId": "N",
+    "addressLabel": "DEMO-N-가구-023",
+    "phoneKind": "휴대",
+    "contactRef": "DEMO-CONTACT-H023",
+    "guardian": null,
+    "consentToCall": true,
+    "callEligible": true,
+    "exclusionReason": null,
+    "sourceType": "이장",
+    "lastCheckedAt": "2026-09-13",
+    "originalNote": "모의 방문 메모: 자력 / 특이사항 기록 없음",
+    "demoPosition": {
+      "x": 570,
+      "y": 238
+    },
+    "teamId": "TN",
+    "shelterId": "S2",
+    "cohabitant": "가족 동거",
+    "devices": [],
+    "synthetic": true
+  },
+  {
+    "id": "H024",
+    "name": "김선○",
+    "age": 73,
+    "gender": "남",
+    "priorityGrade": 4,
+    "mobility": "불명",
+    "healthNotes": [
+      "거동 확인 필요"
+    ],
+    "zoneId": "N",
+    "addressLabel": "DEMO-N-가구-024",
+    "phoneKind": "유선",
+    "contactRef": "DEMO-CONTACT-H024",
+    "guardian": {
+      "relationship": "가족",
+      "name": "가족○",
+      "contactRef": "DEMO-CONTACT-G024"
+    },
+    "consentToCall": true,
+    "callEligible": true,
+    "exclusionReason": null,
+    "sourceType": "이장",
+    "lastCheckedAt": "2026-09-12",
+    "originalNote": "모의 방문 메모: 불명 / 거동 확인 필요",
+    "demoPosition": {
+      "x": 702,
+      "y": 238
+    },
+    "teamId": "TN",
+    "shelterId": "S2",
+    "cohabitant": "가족 동거",
+    "devices": [],
+    "synthetic": true
+  },
+  {
+    "id": "H025",
+    "name": "문하○",
+    "age": 74,
+    "gender": "여",
+    "priorityGrade": 1,
+    "mobility": "자력",
+    "healthNotes": [
+      "특이사항 기록 없음"
+    ],
+    "zoneId": "N",
+    "addressLabel": "DEMO-N-가구-025",
+    "phoneKind": "휴대",
+    "contactRef": "DEMO-CONTACT-H025",
+    "guardian": null,
+    "consentToCall": true,
+    "callEligible": true,
+    "exclusionReason": null,
+    "sourceType": "이장",
+    "lastCheckedAt": "2026-09-11",
+    "originalNote": "모의 방문 메모: 자력 / 특이사항 기록 없음",
+    "demoPosition": {
+      "x": 835,
+      "y": 238
+    },
+    "teamId": "TN",
+    "shelterId": "S2",
+    "cohabitant": "가족 동거",
+    "devices": [],
+    "synthetic": true
+  },
+  {
+    "id": "H026",
+    "name": "한윤○",
+    "age": 75,
+    "gender": "남",
+    "priorityGrade": 3,
+    "mobility": "보조",
+    "healthNotes": [
+      "보행 보조 필요"
+    ],
+    "zoneId": "E",
+    "addressLabel": "DEMO-E-가구-026",
+    "phoneKind": "휴대",
+    "contactRef": "DEMO-CONTACT-H026",
+    "guardian": null,
+    "consentToCall": true,
+    "callEligible": true,
+    "exclusionReason": null,
+    "sourceType": "보건지소",
+    "lastCheckedAt": "2026-09-10",
+    "originalNote": "모의 방문 메모: 보조 / 보행 보조 필요",
+    "demoPosition": {
+      "x": 915,
+      "y": 302
+    },
+    "teamId": "TE",
+    "shelterId": "S2",
+    "cohabitant": "가족 동거",
+    "devices": [
+      "휠체어"
+    ],
+    "synthetic": true
+  },
+  {
+    "id": "H027",
+    "name": "서정○",
+    "age": 81,
+    "gender": "여",
+    "priorityGrade": 2,
+    "mobility": "자력",
+    "healthNotes": [
+      "특이사항 기록 없음"
+    ],
+    "zoneId": "E",
+    "addressLabel": "DEMO-E-가구-027",
+    "phoneKind": "휴대",
+    "contactRef": "DEMO-CONTACT-H027",
+    "guardian": {
+      "relationship": "가족",
+      "name": "가족○",
+      "contactRef": "DEMO-CONTACT-G027"
+    },
+    "consentToCall": false,
+    "callEligible": false,
+    "exclusionReason": "모의 발신 동의 없음",
+    "sourceType": "보건지소",
+    "lastCheckedAt": "2026-09-09",
+    "originalNote": "모의 방문 메모: 자력 / 특이사항 기록 없음",
+    "demoPosition": {
+      "x": 962,
+      "y": 302
+    },
+    "teamId": "TE",
+    "shelterId": "S2",
+    "cohabitant": "가족 동거",
+    "devices": [],
+    "synthetic": true
+  },
+  {
+    "id": "H028",
+    "name": "도민○",
+    "age": 77,
+    "gender": "남",
+    "priorityGrade": 1,
+    "mobility": "자력",
+    "healthNotes": [
+      "특이사항 기록 없음"
+    ],
+    "zoneId": "E",
+    "addressLabel": "DEMO-E-가구-028",
+    "phoneKind": "유선",
+    "contactRef": "DEMO-CONTACT-H028",
+    "guardian": null,
+    "consentToCall": true,
+    "callEligible": true,
+    "exclusionReason": null,
+    "sourceType": "보건지소",
+    "lastCheckedAt": "2026-09-08",
+    "originalNote": "모의 방문 메모: 자력 / 특이사항 기록 없음",
+    "demoPosition": {
+      "x": 1010,
+      "y": 302
+    },
+    "teamId": "TE",
+    "shelterId": "S2",
+    "cohabitant": "가족 동거",
+    "devices": [],
+    "synthetic": true
+  },
+  {
+    "id": "H029",
+    "name": "정선○",
+    "age": 78,
+    "gender": "여",
+    "priorityGrade": 1,
+    "mobility": "자력",
+    "healthNotes": [
+      "특이사항 기록 없음"
+    ],
+    "zoneId": "E",
+    "addressLabel": "DEMO-E-가구-029",
+    "phoneKind": "휴대",
+    "contactRef": "DEMO-CONTACT-H029",
+    "guardian": null,
+    "consentToCall": true,
+    "callEligible": true,
+    "exclusionReason": null,
+    "sourceType": "보건지소",
+    "lastCheckedAt": "2026-09-07",
+    "originalNote": "모의 방문 메모: 자력 / 특이사항 기록 없음",
+    "demoPosition": {
+      "x": 1058,
+      "y": 302
+    },
+    "teamId": "TE",
+    "shelterId": "S2",
+    "cohabitant": "가족 동거",
+    "devices": [],
+    "synthetic": true
+  },
+  {
+    "id": "H030",
+    "name": "김하○",
+    "age": 84,
+    "gender": "남",
+    "priorityGrade": 3,
+    "mobility": "자력",
+    "healthNotes": [
+      "특이사항 기록 없음"
+    ],
+    "zoneId": "E",
+    "addressLabel": "DEMO-E-가구-030",
+    "phoneKind": "휴대",
+    "contactRef": "DEMO-CONTACT-H030",
+    "guardian": {
+      "relationship": "가족",
+      "name": "가족○",
+      "contactRef": "DEMO-CONTACT-G030"
+    },
+    "consentToCall": true,
+    "callEligible": true,
+    "exclusionReason": null,
+    "sourceType": "보건지소",
+    "lastCheckedAt": "2026-10-06",
+    "originalNote": "모의 방문 메모: 자력 / 특이사항 기록 없음",
+    "demoPosition": {
+      "x": 1105,
+      "y": 302
+    },
+    "teamId": "TE",
+    "shelterId": "S2",
+    "cohabitant": "독거",
+    "devices": [],
+    "synthetic": true
+  },
+  {
+    "id": "H031",
+    "name": "문윤○",
+    "age": 65,
+    "gender": "여",
+    "priorityGrade": 1,
+    "mobility": "자력",
+    "healthNotes": [
+      "특이사항 기록 없음"
+    ],
+    "zoneId": "E",
+    "addressLabel": "DEMO-E-가구-031",
+    "phoneKind": "휴대",
+    "contactRef": "DEMO-CONTACT-H031",
+    "guardian": null,
+    "consentToCall": true,
+    "callEligible": true,
+    "exclusionReason": null,
+    "sourceType": "보건지소",
+    "lastCheckedAt": "2026-10-05",
+    "originalNote": "모의 방문 메모: 자력 / 특이사항 기록 없음",
+    "demoPosition": {
+      "x": 915,
+      "y": 470
+    },
+    "teamId": "TE",
+    "shelterId": "S2",
+    "cohabitant": "가족 동거",
+    "devices": [],
+    "synthetic": true
+  },
+  {
+    "id": "H032",
+    "name": "한정○",
+    "age": 66,
+    "gender": "남",
+    "priorityGrade": 1,
+    "mobility": "자력",
+    "healthNotes": [
+      "특이사항 기록 없음"
+    ],
+    "zoneId": "E",
+    "addressLabel": "DEMO-E-가구-032",
+    "phoneKind": "유선",
+    "contactRef": "DEMO-CONTACT-H032",
+    "guardian": null,
+    "consentToCall": true,
+    "callEligible": true,
+    "exclusionReason": null,
+    "sourceType": "보건지소",
+    "lastCheckedAt": "2026-10-04",
+    "originalNote": "모의 방문 메모: 자력 / 특이사항 기록 없음",
+    "demoPosition": {
+      "x": 962,
+      "y": 470
+    },
+    "teamId": "TE",
+    "shelterId": "S2",
+    "cohabitant": "가족 동거",
+    "devices": [],
+    "synthetic": true
+  },
+  {
+    "id": "H033",
+    "name": "서민○",
+    "age": 67,
+    "gender": "여",
+    "priorityGrade": 1,
+    "mobility": "자력",
+    "healthNotes": [
+      "특이사항 기록 없음"
+    ],
+    "zoneId": "E",
+    "addressLabel": "DEMO-E-가구-033",
+    "phoneKind": "휴대",
+    "contactRef": "DEMO-CONTACT-H033",
+    "guardian": {
+      "relationship": "가족",
+      "name": "가족○",
+      "contactRef": "DEMO-CONTACT-G033"
+    },
+    "consentToCall": true,
+    "callEligible": true,
+    "exclusionReason": null,
+    "sourceType": "보건지소",
+    "lastCheckedAt": "2026-10-03",
+    "originalNote": "모의 방문 메모: 자력 / 특이사항 기록 없음",
+    "demoPosition": {
+      "x": 1010,
+      "y": 470
+    },
+    "teamId": "TE",
+    "shelterId": "S2",
+    "cohabitant": "가족 동거",
+    "devices": [],
+    "synthetic": true
+  },
+  {
+    "id": "H034",
+    "name": "도선○",
+    "age": 88,
+    "gender": "남",
+    "priorityGrade": 3,
+    "mobility": "자력",
+    "healthNotes": [
+      "특이사항 기록 없음"
+    ],
+    "zoneId": "E",
+    "addressLabel": "DEMO-E-가구-034",
+    "phoneKind": "없음",
+    "contactRef": null,
+    "guardian": null,
+    "consentToCall": true,
+    "callEligible": false,
+    "exclusionReason": "연락 기기 없음",
+    "sourceType": "보건지소",
+    "lastCheckedAt": "2026-10-02",
+    "originalNote": "모의 방문 메모: 자력 / 특이사항 기록 없음",
+    "demoPosition": {
+      "x": 1058,
+      "y": 470
+    },
+    "teamId": "TE",
+    "shelterId": "S2",
+    "cohabitant": "독거",
+    "devices": [],
+    "synthetic": true
+  },
+  {
+    "id": "H035",
+    "name": "정하○",
+    "age": 69,
+    "gender": "여",
+    "priorityGrade": 1,
+    "mobility": "자력",
+    "healthNotes": [
+      "특이사항 기록 없음"
+    ],
+    "zoneId": "E",
+    "addressLabel": "DEMO-E-가구-035",
+    "phoneKind": "휴대",
+    "contactRef": "DEMO-CONTACT-H035",
+    "guardian": null,
+    "consentToCall": true,
+    "callEligible": true,
+    "exclusionReason": null,
+    "sourceType": "보건지소",
+    "lastCheckedAt": "2026-10-01",
+    "originalNote": "모의 방문 메모: 자력 / 특이사항 기록 없음",
+    "demoPosition": {
+      "x": 1105,
+      "y": 470
+    },
+    "teamId": "TE",
+    "shelterId": "S2",
+    "cohabitant": "가족 동거",
+    "devices": [],
+    "synthetic": true
+  },
+  {
+    "id": "H036",
+    "name": "김윤○",
+    "age": 70,
+    "gender": "남",
+    "priorityGrade": 1,
+    "mobility": "자력",
+    "healthNotes": [
+      "특이사항 기록 없음"
+    ],
+    "zoneId": "E",
+    "addressLabel": "DEMO-E-가구-036",
+    "phoneKind": "유선",
+    "contactRef": "DEMO-CONTACT-H036",
+    "guardian": {
+      "relationship": "가족",
+      "name": "가족○",
+      "contactRef": "DEMO-CONTACT-G036"
+    },
+    "consentToCall": true,
+    "callEligible": true,
+    "exclusionReason": null,
+    "sourceType": "보건지소",
+    "lastCheckedAt": "2026-09-30",
+    "originalNote": "모의 방문 메모: 자력 / 특이사항 기록 없음",
+    "demoPosition": {
+      "x": 915,
+      "y": 638
+    },
+    "teamId": "TE",
+    "shelterId": "S2",
+    "cohabitant": "가족 동거",
+    "devices": [],
+    "synthetic": true
+  },
+  {
+    "id": "H037",
+    "name": "문정○",
+    "age": 71,
+    "gender": "여",
+    "priorityGrade": 1,
+    "mobility": "자력",
+    "healthNotes": [
+      "특이사항 기록 없음"
+    ],
+    "zoneId": "E",
+    "addressLabel": "DEMO-E-가구-037",
+    "phoneKind": "휴대",
+    "contactRef": "DEMO-CONTACT-H037",
+    "guardian": null,
+    "consentToCall": true,
+    "callEligible": true,
+    "exclusionReason": null,
+    "sourceType": "보건지소",
+    "lastCheckedAt": "2026-09-29",
+    "originalNote": "모의 방문 메모: 자력 / 특이사항 기록 없음",
+    "demoPosition": {
+      "x": 962,
+      "y": 638
+    },
+    "teamId": "TE",
+    "shelterId": "S2",
+    "cohabitant": "가족 동거",
+    "devices": [],
+    "synthetic": true
+  },
+  {
+    "id": "H038",
+    "name": "한민○",
+    "age": 72,
+    "gender": "남",
+    "priorityGrade": 1,
+    "mobility": "자력",
+    "healthNotes": [
+      "특이사항 기록 없음"
+    ],
+    "zoneId": "E",
+    "addressLabel": "DEMO-E-가구-038",
+    "phoneKind": "휴대",
+    "contactRef": "DEMO-CONTACT-H038",
+    "guardian": null,
+    "consentToCall": true,
+    "callEligible": true,
+    "exclusionReason": null,
+    "sourceType": "가족",
+    "lastCheckedAt": "2026-09-28",
+    "originalNote": "모의 방문 메모: 자력 / 특이사항 기록 없음",
+    "demoPosition": {
+      "x": 1010,
+      "y": 638
+    },
+    "teamId": "TE",
+    "shelterId": "S2",
+    "cohabitant": "가족 동거",
+    "devices": [],
+    "synthetic": true
+  },
+  {
+    "id": "H039",
+    "name": "서선○",
+    "age": 73,
+    "gender": "여",
+    "priorityGrade": 3,
+    "mobility": "보조",
+    "healthNotes": [
+      "보행 보조 필요"
+    ],
+    "zoneId": "S",
+    "addressLabel": "DEMO-S-가구-039",
+    "phoneKind": "휴대",
+    "contactRef": "DEMO-CONTACT-H039",
+    "guardian": {
+      "relationship": "가족",
+      "name": "가족○",
+      "contactRef": "DEMO-CONTACT-G039"
+    },
+    "consentToCall": true,
+    "callEligible": true,
+    "exclusionReason": null,
+    "sourceType": "가족",
+    "lastCheckedAt": "2026-09-27",
+    "originalNote": "모의 방문 메모: 보조 / 보행 보조 필요",
+    "demoPosition": {
+      "x": 425,
+      "y": 472
+    },
+    "teamId": "TS",
+    "shelterId": "S3",
+    "cohabitant": "가족 동거",
+    "devices": [
+      "휠체어"
+    ],
+    "synthetic": true
+  },
+  {
+    "id": "H040",
+    "name": "도하○",
+    "age": 82,
+    "gender": "남",
+    "priorityGrade": 2,
+    "mobility": "자력",
+    "healthNotes": [
+      "특이사항 기록 없음"
+    ],
+    "zoneId": "S",
+    "addressLabel": "DEMO-S-가구-040",
+    "phoneKind": "유선",
+    "contactRef": "DEMO-CONTACT-H040",
+    "guardian": null,
+    "consentToCall": true,
+    "callEligible": true,
+    "exclusionReason": null,
+    "sourceType": "가족",
+    "lastCheckedAt": "2026-07-09",
+    "originalNote": "모의 방문 메모: 자력 / 특이사항 기록 없음",
+    "demoPosition": {
+      "x": 518,
+      "y": 472
+    },
+    "teamId": "TS",
+    "shelterId": "S3",
+    "cohabitant": "가족 동거",
+    "devices": [],
+    "synthetic": true
+  },
+  {
+    "id": "H041",
+    "name": "정윤○",
+    "age": 75,
+    "gender": "여",
+    "priorityGrade": 1,
+    "mobility": "자력",
+    "healthNotes": [
+      "특이사항 기록 없음"
+    ],
+    "zoneId": "S",
+    "addressLabel": "DEMO-S-가구-041",
+    "phoneKind": "휴대",
+    "contactRef": "DEMO-CONTACT-H041",
+    "guardian": null,
+    "consentToCall": true,
+    "callEligible": true,
+    "exclusionReason": null,
+    "sourceType": "가족",
+    "lastCheckedAt": "2026-09-25",
+    "originalNote": "모의 방문 메모: 자력 / 특이사항 기록 없음",
+    "demoPosition": {
+      "x": 610,
+      "y": 472
+    },
+    "teamId": "TS",
+    "shelterId": "S3",
+    "cohabitant": "가족 동거",
+    "devices": [],
+    "synthetic": true
+  },
+  {
+    "id": "H042",
+    "name": "김정○",
+    "age": 76,
+    "gender": "남",
+    "priorityGrade": 1,
+    "mobility": "자력",
+    "healthNotes": [
+      "특이사항 기록 없음"
+    ],
+    "zoneId": "S",
+    "addressLabel": "DEMO-S-가구-042",
+    "phoneKind": "휴대",
+    "contactRef": "DEMO-CONTACT-H042",
+    "guardian": {
+      "relationship": "가족",
+      "name": "가족○",
+      "contactRef": "DEMO-CONTACT-G042"
+    },
+    "consentToCall": true,
+    "callEligible": true,
+    "exclusionReason": null,
+    "sourceType": "가족",
+    "lastCheckedAt": "2026-09-24",
+    "originalNote": "모의 방문 메모: 자력 / 특이사항 기록 없음",
+    "demoPosition": {
+      "x": 702,
+      "y": 472
+    },
+    "teamId": "TS",
+    "shelterId": "S3",
+    "cohabitant": "가족 동거",
+    "devices": [],
+    "synthetic": true
+  },
+  {
+    "id": "H043",
+    "name": "문민○",
+    "age": 77,
+    "gender": "여",
+    "priorityGrade": 1,
+    "mobility": "자력",
+    "healthNotes": [
+      "특이사항 기록 없음"
+    ],
+    "zoneId": "S",
+    "addressLabel": "DEMO-S-가구-043",
+    "phoneKind": "휴대",
+    "contactRef": "DEMO-CONTACT-H043",
+    "guardian": null,
+    "consentToCall": true,
+    "callEligible": true,
+    "exclusionReason": null,
+    "sourceType": "통화",
+    "lastCheckedAt": "2026-09-23",
+    "originalNote": "모의 방문 메모: 자력 / 특이사항 기록 없음",
+    "demoPosition": {
+      "x": 795,
+      "y": 472
+    },
+    "teamId": "TS",
+    "shelterId": "S3",
+    "cohabitant": "가족 동거",
+    "devices": [],
+    "synthetic": true
+  },
+  {
+    "id": "H044",
+    "name": "한선○",
+    "age": 78,
+    "gender": "남",
+    "priorityGrade": 3,
+    "mobility": "보조",
+    "healthNotes": [
+      "보행 보조 필요"
+    ],
+    "zoneId": "S",
+    "addressLabel": "DEMO-S-가구-044",
+    "phoneKind": "유선",
+    "contactRef": "DEMO-CONTACT-H044",
+    "guardian": null,
+    "consentToCall": true,
+    "callEligible": true,
+    "exclusionReason": null,
+    "sourceType": "통화",
+    "lastCheckedAt": "2026-09-22",
+    "originalNote": "모의 방문 메모: 보조 / 보행 보조 필요",
+    "demoPosition": {
+      "x": 425,
+      "y": 678
+    },
+    "teamId": "TS",
+    "shelterId": "S3",
+    "cohabitant": "가족 동거",
+    "devices": [
+      "휠체어"
+    ],
+    "synthetic": true
+  },
+  {
+    "id": "H045",
+    "name": "서하○",
+    "age": 81,
+    "gender": "여",
+    "priorityGrade": 2,
+    "mobility": "자력",
+    "healthNotes": [
+      "특이사항 기록 없음"
+    ],
+    "zoneId": "S",
+    "addressLabel": "DEMO-S-가구-045",
+    "phoneKind": "휴대",
+    "contactRef": "DEMO-CONTACT-H045",
+    "guardian": {
+      "relationship": "가족",
+      "name": "가족○",
+      "contactRef": "DEMO-CONTACT-G045"
+    },
+    "consentToCall": true,
+    "callEligible": true,
+    "exclusionReason": null,
+    "sourceType": "통화",
+    "lastCheckedAt": "2026-09-21",
+    "originalNote": "모의 방문 메모: 자력 / 특이사항 기록 없음",
+    "demoPosition": {
+      "x": 518,
+      "y": 678
+    },
+    "teamId": "TS",
+    "shelterId": "S3",
+    "cohabitant": "가족 동거",
+    "devices": [],
+    "synthetic": true
+  },
+  {
+    "id": "H046",
+    "name": "도윤○",
+    "age": 65,
+    "gender": "남",
+    "priorityGrade": 1,
+    "mobility": "자력",
+    "healthNotes": [
+      "특이사항 기록 없음"
+    ],
+    "zoneId": "S",
+    "addressLabel": "DEMO-S-가구-046",
+    "phoneKind": "휴대",
+    "contactRef": "DEMO-CONTACT-H046",
+    "guardian": null,
+    "consentToCall": true,
+    "callEligible": true,
+    "exclusionReason": null,
+    "sourceType": "통화",
+    "lastCheckedAt": "2026-09-20",
+    "originalNote": "모의 방문 메모: 자력 / 특이사항 기록 없음",
+    "demoPosition": {
+      "x": 610,
+      "y": 678
+    },
+    "teamId": "TS",
+    "shelterId": "S3",
+    "cohabitant": "가족 동거",
+    "devices": [],
+    "synthetic": true
+  },
+  {
+    "id": "H047",
+    "name": "정정○",
+    "age": 66,
+    "gender": "여",
+    "priorityGrade": 1,
+    "mobility": "자력",
+    "healthNotes": [
+      "특이사항 기록 없음"
+    ],
+    "zoneId": "S",
+    "addressLabel": "DEMO-S-가구-047",
+    "phoneKind": "휴대",
+    "contactRef": "DEMO-CONTACT-H047",
+    "guardian": null,
+    "consentToCall": true,
+    "callEligible": true,
+    "exclusionReason": null,
+    "sourceType": "통화",
+    "lastCheckedAt": "2026-09-19",
+    "originalNote": "모의 방문 메모: 자력 / 특이사항 기록 없음",
+    "demoPosition": {
+      "x": 702,
+      "y": 678
+    },
+    "teamId": "TS",
+    "shelterId": "S3",
+    "cohabitant": "가족 동거",
+    "devices": [],
+    "synthetic": true
+  },
+  {
+    "id": "H048",
+    "name": "김민○",
+    "age": 87,
+    "gender": "남",
+    "priorityGrade": 3,
+    "mobility": "자력",
+    "healthNotes": [
+      "특이사항 기록 없음"
+    ],
+    "zoneId": "S",
+    "addressLabel": "DEMO-S-가구-048",
+    "phoneKind": "유선",
+    "contactRef": "DEMO-CONTACT-H048",
+    "guardian": {
+      "relationship": "가족",
+      "name": "가족○",
+      "contactRef": "DEMO-CONTACT-G048"
+    },
+    "consentToCall": true,
+    "callEligible": true,
+    "exclusionReason": null,
+    "sourceType": "통화",
+    "lastCheckedAt": "2026-09-18",
+    "originalNote": "모의 방문 메모: 자력 / 특이사항 기록 없음",
+    "demoPosition": {
+      "x": 795,
+      "y": 678
+    },
+    "teamId": "TS",
+    "shelterId": "S3",
+    "cohabitant": "독거",
+    "devices": [],
+    "synthetic": true
+  }
+]

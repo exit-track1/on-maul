@@ -1,0 +1,41 @@
+[
+  {
+    "id": "S1",
+    "name": "온빛 마을회관",
+    "type": "마을회관",
+    "capacity": 40,
+    "demoLocation": {
+      "x": 370,
+      "y": 360
+    },
+    "accessibility": "unconfirmed",
+    "petsAllowed": false,
+    "synthetic": true
+  },
+  {
+    "id": "S2",
+    "name": "온빛 배움학교",
+    "type": "학교",
+    "capacity": 120,
+    "demoLocation": {
+      "x": 740,
+      "y": 390
+    },
+    "accessibility": "confirmed",
+    "petsAllowed": true,
+    "synthetic": true
+  },
+  {
+    "id": "S3",
+    "name": "온빛 생활체육관",
+    "type": "체육관",
+    "capacity": 80,
+    "demoLocation": {
+      "x": 660,
+      "y": 720
+    },
+    "accessibility": "confirmed",
+    "petsAllowed": false,
+    "synthetic": true
+  }
+]

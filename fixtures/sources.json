@@ -1,0 +1,122 @@
+[
+  {
+    "id": "SRC01",
+    "category": "산불 현황",
+    "name": "산불 현황 모의 자료",
+    "demoRefreshSeconds": 600,
+    "demoPayload": {
+      "schema": "onmaul-demo/v1",
+      "summary": "북서 가상 능선 산불 시나리오",
+      "observedAt": "2026-10-09T11:00:00+09:00",
+      "windDirection": null,
+      "windSpeedMps": null,
+      "value": null
+    },
+    "synthetic": true
+  },
+  {
+    "id": "SRC02",
+    "category": "재난문자",
+    "name": "재난문자 모의 자료",
+    "demoRefreshSeconds": 60,
+    "demoPayload": {
+      "schema": "onmaul-demo/v1",
+      "summary": "온빛 마을 모의 대피 지시",
+      "observedAt": "2026-10-09T11:00:00+09:00",
+      "windDirection": null,
+      "windSpeedMps": null,
+      "value": null
+    },
+    "synthetic": true
+  },
+  {
+    "id": "SRC03",
+    "category": "위험 지수",
+    "name": "위험 지수 모의 자료",
+    "demoRefreshSeconds": 600,
+    "demoPayload": {
+      "schema": "onmaul-demo/v1",
+      "summary": "시연 지수 58",
+      "observedAt": "2026-10-09T11:00:00+09:00",
+      "windDirection": null,
+      "windSpeedMps": null,
+      "value": 58
+    },
+    "synthetic": true
+  },
+  {
+    "id": "SRC04",
+    "category": "기상특보",
+    "name": "기상특보 모의 자료",
+    "demoRefreshSeconds": 600,
+    "demoPayload": {
+      "schema": "onmaul-demo/v1",
+      "summary": "건조 조건 모의 표시",
+      "observedAt": "2026-10-09T11:00:00+09:00",
+      "windDirection": null,
+      "windSpeedMps": null,
+      "value": null
+    },
+    "synthetic": true
+  },
+  {
+    "id": "SRC05",
+    "category": "바람 관측",
+    "name": "바람 관측 모의 자료",
+    "demoRefreshSeconds": 600,
+    "demoPayload": {
+      "schema": "onmaul-demo/v1",
+      "summary": "서풍 9 m/s 시연 값",
+      "observedAt": "2026-10-09T11:00:00+09:00",
+      "windDirection": 280,
+      "windSpeedMps": 9,
+      "value": null
+    },
+    "synthetic": true
+  },
+  {
+    "id": "SRC06",
+    "category": "예보",
+    "name": "예보 모의 자료",
+    "demoRefreshSeconds": 3600,
+    "demoPayload": {
+      "schema": "onmaul-demo/v1",
+      "summary": "강수 없음 시연 값",
+      "observedAt": "2026-10-09T11:00:00+09:00",
+      "windDirection": null,
+      "windSpeedMps": null,
+      "value": null
+    },
+    "synthetic": true
+  },
+  {
+    "id": "SRC07",
+    "category": "하천 수위",
+    "name": "하천 수위 모의 자료",
+    "demoRefreshSeconds": 600,
+    "demoPayload": {
+      "schema": "onmaul-demo/v1",
+      "summary": "수위 관심 미만 시연 값",
+      "observedAt": "2026-10-09T11:00:00+09:00",
+      "windDirection": null,
+      "windSpeedMps": null,
+      "value": null
+    },
+    "synthetic": true
+  },
+  {
+    "id": "SRC08",
+    "category": "대피소",
+    "name": "대피소 모의 자료",
+    "demoRefreshSeconds": 3600,
+    "demoPayload": {
+      "schema": "onmaul-demo/v1",
+      "summary": "가상 대피소 3곳",
+      "observedAt": "2026-10-09T11:00:00+09:00",
+      "windDirection": null,
+      "windSpeedMps": null,
+      "value": null
+    },
+    "synthetic": true
+  }
+]

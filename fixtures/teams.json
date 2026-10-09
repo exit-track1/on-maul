@@ -1,0 +1,218 @@
+[
+  {
+    "id": "TW",
+    "zoneId": "W",
+    "name": "서구역 대기조",
+    "vehicleId": "V04",
+    "members": [
+      {
+        "id": "M01",
+        "name": "백대○",
+        "roleLabel": "운전 담당",
+        "canDrive": true,
+        "availability": "가능",
+        "reason": null,
+        "synthetic": true
+      },
+      {
+        "id": "M02",
+        "name": "차대○",
+        "roleLabel": "방문 담당",
+        "canDrive": true,
+        "availability": "가능",
+        "reason": null,
+        "synthetic": true
+      },
+      {
+        "id": "M03",
+        "name": "길대○",
+        "roleLabel": "지원 담당",
+        "canDrive": false,
+        "availability": "불가",
+        "reason": "모의 일정 중복",
+        "synthetic": true
+      }
+    ],
+    "assignedHouseholdIds": [
+      "H001",
+      "H002",
+      "H003",
+      "H004",
+      "H005",
+      "H006",
+      "H007",
+      "H008",
+      "H009",
+      "H010"
+    ],
+    "meetingPoint": {
+      "x": 240,
+      "y": 470
+    },
+    "synthetic": true
+  },
+  {
+    "id": "TN",
+    "zoneId": "N",
+    "name": "북구역 대기조",
+    "vehicleId": "V05",
+    "members": [
+      {
+        "id": "M04",
+        "name": "백대○",
+        "roleLabel": "운전 담당",
+        "canDrive": true,
+        "availability": "가능",
+        "reason": null,
+        "synthetic": true
+      },
+      {
+        "id": "M05",
+        "name": "차대○",
+        "roleLabel": "방문 담당",
+        "canDrive": true,
+        "availability": "가능",
+        "reason": null,
+        "synthetic": true
+      },
+      {
+        "id": "M06",
+        "name": "길대○",
+        "roleLabel": "지원 담당",
+        "canDrive": false,
+        "availability": "불가",
+        "reason": "모의 일정 중복",
+        "synthetic": true
+      }
+    ],
+    "assignedHouseholdIds": [
+      "H011",
+      "H012",
+      "H013",
+      "H014",
+      "H015",
+      "H016",
+      "H017",
+      "H018",
+      "H019",
+      "H020",
+      "H021",
+      "H022",
+      "H023",
+      "H024",
+      "H025"
+    ],
+    "meetingPoint": {
+      "x": 570,
+      "y": 180
+    },
+    "synthetic": true
+  },
+  {
+    "id": "TE",
+    "zoneId": "E",
+    "name": "동구역 대기조",
+    "vehicleId": "V06",
+    "members": [
+      {
+        "id": "M07",
+        "name": "백대○",
+        "roleLabel": "운전 담당",
+        "canDrive": true,
+        "availability": "가능",
+        "reason": null,
+        "synthetic": true
+      },
+      {
+        "id": "M08",
+        "name": "차대○",
+        "roleLabel": "방문 담당",
+        "canDrive": true,
+        "availability": "가능",
+        "reason": null,
+        "synthetic": true
+      },
+      {
+        "id": "M09",
+        "name": "길대○",
+        "roleLabel": "지원 담당",
+        "canDrive": false,
+        "availability": "불가",
+        "reason": "모의 일정 중복",
+        "synthetic": true
+      }
+    ],
+    "assignedHouseholdIds": [
+      "H026",
+      "H027",
+      "H028",
+      "H029",
+      "H030",
+      "H031",
+      "H032",
+      "H033",
+      "H034",
+      "H035",
+      "H036",
+      "H037",
+      "H038"
+    ],
+    "meetingPoint": {
+      "x": 1010,
+      "y": 470
+    },
+    "synthetic": true
+  },
+  {
+    "id": "TS",
+    "zoneId": "S",
+    "name": "남구역 대기조",
+    "vehicleId": "V07",
+    "members": [
+      {
+        "id": "M10",
+        "name": "백대○",
+        "roleLabel": "운전 담당",
+        "canDrive": true,
+        "availability": "가능",
+        "reason": null,
+        "synthetic": true
+      },
+      {
+        "id": "M11",
+        "name": "차대○",
+        "roleLabel": "방문 담당",
+        "canDrive": true,
+        "availability": "가능",
+        "reason": null,
+        "synthetic": true
+      },
+      {
+        "id": "M12",
+        "name": "길대○",
+        "roleLabel": "지원 담당",
+        "canDrive": false,
+        "availability": "가능",
+        "reason": null,
+        "synthetic": true
+      }
+    ],
+    "assignedHouseholdIds": [
+      "H039",
+      "H040",
+      "H041",
+      "H042",
+      "H043",
+      "H044",
+      "H045",
+      "H046",
+      "H047",
+      "H048"
+    ],
+    "meetingPoint": {
+      "x": 610,
+      "y": 575
+    },
+    "synthetic": true
+  }
+]

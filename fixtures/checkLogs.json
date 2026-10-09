@@ -1,0 +1,1346 @@
+[
+  {
+    "id": "CHECK-H001-1",
+    "householdId": "H001",
+    "sourceType": "가족",
+    "checkedAt": "2026-09-28",
+    "checkedFields": [
+      "mobility",
+      "contactRef"
+    ],
+    "changed": null,
+    "operatorLabel": "모의 확인 담당자",
+    "evidence": "합성 확인 이력",
+    "synthetic": true
+  },
+  {
+    "id": "CHECK-H001-2",
+    "householdId": "H001",
+    "sourceType": "생활지원사",
+    "checkedAt": "2026-10-05",
+    "checkedFields": [
+      "mobility",
+      "contactRef"
+    ],
+    "changed": null,
+    "operatorLabel": "모의 확인 담당자",
+    "evidence": "합성 확인 이력",
+    "synthetic": true
+  },
+  {
+    "id": "CHECK-H002-1",
+    "householdId": "H002",
+    "sourceType": "가족",
+    "checkedAt": "2026-09-27",
+    "checkedFields": [
+      "mobility",
+      "contactRef"
+    ],
+    "changed": null,
+    "operatorLabel": "모의 확인 담당자",
+    "evidence": "합성 확인 이력",
+    "synthetic": true
+  },
+  {
+    "id": "CHECK-H002-2",
+    "householdId": "H002",
+    "sourceType": "생활지원사",
+    "checkedAt": "2026-10-04",
+    "checkedFields": [
+      "mobility",
+      "contactRef"
+    ],
+    "changed": null,
+    "operatorLabel": "모의 확인 담당자",
+    "evidence": "합성 확인 이력",
+    "synthetic": true
+  },
+  {
+    "id": "CHECK-H003-1",
+    "householdId": "H003",
+    "sourceType": "가족",
+    "checkedAt": "2026-09-26",
+    "checkedFields": [
+      "mobility",
+      "contactRef"
+    ],
+    "changed": null,
+    "operatorLabel": "모의 확인 담당자",
+    "evidence": "합성 확인 이력",
+    "synthetic": true
+  },
+  {
+    "id": "CHECK-H003-2",
+    "householdId": "H003",
+    "sourceType": "생활지원사",
+    "checkedAt": "2026-10-03",
+    "checkedFields": [
+      "mobility",
+      "contactRef"
+    ],
+    "changed": null,
+    "operatorLabel": "모의 확인 담당자",
+    "evidence": "합성 확인 이력",
+    "synthetic": true
+  },
+  {
+    "id": "CHECK-H004-1",
+    "householdId": "H004",
+    "sourceType": "가족",
+    "checkedAt": "2026-09-25",
+    "checkedFields": [
+      "mobility",
+      "contactRef"
+    ],
+    "changed": null,
+    "operatorLabel": "모의 확인 담당자",
+    "evidence": "합성 확인 이력",
+    "synthetic": true
+  },
+  {
+    "id": "CHECK-H004-2",
+    "householdId": "H004",
+    "sourceType": "생활지원사",
+    "checkedAt": "2026-10-02",
+    "checkedFields": [
+      "mobility",
+      "contactRef"
+    ],
+    "changed": null,
+    "operatorLabel": "모의 확인 담당자",
+    "evidence": "합성 확인 이력",
+    "synthetic": true
+  },
+  {
+    "id": "CHECK-H005-1",
+    "householdId": "H005",
+    "sourceType": "가족",
+    "checkedAt": "2026-09-24",
+    "checkedFields": [
+      "mobility",
+      "contactRef"
+    ],
+    "changed": null,
+    "operatorLabel": "모의 확인 담당자",
+    "evidence": "합성 확인 이력",
+    "synthetic": true
+  },
+  {
+    "id": "CHECK-H005-2",
+    "householdId": "H005",
+    "sourceType": "생활지원사",
+    "checkedAt": "2026-10-01",
+    "checkedFields": [
+      "mobility",
+      "contactRef"
+    ],
+    "changed": null,
+    "operatorLabel": "모의 확인 담당자",
+    "evidence": "합성 확인 이력",
+    "synthetic": true
+  },
+  {
+    "id": "CHECK-H006-1",
+    "householdId": "H006",
+    "sourceType": "가족",
+    "checkedAt": "2026-07-04",
+    "checkedFields": [
+      "mobility",
+      "contactRef"
+    ],
+    "changed": null,
+    "operatorLabel": "모의 확인 담당자",
+    "evidence": "합성 확인 이력",
+    "synthetic": true
+  },
+  {
+    "id": "CHECK-H006-2",
+    "householdId": "H006",
+    "sourceType": "생활지원사",
+    "checkedAt": "2026-07-11",
+    "checkedFields": [
+      "mobility",
+      "contactRef"
+    ],
+    "changed": null,
+    "operatorLabel": "모의 확인 담당자",
+    "evidence": "합성 확인 이력",
+    "synthetic": true
+  },
+  {
+    "id": "CHECK-H007-1",
+    "householdId": "H007",
+    "sourceType": "가족",
+    "checkedAt": "2026-09-22",
+    "checkedFields": [
+      "mobility",
+      "contactRef"
+    ],
+    "changed": null,
+    "operatorLabel": "모의 확인 담당자",
+    "evidence": "합성 확인 이력",
+    "synthetic": true
+  },
+  {
+    "id": "CHECK-H007-2",
+    "householdId": "H007",
+    "sourceType": "생활지원사",
+    "checkedAt": "2026-09-29",
+    "checkedFields": [
+      "mobility",
+      "contactRef"
+    ],
+    "changed": null,
+    "operatorLabel": "모의 확인 담당자",
+    "evidence": "합성 확인 이력",
+    "synthetic": true
+  },
+  {
+    "id": "CHECK-H008-1",
+    "householdId": "H008",
+    "sourceType": "가족",
+    "checkedAt": "2026-09-21",
+    "checkedFields": [
+      "mobility",
+      "contactRef"
+    ],
+    "changed": null,
+    "operatorLabel": "모의 확인 담당자",
+    "evidence": "합성 확인 이력",
+    "synthetic": true
+  },
+  {
+    "id": "CHECK-H008-2",
+    "householdId": "H008",
+    "sourceType": "생활지원사",
+    "checkedAt": "2026-09-28",
+    "checkedFields": [
+      "mobility",
+      "contactRef"
+    ],
+    "changed": null,
+    "operatorLabel": "모의 확인 담당자",
+    "evidence": "합성 확인 이력",
+    "synthetic": true
+  },
+  {
+    "id": "CHECK-H009-1",
+    "householdId": "H009",
+    "sourceType": "가족",
+    "checkedAt": "2026-07-03",
+    "checkedFields": [
+      "mobility",
+      "contactRef"
+    ],
+    "changed": null,
+    "operatorLabel": "모의 확인 담당자",
+    "evidence": "합성 확인 이력",
+    "synthetic": true
+  },
+  {
+    "id": "CHECK-H009-2",
+    "householdId": "H009",
+    "sourceType": "생활지원사",
+    "checkedAt": "2026-07-10",
+    "checkedFields": [
+      "mobility",
+      "contactRef"
+    ],
+    "changed": null,
+    "operatorLabel": "모의 확인 담당자",
+    "evidence": "합성 확인 이력",
+    "synthetic": true
+  },
+  {
+    "id": "CHECK-H010-1",
+    "householdId": "H010",
+    "sourceType": "가족",
+    "checkedAt": "2026-09-19",
+    "checkedFields": [
+      "mobility",
+      "contactRef"
+    ],
+    "changed": null,
+    "operatorLabel": "모의 확인 담당자",
+    "evidence": "합성 확인 이력",
+    "synthetic": true
+  },
+  {
+    "id": "CHECK-H010-2",
+    "householdId": "H010",
+    "sourceType": "생활지원사",
+    "checkedAt": "2026-09-26",
+    "checkedFields": [
+      "mobility",
+      "contactRef"
+    ],
+    "changed": null,
+    "operatorLabel": "모의 확인 담당자",
+    "evidence": "합성 확인 이력",
+    "synthetic": true
+  },
+  {
+    "id": "CHECK-H011-1",
+    "householdId": "H011",
+    "sourceType": "가족",
+    "checkedAt": "2026-09-18",
+    "checkedFields": [
+      "mobility",
+      "contactRef"
+    ],
+    "changed": null,
+    "operatorLabel": "모의 확인 담당자",
+    "evidence": "합성 확인 이력",
+    "synthetic": true
+  },
+  {
+    "id": "CHECK-H011-2",
+    "householdId": "H011",
+    "sourceType": "생활지원사",
+    "checkedAt": "2026-09-25",
+    "checkedFields": [
+      "mobility",
+      "contactRef"
+    ],
+    "changed": null,
+    "operatorLabel": "모의 확인 담당자",
+    "evidence": "합성 확인 이력",
+    "synthetic": true
+  },
+  {
+    "id": "CHECK-H012-1",
+    "householdId": "H012",
+    "sourceType": "가족",
+    "checkedAt": "2026-09-17",
+    "checkedFields": [
+      "mobility",
+      "contactRef"
+    ],
+    "changed": null,
+    "operatorLabel": "모의 확인 담당자",
+    "evidence": "합성 확인 이력",
+    "synthetic": true
+  },
+  {
+    "id": "CHECK-H012-2",
+    "householdId": "H012",
+    "sourceType": "생활지원사",
+    "checkedAt": "2026-09-24",
+    "checkedFields": [
+      "mobility",
+      "contactRef"
+    ],
+    "changed": null,
+    "operatorLabel": "모의 확인 담당자",
+    "evidence": "합성 확인 이력",
+    "synthetic": true
+  },
+  {
+    "id": "CHECK-H013-1",
+    "householdId": "H013",
+    "sourceType": "가족",
+    "checkedAt": "2026-09-16",
+    "checkedFields": [
+      "mobility",
+      "contactRef"
+    ],
+    "changed": null,
+    "operatorLabel": "모의 확인 담당자",
+    "evidence": "합성 확인 이력",
+    "synthetic": true
+  },
+  {
+    "id": "CHECK-H013-2",
+    "householdId": "H013",
+    "sourceType": "생활지원사",
+    "checkedAt": "2026-09-23",
+    "checkedFields": [
+      "mobility",
+      "contactRef"
+    ],
+    "changed": null,
+    "operatorLabel": "모의 확인 담당자",
+    "evidence": "합성 확인 이력",
+    "synthetic": true
+  },
+  {
+    "id": "CHECK-H014-1",
+    "householdId": "H014",
+    "sourceType": "가족",
+    "checkedAt": "2026-09-15",
+    "checkedFields": [
+      "mobility",
+      "contactRef"
+    ],
+    "changed": null,
+    "operatorLabel": "모의 확인 담당자",
+    "evidence": "합성 확인 이력",
+    "synthetic": true
+  },
+  {
+    "id": "CHECK-H014-2",
+    "householdId": "H014",
+    "sourceType": "생활지원사",
+    "checkedAt": "2026-09-22",
+    "checkedFields": [
+      "mobility",
+      "contactRef"
+    ],
+    "changed": null,
+    "operatorLabel": "모의 확인 담당자",
+    "evidence": "합성 확인 이력",
+    "synthetic": true
+  },
+  {
+    "id": "CHECK-H015-1",
+    "householdId": "H015",
+    "sourceType": "가족",
+    "checkedAt": "2026-09-14",
+    "checkedFields": [
+      "mobility",
+      "contactRef"
+    ],
+    "changed": null,
+    "operatorLabel": "모의 확인 담당자",
+    "evidence": "합성 확인 이력",
+    "synthetic": true
+  },
+  {
+    "id": "CHECK-H015-2",
+    "householdId": "H015",
+    "sourceType": "생활지원사",
+    "checkedAt": "2026-09-21",
+    "checkedFields": [
+      "mobility",
+      "contactRef"
+    ],
+    "changed": null,
+    "operatorLabel": "모의 확인 담당자",
+    "evidence": "합성 확인 이력",
+    "synthetic": true
+  },
+  {
+    "id": "CHECK-H016-1",
+    "householdId": "H016",
+    "sourceType": "가족",
+    "checkedAt": "2026-09-13",
+    "checkedFields": [
+      "mobility",
+      "contactRef"
+    ],
+    "changed": null,
+    "operatorLabel": "모의 확인 담당자",
+    "evidence": "합성 확인 이력",
+    "synthetic": true
+  },
+  {
+    "id": "CHECK-H016-2",
+    "householdId": "H016",
+    "sourceType": "이장",
+    "checkedAt": "2026-09-20",
+    "checkedFields": [
+      "mobility",
+      "contactRef"
+    ],
+    "changed": null,
+    "operatorLabel": "모의 확인 담당자",
+    "evidence": "합성 확인 이력",
+    "synthetic": true
+  },
+  {
+    "id": "CHECK-H017-1",
+    "householdId": "H017",
+    "sourceType": "가족",
+    "checkedAt": "2026-09-12",
+    "checkedFields": [
+      "mobility",
+      "contactRef"
+    ],
+    "changed": null,
+    "operatorLabel": "모의 확인 담당자",
+    "evidence": "합성 확인 이력",
+    "synthetic": true
+  },
+  {
+    "id": "CHECK-H017-2",
+    "householdId": "H017",
+    "sourceType": "이장",
+    "checkedAt": "2026-09-19",
+    "checkedFields": [
+      "mobility",
+      "contactRef"
+    ],
+    "changed": null,
+    "operatorLabel": "모의 확인 담당자",
+    "evidence": "합성 확인 이력",
+    "synthetic": true
+  },
+  {
+    "id": "CHECK-H018-1",
+    "householdId": "H018",
+    "sourceType": "가족",
+    "checkedAt": "2026-09-11",
+    "checkedFields": [
+      "mobility",
+      "contactRef"
+    ],
+    "changed": null,
+    "operatorLabel": "모의 확인 담당자",
+    "evidence": "합성 확인 이력",
+    "synthetic": true
+  },
+  {
+    "id": "CHECK-H018-2",
+    "householdId": "H018",
+    "sourceType": "이장",
+    "checkedAt": "2026-09-18",
+    "checkedFields": [
+      "mobility",
+      "contactRef"
+    ],
+    "changed": null,
+    "operatorLabel": "모의 확인 담당자",
+    "evidence": "합성 확인 이력",
+    "synthetic": true
+  },
+  {
+    "id": "CHECK-H019-1",
+    "householdId": "H019",
+    "sourceType": "가족",
+    "checkedAt": "2026-09-10",
+    "checkedFields": [
+      "mobility",
+      "contactRef"
+    ],
+    "changed": null,
+    "operatorLabel": "모의 확인 담당자",
+    "evidence": "합성 확인 이력",
+    "synthetic": true
+  },
+  {
+    "id": "CHECK-H019-2",
+    "householdId": "H019",
+    "sourceType": "이장",
+    "checkedAt": "2026-09-17",
+    "checkedFields": [
+      "mobility",
+      "contactRef"
+    ],
+    "changed": null,
+    "operatorLabel": "모의 확인 담당자",
+    "evidence": "합성 확인 이력",
+    "synthetic": true
+  },
+  {
+    "id": "CHECK-H020-1",
+    "householdId": "H020",
+    "sourceType": "가족",
+    "checkedAt": "2026-09-09",
+    "checkedFields": [
+      "mobility",
+      "contactRef"
+    ],
+    "changed": null,
+    "operatorLabel": "모의 확인 담당자",
+    "evidence": "합성 확인 이력",
+    "synthetic": true
+  },
+  {
+    "id": "CHECK-H020-2",
+    "householdId": "H020",
+    "sourceType": "이장",
+    "checkedAt": "2026-09-16",
+    "checkedFields": [
+      "mobility",
+      "contactRef"
+    ],
+    "changed": null,
+    "operatorLabel": "모의 확인 담당자",
+    "evidence": "합성 확인 이력",
+    "synthetic": true
+  },
+  {
+    "id": "CHECK-H021-1",
+    "householdId": "H021",
+    "sourceType": "가족",
+    "checkedAt": "2026-07-03",
+    "checkedFields": [
+      "mobility",
+      "contactRef"
+    ],
+    "changed": null,
+    "operatorLabel": "모의 확인 담당자",
+    "evidence": "합성 확인 이력",
+    "synthetic": true
+  },
+  {
+    "id": "CHECK-H021-2",
+    "householdId": "H021",
+    "sourceType": "이장",
+    "checkedAt": "2026-07-10",
+    "checkedFields": [
+      "mobility",
+      "contactRef"
+    ],
+    "changed": null,
+    "operatorLabel": "모의 확인 담당자",
+    "evidence": "합성 확인 이력",
+    "synthetic": true
+  },
+  {
+    "id": "CHECK-H022-1",
+    "householdId": "H022",
+    "sourceType": "가족",
+    "checkedAt": "2026-09-07",
+    "checkedFields": [
+      "mobility",
+      "contactRef"
+    ],
+    "changed": null,
+    "operatorLabel": "모의 확인 담당자",
+    "evidence": "합성 확인 이력",
+    "synthetic": true
+  },
+  {
+    "id": "CHECK-H022-2",
+    "householdId": "H022",
+    "sourceType": "이장",
+    "checkedAt": "2026-09-14",
+    "checkedFields": [
+      "mobility",
+      "contactRef"
+    ],
+    "changed": null,
+    "operatorLabel": "모의 확인 담당자",
+    "evidence": "합성 확인 이력",
+    "synthetic": true
+  },
+  {
+    "id": "CHECK-H023-1",
+    "householdId": "H023",
+    "sourceType": "가족",
+    "checkedAt": "2026-09-06",
+    "checkedFields": [
+      "mobility",
+      "contactRef"
+    ],
+    "changed": null,
+    "operatorLabel": "모의 확인 담당자",
+    "evidence": "합성 확인 이력",
+    "synthetic": true
+  },
+  {
+    "id": "CHECK-H023-2",
+    "householdId": "H023",
+    "sourceType": "이장",
+    "checkedAt": "2026-09-13",
+    "checkedFields": [
+      "mobility",
+      "contactRef"
+    ],
+    "changed": null,
+    "operatorLabel": "모의 확인 담당자",
+    "evidence": "합성 확인 이력",
+    "synthetic": true
+  },
+  {
+    "id": "CHECK-H024-1",
+    "householdId": "H024",
+    "sourceType": "가족",
+    "checkedAt": "2026-09-05",
+    "checkedFields": [
+      "mobility",
+      "contactRef"
+    ],
+    "changed": null,
+    "operatorLabel": "모의 확인 담당자",
+    "evidence": "합성 확인 이력",
+    "synthetic": true
+  },
+  {
+    "id": "CHECK-H024-2",
+    "householdId": "H024",
+    "sourceType": "이장",
+    "checkedAt": "2026-09-12",
+    "checkedFields": [
+      "mobility",
+      "contactRef"
+    ],
+    "changed": null,
+    "operatorLabel": "모의 확인 담당자",
+    "evidence": "합성 확인 이력",
+    "synthetic": true
+  },
+  {
+    "id": "CHECK-H025-1",
+    "householdId": "H025",
+    "sourceType": "가족",
+    "checkedAt": "2026-09-04",
+    "checkedFields": [
+      "mobility",
+      "contactRef"
+    ],
+    "changed": null,
+    "operatorLabel": "모의 확인 담당자",
+    "evidence": "합성 확인 이력",
+    "synthetic": true
+  },
+  {
+    "id": "CHECK-H025-2",
+    "householdId": "H025",
+    "sourceType": "이장",
+    "checkedAt": "2026-09-11",
+    "checkedFields": [
+      "mobility",
+      "contactRef"
+    ],
+    "changed": null,
+    "operatorLabel": "모의 확인 담당자",
+    "evidence": "합성 확인 이력",
+    "synthetic": true
+  },
+  {
+    "id": "CHECK-H026-1",
+    "householdId": "H026",
+    "sourceType": "가족",
+    "checkedAt": "2026-09-03",
+    "checkedFields": [
+      "mobility",
+      "contactRef"
+    ],
+    "changed": null,
+    "operatorLabel": "모의 확인 담당자",
+    "evidence": "합성 확인 이력",
+    "synthetic": true
+  },
+  {
+    "id": "CHECK-H026-2",
+    "householdId": "H026",
+    "sourceType": "보건지소",
+    "checkedAt": "2026-09-10",
+    "checkedFields": [
+      "mobility",
+      "contactRef"
+    ],
+    "changed": null,
+    "operatorLabel": "모의 확인 담당자",
+    "evidence": "합성 확인 이력",
+    "synthetic": true
+  },
+  {
+    "id": "CHECK-H027-1",
+    "householdId": "H027",
+    "sourceType": "가족",
+    "checkedAt": "2026-09-02",
+    "checkedFields": [
+      "mobility",
+      "contactRef"
+    ],
+    "changed": null,
+    "operatorLabel": "모의 확인 담당자",
+    "evidence": "합성 확인 이력",
+    "synthetic": true
+  },
+  {
+    "id": "CHECK-H027-2",
+    "householdId": "H027",
+    "sourceType": "보건지소",
+    "checkedAt": "2026-09-09",
+    "checkedFields": [
+      "mobility",
+      "contactRef"
+    ],
+    "changed": null,
+    "operatorLabel": "모의 확인 담당자",
+    "evidence": "합성 확인 이력",
+    "synthetic": true
+  },
+  {
+    "id": "CHECK-H028-1",
+    "householdId": "H028",
+    "sourceType": "가족",
+    "checkedAt": "2026-09-01",
+    "checkedFields": [
+      "mobility",
+      "contactRef"
+    ],
+    "changed": null,
+    "operatorLabel": "모의 확인 담당자",
+    "evidence": "합성 확인 이력",
+    "synthetic": true
+  },
+  {
+    "id": "CHECK-H028-2",
+    "householdId": "H028",
+    "sourceType": "보건지소",
+    "checkedAt": "2026-09-08",
+    "checkedFields": [
+      "mobility",
+      "contactRef"
+    ],
+    "changed": null,
+    "operatorLabel": "모의 확인 담당자",
+    "evidence": "합성 확인 이력",
+    "synthetic": true
+  },
+  {
+    "id": "CHECK-H029-1",
+    "householdId": "H029",
+    "sourceType": "가족",
+    "checkedAt": "2026-08-31",
+    "checkedFields": [
+      "mobility",
+      "contactRef"
+    ],
+    "changed": null,
+    "operatorLabel": "모의 확인 담당자",
+    "evidence": "합성 확인 이력",
+    "synthetic": true
+  },
+  {
+    "id": "CHECK-H029-2",
+    "householdId": "H029",
+    "sourceType": "보건지소",
+    "checkedAt": "2026-09-07",
+    "checkedFields": [
+      "mobility",
+      "contactRef"
+    ],
+    "changed": null,
+    "operatorLabel": "모의 확인 담당자",
+    "evidence": "합성 확인 이력",
+    "synthetic": true
+  },
+  {
+    "id": "CHECK-H030-1",
+    "householdId": "H030",
+    "sourceType": "가족",
+    "checkedAt": "2026-09-29",
+    "checkedFields": [
+      "mobility",
+      "contactRef"
+    ],
+    "changed": null,
+    "operatorLabel": "모의 확인 담당자",
+    "evidence": "합성 확인 이력",
+    "synthetic": true
+  },
+  {
+    "id": "CHECK-H030-2",
+    "householdId": "H030",
+    "sourceType": "보건지소",
+    "checkedAt": "2026-10-06",
+    "checkedFields": [
+      "mobility",
+      "contactRef"
+    ],
+    "changed": null,
+    "operatorLabel": "모의 확인 담당자",
+    "evidence": "합성 확인 이력",
+    "synthetic": true
+  },
+  {
+    "id": "CHECK-H031-1",
+    "householdId": "H031",
+    "sourceType": "가족",
+    "checkedAt": "2026-09-28",
+    "checkedFields": [
+      "mobility",
+      "contactRef"
+    ],
+    "changed": null,
+    "operatorLabel": "모의 확인 담당자",
+    "evidence": "합성 확인 이력",
+    "synthetic": true
+  },
+  {
+    "id": "CHECK-H031-2",
+    "householdId": "H031",
+    "sourceType": "보건지소",
+    "checkedAt": "2026-10-05",
+    "checkedFields": [
+      "mobility",
+      "contactRef"
+    ],
+    "changed": null,
+    "operatorLabel": "모의 확인 담당자",
+    "evidence": "합성 확인 이력",
+    "synthetic": true
+  },
+  {
+    "id": "CHECK-H032-1",
+    "householdId": "H032",
+    "sourceType": "가족",
+    "checkedAt": "2026-09-27",
+    "checkedFields": [
+      "mobility",
+      "contactRef"
+    ],
+    "changed": null,
+    "operatorLabel": "모의 확인 담당자",
+    "evidence": "합성 확인 이력",
+    "synthetic": true
+  },
+  {
+    "id": "CHECK-H032-2",
+    "householdId": "H032",
+    "sourceType": "보건지소",
+    "checkedAt": "2026-10-04",
+    "checkedFields": [
+      "mobility",
+      "contactRef"
+    ],
+    "changed": null,
+    "operatorLabel": "모의 확인 담당자",
+    "evidence": "합성 확인 이력",
+    "synthetic": true
+  },
+  {
+    "id": "CHECK-H033-1",
+    "householdId": "H033",
+    "sourceType": "가족",
+    "checkedAt": "2026-09-26",
+    "checkedFields": [
+      "mobility",
+      "contactRef"
+    ],
+    "changed": null,
+    "operatorLabel": "모의 확인 담당자",
+    "evidence": "합성 확인 이력",
+    "synthetic": true
+  },
+  {
+    "id": "CHECK-H033-2",
+    "householdId": "H033",
+    "sourceType": "보건지소",
+    "checkedAt": "2026-10-03",
+    "checkedFields": [
+      "mobility",
+      "contactRef"
+    ],
+    "changed": null,
+    "operatorLabel": "모의 확인 담당자",
+    "evidence": "합성 확인 이력",
+    "synthetic": true
+  },
+  {
+    "id": "CHECK-H034-1",
+    "householdId": "H034",
+    "sourceType": "가족",
+    "checkedAt": "2026-09-25",
+    "checkedFields": [
+      "mobility",
+      "contactRef"
+    ],
+    "changed": null,
+    "operatorLabel": "모의 확인 담당자",
+    "evidence": "합성 확인 이력",
+    "synthetic": true
+  },
+  {
+    "id": "CHECK-H034-2",
+    "householdId": "H034",
+    "sourceType": "보건지소",
+    "checkedAt": "2026-10-02",
+    "checkedFields": [
+      "mobility",
+      "contactRef"
+    ],
+    "changed": null,
+    "operatorLabel": "모의 확인 담당자",
+    "evidence": "합성 확인 이력",
+    "synthetic": true
+  },
+  {
+    "id": "CHECK-H035-1",
+    "householdId": "H035",
+    "sourceType": "가족",
+    "checkedAt": "2026-09-24",
+    "checkedFields": [
+      "mobility",
+      "contactRef"
+    ],
+    "changed": null,
+    "operatorLabel": "모의 확인 담당자",
+    "evidence": "합성 확인 이력",
+    "synthetic": true
+  },
+  {
+    "id": "CHECK-H035-2",
+    "householdId": "H035",
+    "sourceType": "보건지소",
+    "checkedAt": "2026-10-01",
+    "checkedFields": [
+      "mobility",
+      "contactRef"
+    ],
+    "changed": null,
+    "operatorLabel": "모의 확인 담당자",
+    "evidence": "합성 확인 이력",
+    "synthetic": true
+  },
+  {
+    "id": "CHECK-H036-1",
+    "householdId": "H036",
+    "sourceType": "가족",
+    "checkedAt": "2026-09-23",
+    "checkedFields": [
+      "mobility",
+      "contactRef"
+    ],
+    "changed": null,
+    "operatorLabel": "모의 확인 담당자",
+    "evidence": "합성 확인 이력",
+    "synthetic": true
+  },
+  {
+    "id": "CHECK-H036-2",
+    "householdId": "H036",
+    "sourceType": "보건지소",
+    "checkedAt": "2026-09-30",
+    "checkedFields": [
+      "mobility",
+      "contactRef"
+    ],
+    "changed": null,
+    "operatorLabel": "모의 확인 담당자",
+    "evidence": "합성 확인 이력",
+    "synthetic": true
+  },
+  {
+    "id": "CHECK-H037-1",
+    "householdId": "H037",
+    "sourceType": "가족",
+    "checkedAt": "2026-09-22",
+    "checkedFields": [
+      "mobility",
+      "contactRef"
+    ],
+    "changed": null,
+    "operatorLabel": "모의 확인 담당자",
+    "evidence": "합성 확인 이력",
+    "synthetic": true
+  },
+  {
+    "id": "CHECK-H037-2",
+    "householdId": "H037",
+    "sourceType": "보건지소",
+    "checkedAt": "2026-09-29",
+    "checkedFields": [
+      "mobility",
+      "contactRef"
+    ],
+    "changed": null,
+    "operatorLabel": "모의 확인 담당자",
+    "evidence": "합성 확인 이력",
+    "synthetic": true
+  },
+  {
+    "id": "CHECK-H038-1",
+    "householdId": "H038",
+    "sourceType": "가족",
+    "checkedAt": "2026-09-21",
+    "checkedFields": [
+      "mobility",
+      "contactRef"
+    ],
+    "changed": null,
+    "operatorLabel": "모의 확인 담당자",
+    "evidence": "합성 확인 이력",
+    "synthetic": true
+  },
+  {
+    "id": "CHECK-H038-2",
+    "householdId": "H038",
+    "sourceType": "가족",
+    "checkedAt": "2026-09-28",
+    "checkedFields": [
+      "mobility",
+      "contactRef"
+    ],
+    "changed": null,
+    "operatorLabel": "모의 확인 담당자",
+    "evidence": "합성 확인 이력",
+    "synthetic": true
+  },
+  {
+    "id": "CHECK-H039-1",
+    "householdId": "H039",
+    "sourceType": "가족",
+    "checkedAt": "2026-09-20",
+    "checkedFields": [
+      "mobility",
+      "contactRef"
+    ],
+    "changed": null,
+    "operatorLabel": "모의 확인 담당자",
+    "evidence": "합성 확인 이력",
+    "synthetic": true
+  },
+  {
+    "id": "CHECK-H039-2",
+    "householdId": "H039",
+    "sourceType": "가족",
+    "checkedAt": "2026-09-27",
+    "checkedFields": [
+      "mobility",
+      "contactRef"
+    ],
+    "changed": null,
+    "operatorLabel": "모의 확인 담당자",
+    "evidence": "합성 확인 이력",
+    "synthetic": true
+  },
+  {
+    "id": "CHECK-H040-1",
+    "householdId": "H040",
+    "sourceType": "가족",
+    "checkedAt": "2026-07-02",
+    "checkedFields": [
+      "mobility",
+      "contactRef"
+    ],
+    "changed": null,
+    "operatorLabel": "모의 확인 담당자",
+    "evidence": "합성 확인 이력",
+    "synthetic": true
+  },
+  {
+    "id": "CHECK-H040-2",
+    "householdId": "H040",
+    "sourceType": "가족",
+    "checkedAt": "2026-07-09",
+    "checkedFields": [
+      "mobility",
+      "contactRef"
+    ],
+    "changed": null,
+    "operatorLabel": "모의 확인 담당자",
+    "evidence": "합성 확인 이력",
+    "synthetic": true
+  },
+  {
+    "id": "CHECK-H041-1",
+    "householdId": "H041",
+    "sourceType": "가족",
+    "checkedAt": "2026-09-18",
+    "checkedFields": [
+      "mobility",
+      "contactRef"
+    ],
+    "changed": null,
+    "operatorLabel": "모의 확인 담당자",
+    "evidence": "합성 확인 이력",
+    "synthetic": true
+  },
+  {
+    "id": "CHECK-H041-2",
+    "householdId": "H041",
+    "sourceType": "가족",
+    "checkedAt": "2026-09-25",
+    "checkedFields": [
+      "mobility",
+      "contactRef"
+    ],
+    "changed": null,
+    "operatorLabel": "모의 확인 담당자",
+    "evidence": "합성 확인 이력",
+    "synthetic": true
+  },
+  {
+    "id": "CHECK-H042-1",
+    "householdId": "H042",
+    "sourceType": "가족",
+    "checkedAt": "2026-09-17",
+    "checkedFields": [
+      "mobility",
+      "contactRef"
+    ],
+    "changed": null,
+    "operatorLabel": "모의 확인 담당자",
+    "evidence": "합성 확인 이력",
+    "synthetic": true
+  },
+  {
+    "id": "CHECK-H042-2",
+    "householdId": "H042",
+    "sourceType": "가족",
+    "checkedAt": "2026-09-24",
+    "checkedFields": [
+      "mobility",
+      "contactRef"
+    ],
+    "changed": null,
+    "operatorLabel": "모의 확인 담당자",
+    "evidence": "합성 확인 이력",
+    "synthetic": true
+  },
+  {
+    "id": "CHECK-H043-1",
+    "householdId": "H043",
+    "sourceType": "가족",
+    "checkedAt": "2026-09-16",
+    "checkedFields": [
+      "mobility",
+      "contactRef"
+    ],
+    "changed": null,
+    "operatorLabel": "모의 확인 담당자",
+    "evidence": "합성 확인 이력",
+    "synthetic": true
+  },
+  {
+    "id": "CHECK-H043-2",
+    "householdId": "H043",
+    "sourceType": "통화",
+    "checkedAt": "2026-09-23",
+    "checkedFields": [
+      "mobility",
+      "contactRef"
+    ],
+    "changed": null,
+    "operatorLabel": "모의 확인 담당자",
+    "evidence": "합성 확인 이력",
+    "synthetic": true
+  },
+  {
+    "id": "CHECK-H044-1",
+    "householdId": "H044",
+    "sourceType": "가족",
+    "checkedAt": "2026-09-15",
+    "checkedFields": [
+      "mobility",
+      "contactRef"
+    ],
+    "changed": null,
+    "operatorLabel": "모의 확인 담당자",
+    "evidence": "합성 확인 이력",
+    "synthetic": true
+  },
+  {
+    "id": "CHECK-H044-2",
+    "householdId": "H044",
+    "sourceType": "통화",
+    "checkedAt": "2026-09-22",
+    "checkedFields": [
+      "mobility",
+      "contactRef"
+    ],
+    "changed": null,
+    "operatorLabel": "모의 확인 담당자",
+    "evidence": "합성 확인 이력",
+    "synthetic": true
+  },
+  {
+    "id": "CHECK-H045-1",
+    "householdId": "H045",
+    "sourceType": "가족",
+    "checkedAt": "2026-09-14",
+    "checkedFields": [
+      "mobility",
+      "contactRef"
+    ],
+    "changed": null,
+    "operatorLabel": "모의 확인 담당자",
+    "evidence": "합성 확인 이력",
+    "synthetic": true
+  },
+  {
+    "id": "CHECK-H045-2",
+    "householdId": "H045",
+    "sourceType": "통화",
+    "checkedAt": "2026-09-21",
+    "checkedFields": [
+      "mobility",
+      "contactRef"
+    ],
+    "changed": null,
+    "operatorLabel": "모의 확인 담당자",
+    "evidence": "합성 확인 이력",
+    "synthetic": true
+  },
+  {
+    "id": "CHECK-H046-1",
+    "householdId": "H046",
+    "sourceType": "가족",
+    "checkedAt": "2026-09-13",
+    "checkedFields": [
+      "mobility",
+      "contactRef"
+    ],
+    "changed": null,
+    "operatorLabel": "모의 확인 담당자",
+    "evidence": "합성 확인 이력",
+    "synthetic": true
+  },
+  {
+    "id": "CHECK-H046-2",
+    "householdId": "H046",
+    "sourceType": "통화",
+    "checkedAt": "2026-09-20",
+    "checkedFields": [
+      "mobility",
+      "contactRef"
+    ],
+    "changed": null,
+    "operatorLabel": "모의 확인 담당자",
+    "evidence": "합성 확인 이력",
+    "synthetic": true
+  },
+  {
+    "id": "CHECK-H047-1",
+    "householdId": "H047",
+    "sourceType": "가족",
+    "checkedAt": "2026-09-12",
+    "checkedFields": [
+      "mobility",
+      "contactRef"
+    ],
+    "changed": null,
+    "operatorLabel": "모의 확인 담당자",
+    "evidence": "합성 확인 이력",
+    "synthetic": true
+  },
+  {
+    "id": "CHECK-H047-2",
+    "householdId": "H047",
+    "sourceType": "통화",
+    "checkedAt": "2026-09-19",
+    "checkedFields": [
+      "mobility",
+      "contactRef"
+    ],
+    "changed": null,
+    "operatorLabel": "모의 확인 담당자",
+    "evidence": "합성 확인 이력",
+    "synthetic": true
+  },
+  {
+    "id": "CHECK-H048-1",
+    "householdId": "H048",
+    "sourceType": "가족",
+    "checkedAt": "2026-09-11",
+    "checkedFields": [
+      "mobility",
+      "contactRef"
+    ],
+    "changed": null,
+    "operatorLabel": "모의 확인 담당자",
+    "evidence": "합성 확인 이력",
+    "synthetic": true
+  },
+  {
+    "id": "CHECK-H048-2",
+    "householdId": "H048",
+    "sourceType": "통화",
+    "checkedAt": "2026-09-18",
+    "checkedFields": [
+      "mobility",
+      "contactRef"
+    ],
+    "changed": null,
+    "operatorLabel": "모의 확인 담당자",
+    "evidence": "합성 확인 이력",
+    "synthetic": true
+  }
+]

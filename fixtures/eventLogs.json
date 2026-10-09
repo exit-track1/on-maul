@@ -1,0 +1,42 @@
+[
+  {
+    "id": "LOG-idle-01",
+    "scenarioId": "idle",
+    "timestamp": "2026-10-09T11:00:00+09:00",
+    "actorType": "system",
+    "label": "평시 합성 명단 준비",
+    "synthetic": true
+  },
+  {
+    "id": "LOG-watch-01",
+    "scenarioId": "watch",
+    "timestamp": "2026-10-09T11:05:00+09:00",
+    "actorType": "human",
+    "label": "감시 시작 모의 확인",
+    "synthetic": true
+  },
+  {
+    "id": "LOG-review-01",
+    "scenarioId": "review",
+    "timestamp": "2026-10-09T11:08:00+09:00",
+    "actorType": "human",
+    "label": "발령 검토 시작 모의 확인",
+    "synthetic": true
+  },
+  {
+    "id": "LOG-active-01",
+    "scenarioId": "active",
+    "timestamp": "2026-10-09T11:16:00+09:00",
+    "actorType": "system",
+    "label": "전화·자원 진행 상태 모의 기록",
+    "synthetic": true
+  },
+  {
+    "id": "LOG-late-01",
+    "scenarioId": "late",
+    "timestamp": "2026-10-09T11:35:00+09:00",
+    "actorType": "system",
+    "label": "미완료 대상 모의 인계 기록",
+    "synthetic": true
+  }
+]
