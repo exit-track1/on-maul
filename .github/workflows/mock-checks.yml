@@ -1,0 +1,26 @@
+name: Mock application checks
+on:
+  push:
+    branches: [main]
+  pull_request:
+jobs:
+  mock:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+      - run: npm ci
+      - run: npm test
+      - run: npm run build
+      - run: npm run format:mock:check
+      - run: python3 scripts/check_skill_policy.py
+      - run: npx playwright install --with-deps chromium
+      - run: npm run test:e2e
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: mock-browser-evidence
+          path: fe/test-results/
