@@ -43,15 +43,15 @@ const layerNames: Record<Layer, string> = {
   smoke: '연기 흐름',
 };
 
-function Person({ color = '#8fdbff' }: { color?: string }) {
+function Person({ color = '#FA4616' }: { color?: string }) {
   return (
-    <g className="person-symbol" stroke="#123344" strokeWidth="1.5">
+    <g className="person-symbol" stroke="#4C4A44" strokeWidth="1.5">
       <ellipse
         cx="1"
         cy="12"
         rx="10"
         ry="4"
-        fill="#0d1d26"
+        fill="#4C4A44"
         opacity=".35"
         stroke="none"
       />
@@ -79,41 +79,41 @@ function Person({ color = '#8fdbff' }: { color?: string }) {
 function Vehicle({ ambulance, held }: { ambulance?: boolean; held?: boolean }) {
   return (
     <g>
-      <ellipse cy="5" rx="25" ry="14" fill="#051722" opacity=".35" />
-      <rect x="-18" y="-12" width="8" height="6" rx="2" fill="#172526" />
-      <rect x="-18" y="7" width="8" height="6" rx="2" fill="#172526" />
-      <rect x="9" y="-12" width="8" height="6" rx="2" fill="#172526" />
-      <rect x="9" y="7" width="8" height="6" rx="2" fill="#172526" />
+      <ellipse cy="5" rx="25" ry="14" fill="#4C4A44" opacity=".35" />
+      <rect x="-18" y="-12" width="8" height="6" rx="2" fill="#4C4A44" />
+      <rect x="-18" y="7" width="8" height="6" rx="2" fill="#4C4A44" />
+      <rect x="9" y="-12" width="8" height="6" rx="2" fill="#4C4A44" />
+      <rect x="9" y="7" width="8" height="6" rx="2" fill="#4C4A44" />
       <rect
         x="-22"
         y="-10"
         width="44"
         height="20"
         rx="5"
-        fill={held ? '#e99a70' : ambulance ? '#f3eee4' : '#87bdda'}
-        stroke="#f6fbff"
+        fill={held ? '#FA4616' : ambulance ? '#FFF4D6' : '#D9A700'}
+        stroke="#FFF4D6"
         strokeWidth="1.5"
       />
-      <rect x="8" y="-8" width="7" height="16" rx="2" fill="#344e58" />
-      <path d="M-15-8h18v16h-18" fill={ambulance ? '#fdfbf5' : '#abcfdc'} />
+      <rect x="8" y="-8" width="7" height="16" rx="2" fill="#4C4A44" />
+      <path d="M-15-8h18v16h-18" fill={ambulance ? '#FFF4D6' : '#D9A700'} />
       <path
         d="M-20-8v16"
-        stroke={ambulance ? '#e0523e' : '#d9eef3'}
+        stroke={ambulance ? '#8A0715' : '#FFF4D6'}
         strokeWidth="3"
       />
-      <path d="M20-7v3M20 4v3" stroke="#fff3b5" strokeWidth="2" />
+      <path d="M20-7v3M20 4v3" stroke="#D9A700" strokeWidth="2" />
       {ambulance && (
         <>
-          <path d="M-7-4v8M-11 0h8" stroke="#e0523e" strokeWidth="2.5" />
+          <path d="M-7-4v8M-11 0h8" stroke="#8A0715" strokeWidth="2.5" />
           <rect
             className="vehicle-beacon"
             x="4"
             y="-7"
             width="3"
             height="5"
-            fill="#ef755c"
+            fill="#8A0715"
           />
-          <rect x="4" y="2" width="3" height="5" fill="#6eafe8" />
+          <rect x="4" y="2" width="3" height="5" fill="#FA4616" />
         </>
       )}
     </g>
@@ -158,11 +158,11 @@ function MotionMarker({
       <circle
         r={kind === 'person' ? 18 : 28}
         fill={
-          motion.held ? '#e87c48' : kind === 'person' ? '#9ad5f2' : '#f7c56b'
+          motion.held ? '#8A0715' : kind === 'person' ? '#FA4616' : '#D9A700'
         }
         fillOpacity=".18"
         stroke={
-          motion.held ? '#ed8455' : kind === 'person' ? '#a2deff' : '#ffe2a8'
+          motion.held ? '#8A0715' : kind === 'person' ? '#FA4616' : '#D9A700'
         }
         strokeOpacity=".8"
       />
@@ -171,7 +171,7 @@ function MotionMarker({
           {(motion.members?.length ?? 0) > 1 ? (
             <>
               <g transform="translate(-5 -3)">
-                <Person color="#afdce3" />
+                <Person color="#FA4616" />
               </g>
               <g transform="translate(6 3)">
                 <Person />
@@ -193,7 +193,7 @@ function MotionMarker({
       )}
       <path
         d={`M0 ${labelY < 0 ? -20 : 18}L${labelOffset.x} ${labelY < 0 ? labelY + 7 : labelY - 13}`}
-        stroke={kind === 'person' ? '#8dcbee' : '#e5c481'}
+        stroke={kind === 'person' ? '#FA4616' : '#D9A700'}
         strokeWidth="1"
       />
       <rect
@@ -202,9 +202,9 @@ function MotionMarker({
         width="68"
         height="20"
         rx="5"
-        fill="#142a2c"
+        fill="#4C4A44"
         fillOpacity=".95"
-        stroke={kind === 'person' ? '#8dcbee' : '#e5c481'}
+        stroke={kind === 'person' ? '#FA4616' : '#D9A700'}
         strokeWidth="1"
       />
       <text
@@ -832,7 +832,7 @@ export function MapPanel({
                     data-testid="trip-route"
                     points={pathPoints(route.waypoints)}
                     fill="none"
-                    stroke={m.held ? '#f28b68' : '#f6d28d'}
+                    stroke={m.held ? '#8A0715' : '#D9A700'}
                     strokeWidth="3"
                     strokeDasharray="7 5"
                     opacity=".85"
@@ -852,7 +852,7 @@ export function MapPanel({
                     data-testid="movement-route"
                     points={pathPoints(m.route.waypoints)}
                     fill="none"
-                    stroke={m.kind === 'person' ? '#8ed7fc' : '#f9d693'}
+                    stroke={m.kind === 'person' ? '#FA4616' : '#D9A700'}
                     strokeWidth={m.kind === 'person' ? '2.5' : '3.5'}
                     strokeDasharray={m.kind === 'person' ? '4 7' : '9 6'}
                     opacity=".9"
@@ -890,9 +890,9 @@ export function MapPanel({
                       cx={h.demoPosition.x}
                       cy={h.demoPosition.y}
                       r="32"
-                      fill="#f8d795"
+                      fill="#D9A700"
                       fillOpacity=".16"
-                      stroke="#ffe6a7"
+                      stroke="#D9A700"
                       strokeWidth="3"
                     />
                     <rect
@@ -902,13 +902,13 @@ export function MapPanel({
                       height="26"
                       rx="6"
                       fill="#203d31"
-                      stroke="#ffe6a7"
+                      stroke="#D9A700"
                     />
                     <text
                       x={h.demoPosition.x}
                       y={h.demoPosition.y + 36}
                       textAnchor="middle"
-                      fill="#fff6dc"
+                      fill="#FFF4D6"
                       fontSize="12"
                       fontWeight="700"
                     >

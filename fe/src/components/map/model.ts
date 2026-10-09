@@ -8,12 +8,12 @@ import type { View } from '../../../../shared/src/runtime.ts';
 import type { Point } from '../../../../shared/src/types.ts';
 
 export const MAP_COLORS = {
-  act: '#e36c45',
-  prog: '#73b8ec',
-  safe: '#74c69d',
-  visit: '#edc66b',
-  before: '#b8c2b2',
-  excluded: '#8f9997',
+  act: '#8A0715',
+  prog: '#FA4616',
+  safe: '#CEDC00',
+  visit: '#D9A700',
+  before: '#FFF4D6',
+  excluded: '#A19E93',
 };
 export const pathPoints = (points: Point[]) =>
   points.map((p) => `${p.x},${p.y}`).join(' ');

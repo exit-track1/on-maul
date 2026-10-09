@@ -81,9 +81,9 @@ export function Btn({
   const h = size === 'sm' ? 30 : 36;
   const k = {
     primary: {
-      background: C.ink,
+      background: C.red,
       color: C.white,
-      border: `1px solid ${C.ink}`,
+      border: `1px solid ${C.red}`,
       fontWeight: 600,
     },
     outline: {
@@ -167,7 +167,7 @@ export const Ring = ({ size = 26 }: { size?: number }) => (
       width: size,
       height: size,
       borderRadius: '50%',
-      border: `${Math.round(size * 0.27)}px solid ${C.ink}`,
+      border: `${Math.round(size * 0.27)}px solid ${C.red}`,
       boxSizing: 'border-box',
       background: C.white,
       flexShrink: 0,

@@ -37,9 +37,9 @@ export function ForestLayers({
           <path d={spread.fuelPath} />
         </clipPath>
         <radialGradient id={`${id}-smoke-cloud`}>
-          <stop stopColor="#d6d1c5" stopOpacity=".9" />
-          <stop offset=".45" stopColor="#bfc0b7" stopOpacity=".6" />
-          <stop offset="1" stopColor="#b6b9af" stopOpacity="0" />
+          <stop stopColor="#FFF4D6" stopOpacity=".9" />
+          <stop offset=".45" stopColor="#A19E93" stopOpacity=".6" />
+          <stop offset="1" stopColor="#A19E93" stopOpacity="0" />
         </radialGradient>
         <filter
           id={`${id}-smoke-wisp`}
@@ -71,11 +71,11 @@ export function ForestLayers({
           aria-label="10분 후 연결된 숲의 예상 산불 범위"
           clipPath={`url(#${id}-forest-clip)`}
         >
-          <path d={future.areaPath} fill="#f4a049" fillOpacity=".09" />
+          <path d={future.areaPath} fill="#FA4616" fillOpacity=".09" />
           <path
             d={future.boundaryPath}
             fill="none"
-            stroke="#ffd09a"
+            stroke="#D9A700"
             strokeWidth="2"
             strokeDasharray="8 7"
             strokeLinejoin="round"
@@ -100,7 +100,7 @@ export function ForestLayers({
             <path
               d={fire.boundaryPath}
               fill="none"
-              stroke="#ef843f"
+              stroke="#FA4616"
               strokeWidth="7"
               opacity=".6"
               filter={`url(#${id}-glow)`}
@@ -108,7 +108,7 @@ export function ForestLayers({
             <path
               d={fire.boundaryPath}
               fill="none"
-              stroke="#e7a05c"
+              stroke="#D9A700"
               strokeWidth="2"
               strokeLinejoin="round"
               opacity=".8"
@@ -119,9 +119,9 @@ export function ForestLayers({
                   className="map-flame"
                   style={{ animationDelay: `${-i * 0.17}s` }}
                   d="M-4 5Q-8-1-3-6Q-3-1 0-11Q8-3 5 3Q2 9-4 5Z"
-                  fill="#f69337"
+                  fill="#FA4616"
                 />
-                <path d="M-2 4Q-3 0 1-4Q5 4-2 4" fill="#ffe5a1" />
+                <path d="M-2 4Q-3 0 1-4Q5 4-2 4" fill="#D9A700" />
               </g>
             ))}
           </g>
@@ -129,8 +129,8 @@ export function ForestLayers({
             cx={map.ignition.x}
             cy={map.ignition.y}
             r="8"
-            fill="#fff0c4"
-            stroke="#e45e30"
+            fill="#FFF4D6"
+            stroke="#8A0715"
             strokeWidth="4"
           />
           <text
@@ -162,7 +162,7 @@ export function ForestLayers({
               <path
                 key={`wisp-${lane}`}
                 d={`M${[...upper, ...lower].join('L')}Z`}
-                fill="#d9dcd1"
+                fill="#A19E93"
                 opacity=".18"
                 filter={`url(#${id}-smoke-wisp)`}
               />
