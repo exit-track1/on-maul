@@ -2,7 +2,7 @@
 
 2026-10-09 · Codex
 
-React 19 + Node.js/TypeScript + Telnyx + 실제 LangGraph를 사용한다. 현재 구현은 합성 상황실의 검증된 모의 동작이며, 실제 휴대폰 수신·모델 추론·정부 API 성공이나 원문 전체 요구 달성을 의미하지 않는다. 원문 100개 요구 ID와 T1–T29/U1–U14의 개별 상태·근거·남은 조건은 [requirements-verification.md](requirements-verification.md)에 기록한다.
+React 19 + Node.js/TypeScript + Telnyx + 실제 LangGraph를 사용한다. 현재 구현은 합성 상황실의 검증된 모의 동작이며, 실제 휴대폰 수신·모델 추론·정부 API 성공이나 원문 전체 요구 달성을 의미하지 않는다. 모의 범위 마감은 검증한 수동 상황실·call-control·실제 계획/전사/재배정 그래프의 기준 구현을 뜻하며, 원문100개의23/69/7/1을 mock 완료율로 해석하지 않는다. 원문 100개 요구 ID와 T1–T29/U1–U14의 개별 상태·근거·남은 조건은 [requirements-verification.md](requirements-verification.md)에 기록한다.
 
 ## 확인된 범위
 
@@ -29,36 +29,42 @@ React 19 + Node.js/TypeScript + Telnyx + 실제 LangGraph를 사용한다. 현�
 | 도우미5범주·동적 자원/예약·revision 순위 변경·명시적 통신 토글·질문/부정/복합명령 차단 | `shared/test/assistant.test.ts`, 담당 Codex 집중10/10 통과 | 모의 규칙/FE 자원·순위 검증 통과·브라우저 전체5문장 리허설 남음 |
 | 명단 원문 구조화 순수 규칙 파서·산소/거동/unknown/estimated·지원 enum·slice 근거·부정/질문/과거/충돌/명령 차단 | `shared/src/household-notes.ts`, `shared/test/household-notes.test.ts`16 + `shared/test/note-grades.test.ts`10 합동26/26·strict 타입 검사, `shared/test/notes-runtime.test.ts`4/4·FE 적용 통과 | 규칙 파서/현재 건강 원문 근거 등급·Runtime/UI 적용 모의 검증 통과·지원필드 전체 적용/실제 추론 미완료 |
 | source 관할 exact match·키워드/임계·시각/최신성·wall/replay 분리·격리 cache key·실패/fallback append | `shared/src/sources.ts`, `shared/test/sources.test.ts` 집중16/16 통과 | 자체 합성 source 계약 검증·모델/실제 수집0 |
-| sourceState→계획/지도/배차·낡은 풍속 ETA=null·현재 임무 보류/예약 유지·종료 JSON 근거 복원 | `shared/src/monitoring.ts`, `shared/test/monitoring.test.ts` 집중9/9 통과 | Runtime 통합 검증 통과·공식 API/모델 executor 없음 |
-| HTTP source 실패/폴백·낡음/과거풍속409·예약/위치·export/저널 재시작·종료 byte-stable | `server/test/source-api.test.ts` 집중4/4 통과 | 모의 API/저널 검증·transport/model0 |
+| sourceState→계획/지도/배차·낡은 풍속 ETA=null·현재 임무 보류/예약 유지·종료 JSON 근거 복원 | `shared/src/monitoring.ts`, `shared/test/monitoring.test.ts` 집중15/15 통과 | Runtime 통합 검증 통과·공식 API/모델 executor 없음 |
+| HTTP source 실패/폴백·낡음/과거풍속409·예약/위치·export/저널 재시작·종료 byte-stable | `server/test/source-api.test.ts` 집중10/10 통과 | 모의 API/저널 검증·transport/model0 |
+| source 실패/수집 뒤 미확정 계획 재검토·무관 수집은 수동 순서 유지·확정 직전 표시조건 재검증·새 LangGraph 검토 checkpoint | `shared/src/runtime.ts`, `server/src/app.ts` 보완; monitoring15+source API10 집중25/25·신규 FE 포함21/21 통과 | Runtime/server 모의 회귀 통과·실제 모델/수집0 |
+| 관측 없는 실패 record의 시각/요약 불명 표시·fixture 값으로 대체하지 않음·별도 fallback/실패 원문 보존 | `fe/src/tabs/Panels.tsx`, 기존 source FE 강화·미확정 계획 회귀 추가 | FE21/21·source Runtime/API 집중25/25 통과 |
 | 실제 LangGraph 계획/전사/재배정 StateGraph·checkpoint·interrupt·Command resume | `server/src/agents.ts`, server 테스트 | 라이브러리 실행 검증 통과·추론은 rules |
 | Telnyx demo 키 있어도0·unknown mode 거부·환경 allowlist/별도 동의·Ed25519 raw body/변조/120초·중복 webhook·생성 불명 | `server/src/telephony.ts`, server 테스트 | 코드/주입 adapter 검증 통과·실전화 미실시 |
 
-경로의 **가장 가까운 개방 도로까지 ≤250px 접근**은 `accessRule: synthetic-nearest-open-road-250px`로 기록하는 합성 가정이다. 현실의 도로 연결·차량 접근·주행 안전 검증이 아니다. 지도는 trip의 같은 waypoints·시뮬 시각으로 위치를 계산한다. 새 `fe/src/components/map/`에는80ms 간격의 local preview가 추가됐으나 공용 상태 진행은 명시적1분 버튼이다. preview는 실제 임무 상태를 진전시키지 않으며 연속 서버 권위 시계·30fps 이동 보간은 미검증이다. 새 지도의 local preview·조작·풍속 차단·종료 검증은 독립 preview의 전체20/20에 포함됐다.
+경로의 **가장 가까운 개방 도로까지 ≤250px 접근**은 `accessRule: synthetic-nearest-open-road-250px`로 기록하는 합성 가정이다. 현실의 도로 연결·차량 접근·주행 안전 검증이 아니다. 지도는 trip의 같은 waypoints·시뮬 시각으로 위치를 계산한다. 새 `fe/src/components/map/`에는80ms 간격의 local preview가 추가됐으나 공용 상태 진행은 명시적1분 버튼이다. preview는 실제 임무 상태를 진전시키지 않으며 연속 서버 권위 시계·30fps 이동 보간은 미검증이다. 새 지도의 local preview·조작·풍속 차단·종료 검증은 독립 preview의 최신21/21에 포함됐다.
 
 ## 실행된 검증
+
+최종 모의 구현의 권위 검증은 shared/server 도메인134/134와 FE21/21이다. 별도 전화 PoC가 함께 포함된 전체189/189는 해당 실행 시점의 결과이며, 이후 다른 채팅의 변경까지 검증한 결과로 확대하지 않는다.
 
 이 표의 명령 출력은 부모 Codex가 실행하고 전달한 결과다. 이 문서 작업에서는 전체 테스트를 다시 실행하지 않았다.
 
 | 명령/검증 | 실제 확인 결과 | 범위 |
 | --- | --- | --- |
-| `npm test` | 172/172 통과 | 현재 공용 mock와 별도 root 전화 PoC를 포함한 전체 실행. 두 시스템의 통합 실연동 증거가 아님 |
-| `npm run test:domain` |122/122 통과 | 현재 mock/shared/server 집중 범위의 전체 실행. 별도 root 전화 PoC는 이 명령에 포함하지 않음 |
+| `npm test` | 실행 시점 전체189/189 통과 | 현재 공용 mock와 별도 root 전화 PoC를 포함한 전체 실행. 두 시스템의 통합 실연동 증거가 아님 |
+| `npm run test:domain` | 최종134/134 통과 | 현재 mock/shared/server 집중 범위의 전체 실행. 별도 root 전화 PoC는 이 명령에 포함하지 않음 |
 | 명단 파서/건강 근거 등급 집중 테스트 | 파서16+등급10 합동26/26 통과·strict 타입 검사 통과 | 순수 규칙 파서·현재 정확한 건강 원문 인용 subset; 이전 overall 추출 등급 무시. Runtime 적용4/4·FE 재구조화 적용 통과; 지원필드 전체 적용/실모델 남음 |
-| source 집중 테스트 | sources16/16·monitoring9/9 통과 | source contract와 실제 Runtime/계획/지도/배차/종료 연결. 전체 최신 합계를 추정하지 않음 |
-| source HTTP/저널 집중 테스트 | `node --import tsx --test server/test/source-api.test.ts`4/4 통과 | 실패/fallback·stale/historical wind409·예약/위치·export/재시작·종료 byte-stable·외부 transport/model0. 전체 합계를 추정하지 않음 |
+| source 집중 테스트 | sources16/16·monitoring15/15 통과 | source 계약·미확정 계획 최신화/순서 보존/확정 조건 재검증·지도/배차/종료 연결 |
+| source HTTP/저널 집중 테스트 | `node --import tsx --test server/test/source-api.test.ts`10/10 통과 | 실패/fallback·stale/historical wind409·예약/위치·export/재시작·종료 byte-stable·최신 표시계획/checkpoint 대조·supersede·오류/await 중 조건변경/승인 후 오염에서 확정과 큐0·외부 transport/model0 |
 | 도우미 집중 테스트 | `node --import tsx --test shared/test/assistant.test.ts`10/10 통과, Prettier check 통과 | 규칙5범주·무효/질문/부정/복합·순위revision·통신human 기록. 전체 도메인 실행에도 포함 |
-| `npm run build` / `npm run typecheck` | 최종 Vite38modules·server 및 FE typecheck 통과 | 새 지도/명단 연결 포함. 기본 산출물 hash가 검증한 private 번들과 같음 |
-| 브라우저 E2E | 20/20 통과(starter17+지도3) | 독립 `/tmp/onmaul-fe-review-1791518832834/assets` 번들·4181 preview; 6탭·명단·확정전0·offline0요청·실패7/8·인수인계·키보드·재배정/동반자/후속확인/조원재호출·4뷰포트·명단 적용·새 지도 preview/정지/레이어/zoom/낡은 풍속/종료 |
-| Playwright 캡처 | 1920×1080·1366×768·1280×800·390×844와 가로 넘침 검사, 1366 통화5행 경계 검사 근거 있음 | 새 지도 포함20/20 실행의 자동 범위. 프로젝터 실사용·2초 인간 판독·30fps 미검증 |
+| `npm run build` / `npm run typecheck` | 최신 source P2 포함 Vite38modules·FE/server typecheck 통과 | 기본 번들을 private4181 preview에 복사해 검증; JS `index-BbAEbTbN.js`·CSS `index-DUk4wsRt.css` |
+| 브라우저 E2E | 최신21/21 통과(starter18+지도3) | 독립 `/tmp/onmaul-fe-review-1791518832834/assets` 번들·4181 preview; 6탭·명단·확정전0·offline0요청·실패7/8·인수인계·키보드·재배정/동반자/후속확인/조원재호출·4뷰포트·명단 적용·새 지도 preview/정지/레이어/zoom/낡은 풍속/종료 |
+| Playwright 캡처 | 1920×1080·1366×768·1280×800·390×844와 가로 넘침 검사, 1366 통화5행 경계 검사 근거 있음 | 새 지도/source P2 포함21/21 실행의 자동 범위. 프로젝터 실사용·2초 인간 판독·30fps 미검증 |
 | 코드 형식/공백 | mock 범위 Prettier·`git diff --check` 통과 | `fe/src`·`fe/tests`·`shared`·`server`·`scripts/dev.mjs`; 실망/현장 검증과 별개 |
-| 공식 프로젝트 스킬 정책 | 기존 `python3 scripts/check_skill_policy.py` 활성1·보관4 통과 기록 | 이번 감사는 allowlist를 변경하지 않았고 삭제된 스킬을 읽거나 설치하지 않음 |
+| 공식 프로젝트 스킬 정책 | 최종 `python3 scripts/check_skill_policy.py` 활성1·보관4 통과 | 이번 감사는 allowlist를 변경하지 않았고 삭제된 스킬을 읽거나 설치하지 않음 |
 | 주요 텍스트 대비 | 기존 흰 배경 토큰 계산: 본문18.88:1·보조7.02:1·조치6.58:1·진행5.58:1·안전6.18:1·플래그5.84:1 | 주요 토큰만; 모든 렌더링 조합/지도/포커스 대비 전수 검증 아님 |
 | 운영 의존성 보안 검사 | 기존 `npm audit --omit=dev` 취약점0 기록 | 현재 전체 의존성/배포 보안 완료를 뜻하지 않음 |
 
 브라우저 단독 `?demo=1`은 외부/API 요청 없이 local Runtime을 사용한다. 서버 연결 모드는 실제 `StateGraph`를 실행하지만 외부 모델 호출은0이다. 실전화 도구 `src/`·`public/`의 8팀/6차량 모델은 React mock의 4조/10자원과 분리돼 있다.
 
 ## 남은 구현·검증
+
+마지막 source P2 보완은 Runtime/API 집중25/25·도메인134/134·FE21/21을 통과했다. 실패/재수집의 ETA·근거 조건 변화 때만 미확정 계획을 갱신하고 무관 수집은 담당자 순서를 유지하며, 확정 전 모든 표시조건을 재검증한다. 서버는 이전 계획 checkpoint를 supersede하고 최신 검토 checkpoint를 만든다. FE는 관측 없는 실패 record에 fixture 시각/요약을 대신 넣지 않고 불명을 표시하며 fallback을 별도 record로 보존한다.
 
 - Telnyx 실제 음성 agent·전사/strict tool 브리지와 mock 상태 통합, 동의된 한국 휴대폰 주민1/조원1 리허설, 실제 종료/재접속·녹음동의/보관/삭제. 현재 mock API는 call-control 모듈이며 별도 전화 PoC의 테스트를 실수신 증거로 쓰지 않는다.
 - OpenAI 추론 adapter와 감시/명단/발령/도우미/방송 그래프, strict schema·원문 근거·최대1회 교정·cache·사용량/예산/실패 폴백. 현재 모델 추론 성공은 없다.

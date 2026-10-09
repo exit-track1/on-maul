@@ -11,19 +11,21 @@
 - **미구현**: 현재 React mock 구현에서 대응 기능을 확인하지 못했다.
 - **미검증**: 코드·설정 또는 검증 계획은 있으나 해당 실행·리허설 증거가 없다.
 
-부모 Codex가 실제 출력으로 확인한 전체 테스트는 `npm test` **172/172 통과**, `npm run test:domain` **122/122 통과**다. 명단 규칙 파서16+건강 근거 등급10의 합동 집중26/26, Runtime 적용4/4, source contract16/16·monitoring9/9·HTTP/저널4/4, 도우미10/10도 실제 집중 검증을 통과했다. 최종 기본 `npm run build`(Vite38modules·server typecheck), 전체 typecheck, mock 범위 Prettier와 `git diff --check`가 통과했다. FE 산출물 hash는20개 브라우저 검증을 실행한 private 번들과 같았다. 독립 `/tmp/onmaul-fe-review-1791518832834/assets` 번들을4181포트 preview로 실행한 브라우저 검증 **20/20 통과**(starter17 + 지도3)에는 새 지형 지도·풍속 차단·도우미·명단 적용·예약·재배정·후속 확인·조원 재호출·4뷰포트가 포함된다. 표의 파일·이름은 실제 실행 범위를 찾는 근거다. 전체 테스트 수는 원문 요구 수 또는 T/U 전체 통과율이 아니다.
+부모 Codex의 최종 실제 출력은 **모의 shared/server 도메인134/134**, **FE21/21** 통과다. `npm test` 전체 **189/189 통과**는 별도 전화 PoC를 포함한 해당 실행 시점의 결과이며 이후 다른 채팅의 변경까지 검증한 증거가 아니다. 명단 규칙 파서16+건강 근거 등급10 집중26/26, Runtime 적용4/4, source contract16/16·monitoring15+HTTP/API10 합동25/25, 도우미10/10도 통과했다. 기본 build(Vite38modules), FE 및 마지막 서버 강화 후 typecheck, mock 범위 Prettier, `git diff --check`, 공식 스킬 정책 활성1/보관4가 통과했다. 기본 번들 JS `index-BbAEbTbN.js`·CSS `index-DUk4wsRt.css`를 독립4181포트 preview에서 검증한 FE21/21(starter18+지도3)에는 소스 실패·미확정 계획·새 지도·도우미·명단 적용·예약·재배정·후속 확인·조원 재호출·4뷰포트가 포함된다. 전체 테스트 수는 원문 요구 수 또는 T/U 전체 통과율이 아니다.
+
+source P2 보완도 검증됐다. source-fail/collect로 미확정 계획의 ETA·근거 조건이 바뀔 때만 최신 재검토로 갱신하고 무관한 수집은 담당자 수동 순서를 유지한다. 확정 전 표시조건 전체를 재검증하며 서버는 이전 계획 checkpoint를 supersede하고 최신 검토 checkpoint를 만든다. 실제 표시계획과 checkpoint를 resume 전후 대조하고 그래프 오류·await 중 source 변화·승인 뒤 자료 오염에서는 확정/큐0을 유지한다. FE는 관측 없는 실패 record에 fixture 시각/요약을 대신 넣지 않고 불명을 표시하며 fallback은 별도 record로 원문 실패를 보존한다. 실패 시45행 도달 불명·공용 채널0/8, fallback ETA 복원 후 담당자 확정 흐름도 FE21/21에서 통과했다.
 
 | 증거 약칭 | 파일·검사 범위 |
 | --- | --- |
 | DOM | `shared/src/domain.ts`, `shared/test/domain.test.ts`: fixture 관계·집계·90/91일·취약도·ETA·완료 근거·동의·가족·인계·두절·복구 |
 | NOTES | `shared/src/household-notes.ts`, `shared/test/household-notes.test.ts`16과 `shared/test/note-grades.test.ts`10의 합동 집중26/26·strict 타입 검사: 산소/거동/불명·supported enum·원문 slice 근거·estimated·부정/질문/과거/충돌/명령을 보수 처리하는 순수 규칙 파서·현재 원문 source/index/offset/정확한 인용으로 건강4종 등급3 검증·이전 overall 추출 등급 무시. `shared/test/notes-runtime.test.ts`4/4와 FE 적용 검증 통과·API 공용 command 제공 |
-| SOURCE | `shared/src/sources.ts`, `shared/src/monitoring.ts`, `shared/test/sources.test.ts`16/16, `shared/test/monitoring.test.ts`9/9, `server/test/source-api.test.ts`4/4: 관할/임계·관측/수집 시각·live/replay 시계·원문 fingerprint/격리 cache key·실패/폴백 append·풍속 신선도와 Runtime/계획/배차/종료·HTTP export/저널 재시작/종료 byte-stable 연결 |
+| SOURCE | `shared/src/sources.ts`, `shared/src/monitoring.ts`, `shared/test/sources.test.ts`16/16, `shared/test/monitoring.test.ts`15/15, `server/test/source-api.test.ts`10/10: 관할/임계·관측/수집 시각·live/replay 시계·원문 fingerprint/격리 cache key·실패/폴백 append·풍속 신선도와 Runtime/계획/배차/종료·HTTP export/저널 재시작/종료 byte-stable 연결. 미확정 계획/표시조건/최신 checkpoint·오류/await 중 변화/승인 뒤 자료 오염의 확정/큐0까지 검증 |
 | ASSIST | `shared/src/runtime.ts`의 assistant 규칙, `shared/test/assistant.test.ts`: 구역/미해결/자원/미확정 순위/통신 토글·동적 집계·revision·질문/부정/복합명령 무변경. 별도 집중 실행10/10 통과 |
 | CALL | `shared/src/runtime.ts`, `shared/test/calls.test.ts`: 공용 채널·후속 확인·재호출·예약 취소·1차 요약·실제 전사와 종단의 분리 |
 | DISP | `shared/src/dispatch.ts`, `shared/src/routing.ts`, `shared/test/dispatch.test.ts`: 합성 도로 연결·통제 우회·3구간 시간·예약·정원·인원·재배정·보류/복구·종료 복원 |
 | GRAPH | `server/src/agents.ts`, `server/test/server.test.ts`: 실제 `StateGraph`, `MemorySaver`, `interrupt`, `Command({resume})`; 계획·전사·재배정 그래프 |
 | API | `server/src/app.ts`, `server/src/telephony.ts`, `server/test/server.test.ts`: 직렬 상태 변경·demo 외부 호출 0·Telnyx allowlist/동의·서명·중복·불명 |
-| FE | `fe/src/App.tsx`, `fe/src/tabs/Panels.tsx`, `fe/src/components/map/{EvacuationMap.tsx,model.ts,map.css}`, `fe/src/styles/global.css`, `fe/tests/starter.spec.ts`, `fe/tests/map.spec.ts`:20/20 통과·6탭·명단·결정·두절·인수인계·뷰포트·키보드 |
+| FE | `fe/src/App.tsx`, `fe/src/tabs/Panels.tsx`, `fe/src/components/map/{EvacuationMap.tsx,model.ts,map.css}`, `fe/src/styles/global.css`, `fe/tests/starter.spec.ts`, `fe/tests/map.spec.ts`:21/21 통과·6탭·명단·결정·두절·인수인계·뷰포트·키보드 |
 | DATA | `fixtures/*.json`, `shared/src/types.ts`, DOM fixture 검사: seed 20261009, 기준일 2026-10-09, Asia/Seoul, 자체 합성 스키마 |
 
 실전화 도구 `src/`·`public/`는 **별도 전화 PoC**다. 그 내부의 8팀·6차량은 React mock의 48가구·4조/12명·10자원과 합쳐진 모델이 아니다. 별도 전화 PoC 테스트는 mock 48가구 전체 연동 또는 실제 휴대폰 수신의 증거가 아니다.
@@ -55,23 +57,23 @@
 | W-4 | 부분 | SOURCE cache key가 policy/관할/원문/payload fingerprint/source/sample/scenario/dataset/mode/origin을 격리; 충돌 fingerprint도 원문으로 구분. 모델 실행 예정 eligibility와 actualModelCalls0 분리. strict AI-0 adapter·실제 cache 실행·교정/비용/사용량은 없음. |
 | W-5 | 부분 | FE 합성 경보 카드·소스 원문 이동. source_record/샘플/시나리오 단위 1회 게시·중복0·근거 ID 연결은 미완료. |
 | W-6 | 부분 | FE 발령 시작 결정 카드·알약·dismiss 기록. 실제 필터 판정 trigger와 고정 카드/지도 수신 시각의 결합은 미완료. |
-| W-7 | 부분 | FE Sources8·append 원문 record JSON·origin/mode·기준일/dataset·관측/수집 wall/replay·freshness·근거 ID·필터 이유·실패 오류/별도 폴백 표시. SOURCE16+통합9+HTTP/저널4 통과. 공식 기관/엔드포인트·전용 수집/판단 타임라인·모델 근거 카드는 미완료. |
+| W-7 | 부분 | FE Sources8·append 원문 record JSON·origin/mode·기준일/dataset·관측/수집 wall/replay·freshness·근거 ID·필터 이유·실패 오류/별도 폴백 표시. SOURCE16+통합15+HTTP/저널10 통과. 관측 없는 실패 record의 fixture 시각/요약 대체 금지·별도 fallback/원문 실패 보존도 FE21/21에서 통과. 공식 기관/엔드포인트·전용 수집/판단 타임라인·모델 근거 카드는 미완료. |
 | W-8 | 부분 | FE 사이드바 소스8·유효 replay 상태 점·상단 실제0/합성 유효 수. 발생/기록1줄 접힘·소스별 전체 시각 표시 계약은 미완료. |
 | W-9 | 부분 | FE 지도 감시/합성 경보·풍향/풍속 표시. 관할 지시 없음/수신 시각/위험지수/위기경보의 계약 문구와 데이터 연결은 미완료. |
-| W-10 | 완료(모의 계약) | SOURCE16/16+통합9/9+HTTP/저널4/4: 기본 주기2배·누락/invalid/미래/stale 불명·live wall/replay scenario 시계 분리·역사/기준일/dataset/scenario 혼합 금지·낡은 풍속 계획 ETA=null/신규투입 차단/현재임무 hold. 실제 관측 단위/허용치/공식 수신은 미검증. |
+| W-10 | 완료(모의 계약) | SOURCE16/16+통합15/15+HTTP/저널10/10: 기본 주기2배·누락/invalid/미래/stale 불명·live wall/replay scenario 시계 분리·역사/기준일/dataset/scenario 혼합 금지·낡은 풍속 계획 ETA=null/신규투입 차단/현재임무 hold. 실제 관측 단위/허용치/공식 수신은 미검증. |
 
 ## 발령 E-1–E-8
 
 | ID | 상태 | 현재 근거와 남은 기준 |
 | --- | --- | --- |
 | E-1 | 부분 | Runtime plan은 사람 동작으로 event 모드·계획·human 기록 생성, FE 발령 절차. 독립 event ID·startedAt/simAt/source snapshot 구조는 원문 수준 미완료. |
-| E-2 | 부분 | DOM 코드 ETA·GRAPH 계획 그래프·SOURCE wind 근거 record와 scenario/dataset/date snapshot 검증·불명시 ETA=null. strict 추론 adapter·여러 공식 소스 결합/원문/caveats·실모델 실행은 미완료. |
+| E-2 | 부분 | DOM 코드 ETA·GRAPH 계획 그래프·SOURCE wind 근거 record와 scenario/dataset/date snapshot 검증·불명시 ETA=null. source 실패/수집의 ETA·근거 조건 변화만 미확정 계획 갱신·무관 수집 수동 순서 유지·최신 검토 checkpoint 보완도 집중25/25에서 통과. strict 추론 adapter·여러 공식 소스 결합/원문/caveats·실모델 실행은 미완료. |
 | E-3 | 부분 | DOM orderedHouseholds·D/V/X 분리·등급/ETA 점수·동점 정렬·Runtime reorder 중복/누락/rank 검사. 원문의 자력+자가차량 감점 −8, source 근거·모델 결과 strict 검증·전체 자원/대피소 제안 검증은 남음. |
 | E-4 | 완료(모의) | FE 순서 검토 ↑↓·Runtime reorder와 미확정 순위 명령·revision/human 기록·확정 후 변경 차단, DOM confirmation 검사. 도우미 전체 명령은 L-6 별도. |
 | E-5 | 부분 | FE D/V/X·공용8 확정 모달·GRAPH 승인 interrupt/resume·DOM 중복/구revision/확정전0. 현재 모드는 전원 합성이며 실제 주민1+조원1의 자동 혼합 발신/휴대폰 수신은 미검증. |
 | E-6 | 완료(모의) | Runtime confirm이 주민45·조원12·방문 요청/문자 모의 기록 생성·교대 큐 시작. DOM 공용 fairness와 CALL 호출 상한. 실제 SMS/실전화 실행은 별도 범위. |
 | E-7 | 미구현 | 공식 지시 원문/수신 시각/장소를 예측에 우선 연결하고 접근성/통제 대안을 검토하는 흐름 없음. 합성 대피문은 공식 수신이 아니다. |
-| E-8 | 부분 | Runtime revision·reconcile·DOM 동의 철회/임시 제외·CALL 늦은 근거·DISP 원자 예약·최신 재배정 승인. 진행 Telnyx 슬롯은 종단 전 유지. 모든 실제 session/attempt/event revision·연락 변경·새 source 조건 재검증은 미완료. |
+| E-8 | 부분 | Runtime revision·reconcile·DOM 동의 철회/임시 제외·CALL 늦은 근거·DISP 원자 예약·최신 재배정 승인. 진행 Telnyx 슬롯은 종단 전 유지. 확정 직전 표시조건 전체 재검증·기존 계획 checkpoint supersede·resume 전후 대조 보완도 집중25/25에서 통과. 모든 실제 session/attempt/event revision·연락 변경·새 source 조건 재검증은 미완료. |
 
 ## 주민 확인 C-1–C-15
 
@@ -98,7 +100,7 @@
 | ID | 상태 | 현재 근거와 남은 기준 |
 | --- | --- | --- |
 | S-1 | 부분 | Runtime 주민/조원 동시 큐·12명 문자기록·member-response 분리, DOM/CALL 공용8. 실제M01+모의11 음성/도구/검증된 DTMF와 혼합 실행은 미완료. |
-| S-2 | 완료(모의) | CALL member no answer: 최초 후 정확히1분 간격 재호출2회·총3시도·불가·대상활성1. FE 재호출/불가 표시도 최신20/20 실행에서 통과했다. |
+| S-2 | 완료(모의) | CALL member no answer: 최초 후 정확히1분 간격 재호출2회·총3시도·불가·대상활성1. FE 재호출/불가 표시도 최신21/21 실행에서 통과했다. |
 | S-3 | 완료(모의) | DISP driver/support 예약: 자격+가능+응답ok·운전자/지원2인·면차량도 확인된 인원 요구·빌린 차량만으로 운전자 인정하지 않음. 실제 가용 인원 확인은 미검증. |
 | S-4 | 부분 | FE 담당 목록·현재 임무·주소/연락/장비 Drawer, DISP 단일예약/제외. 전체 담당 자동1건 제안·같은 임무ID 문자/근거시각·실제 SMS 없는 전달 계약은 미완료. |
 | S-5 | 완료(모의 정책) | DISP zone12/target20·unknown, SOURCE stale/mixed wind: 구역 또는 대상<15 일반조 금지·자동 모의인계·불명/낡음 신규투입 보류·현재 임무 hold·출발/탑승/복구 재검증.15분은 현장 검증 없는 데모 정책. |
@@ -114,9 +116,9 @@
 | D-2 | 부분 | DISP 장비·동반자 포함 좌석·접근성·대피소정원·운전자/지원·구역/대상ETA·경로·귀환차량 차단. 자동 구급차 우선 후보/배차 큐·1분 대기 재검증·선호/면차량/인접 전체 우선정책은 미완료. |
 | D-3 | 완료(모의) | DISP 합성 연결 도로를 구성하고 통제 구간 제거·교차점 연결·경로없음 금지·pickup/shelter/return waypoints/시각·40km/h·대기3/와상6분. **가구/집결지→가장 가까운 개방도로 접근은 ≤250px 합성 가정**이며 현실 도로/주행 허가 검증이 아니다. FE 위치는 같은 trip 경로/시각을 계산한다. 새 지도에는 local preview가 추가됐지만 서버 권위 연속 시계/30fps는 미검증. |
 | D-4 | 완료(모의) | DISP 단계 시간/보고 검사: 출동→도착→탑승→대피소→복귀, 귀환중 가용 아님·복귀 완료 예약 해제·대피소 인원은 계속 점유. 복귀 취소 후 즉시 다음 임무는 구현하지 않았으므로 복귀까지 기다린다. |
-| D-5 | 부분 | FE 로컬SVG 48점·6도로/통제·3대피소·면사무소·4집결지·발화/영향영역·풍향·임무 경로/차량 위치·상태단어/형태. 새 지도 컴포넌트의 사람/차량 local preview·지형/연기·레이어·키보드 조작·정지/종료·낡은 풍속 차단은 지도3개와 전체20/20 검증을 통과했다. 서버 시계와의 연속 보간/30fps·전체 상세 수용 기준은 미완료. |
+| D-5 | 부분 | FE 로컬SVG 48점·6도로/통제·3대피소·면사무소·4집결지·발화/영향영역·풍향·임무 경로/차량 위치·상태단어/형태. 새 지도 컴포넌트의 사람/차량 local preview·지형/연기·레이어·키보드 조작·정지/종료·낡은 풍속 차단은 지도3개와 전체21/21 검증을 통과했다. 서버 시계와의 연속 보간/30fps·전체 상세 수용 기준은 미완료. |
 | D-6 | 부분 | FE map/model.ts의 firePerimeter가 DOM eta를 쓰고 비공식 예상영역 면책. 고정 바람 경계도달±20%·바람 변경 재추정·invalid 풍속 렌더링/연속효과 검증은 없음. |
-| D-7 | 부분 | FE HUD/범례·상태 숫자·합성풍향·가구 팝오버/Drawer·면책·모의1분 버튼. 새 지도의 레이어/HUD/배속 local preview는 지도3개와 전체20/20 검증을 통과했다. 실제 POST 시뮬 시계·T+/ha/선두속도·조건시각/불명·HUD≤25% 측정은 미완료. |
+| D-7 | 부분 | FE HUD/범례·상태 숫자·합성풍향·가구 팝오버/Drawer·면책·모의1분 버튼. 새 지도의 레이어/HUD/배속 local preview는 지도3개와 전체21/21 검증을 통과했다. 실제 POST 시뮬 시계·T+/ha/선두속도·조건시각/불명·HUD≤25% 측정은 미완료. |
 | D-8 | 부분 | DOM1px=2m·풍향+180·풍상3/횡2·invalid wind=null·구역최소·대칭/풍상 검사, SOURCE wind freshness/context gate. 바람 변경 누적 prog·reestimated·서버/FE 독립 패리티±0.5분 미완료. 공유 TS 함수는 독립 패리티 검증이 아니다. |
 | D-9 | 완료(모의) | DISP 동일 trip ID로 가구/차량/운전자/조/지원인원/대피소좌석 예약·중복/인원부족/returning 차단·출발/탑승/도착 재검증·복귀해제. 취소/반려는 예약 전이며 현재 실행 임무의 강제 취소/대체 API는 없음. |
 
@@ -140,7 +142,7 @@
 | --- | --- | --- |
 | R-1 | 부분 | Runtime human/assistant/system 모의 기록·API snapshot/events.jsonl·중복검증. 모든 기록 t_sim/t_wall/event_id/evidence_ref/mode의 정식 records.jsonl·전체 실행 ID 연결은 미완료. |
 | R-2 | 부분 | DOM handover·CALL 1차요약·FE 기록: 모든 D−K+미완료방문·X별도·전사/예약. 시작/확정/종료/1차 시각 전체표·인계담당/근거/가중치/오류 정식 열은 남음. |
-| R-3 | 부분 | API/FE export가 같은 View·DISP frozen exact restore·SOURCE 실패/폴백/원문/시각/근거와 sourceState immutable JSON 복원·HTTP 종료 export byte-stable/저널 재시작4/4. 환경 key/실번호/원 provider payload 없음. 모델 비용/usage·실제 전사/동의 정식 보관은 미완료. |
+| R-3 | 부분 | API/FE export가 같은 View·DISP frozen exact restore·SOURCE 실패/폴백/원문/시각/근거와 sourceState immutable JSON 복원·HTTP 종료 export byte-stable/저널 재시작10/10. 환경 key/실번호/원 provider payload 없음. 모델 비용/usage·실제 전사/동의 정식 보관은 미완료. |
 | R-4 | 부분 | FE 인수인계 전체텍스트·window.print·CSS @page A4 landscape. 실제 인쇄 페이지의 체크열/줄끊김/담당/제외사유 시각검증은 미실시. |
 | R-5 | 부분 | mock 전사/attempt/provider ID·telephony recording disabled·FE 녹음없음. 실음성 전사·녹음동의/ID/보관삭제/다운로드권한·종료사유의 정식 계약은 미검증. |
 | R-6 | 완료(모의) | Runtime close acknowledged·실제활성/불명종료 차단·새작업금지·미안전/귀환임무 유지·DISP frozen restore 동일 counts/records/reservations/metadata. 실제 불명 통화를 담당자 인계하고 종료하는 운영 경로는 추가 구현/검증 대상. |
@@ -171,8 +173,8 @@
 | NF-4 | 부분 | DATA seed/referenceDate·Runtime deterministic mock·서버/FE shared 계산. 새 지도 preview는 브라우저 표시 시각만 바꾼다. 연속 서버 권위 시계·FE 보간·바람 변경 누적·실제/시뮬 시계 전체 검증은 미완료. |
 | NF-5 | 부분 | `server/.env.example`: demo/hybrid·Telnyx키/connection/publickey/HTTPS·담당토큰·동의번호2개·journal; unknown mode 거부 검사. 모델/source/속도/재발신/상한/지역/실제상한 설정 계약은 없음. |
 | NF-6 | 부분 | API 로컬CORS·64KiB 본문·strict envelope·서명/시각·별도env번호·credential 없는 export·hybrid토큰. 모든 입력 길이/strict 세부 payload·journal/export 전화/전사 마스킹·지시문 최소화·배포 보안 검증은 남음. |
-| NF-7 | 부분 | API `snapshot.json`, `webhooks.json`, `events.jsonl`·logger false·0600/0700 생성·source HTTP/저널4/4가 실패/풍속 근거와 예약/위치/종료 export 보존 입증. 정식 records/events 분리·wall/sim/evidence 연계·전체 민감로그 마스킹 검증은 남음. |
-| NF-8 | 부분 | 최신 TS의 Node test/Playwright 방식: 전체172/172·domain122/122·최신 private 번들/typecheck·독립 preview E2E20/20·mock Prettier와 diffcheck 통과. 기본 build 최종 갱신도 검증한 private 번들과 같은 FE hash로 통과했다. 전체 T29/U14 통과 주장은 없음. |
+| NF-7 | 부분 | API `snapshot.json`, `webhooks.json`, `events.jsonl`·logger false·0600/0700 생성·source HTTP/저널10/10이 실패/풍속 근거와 예약/위치/종료 export 보존 입증. 정식 records/events 분리·wall/sim/evidence 연계·전체 민감로그 마스킹 검증은 남음. |
+| NF-8 | 부분 | 최신 TS의 Node test/Playwright 방식: 실행 시점 전체189/189·모의 domain134/134·최신 private 번들/typecheck·독립 preview E2E21/21·mock Prettier와 diffcheck 통과. 기본 build도 같은 FE hash로 통과했다. source P2/계획 checkpoint 보완의 집중25/25·전체 도메인134/134·FE21/21이 통과했다. 전체 T29/U14 통과 주장은 없음. |
 | NF-9 | 부분 | React19·TS/Fastify·Telnyx7.25.0·LangGraph1.4.21·Zod·lockfile·그래프/전화/예약 서비스 분리. AI0/1/4/도우미의 실제 그래프·추론adapter·내구checkpoint·전체 strict schema는 남음. |
 | NF-10 | 부분 | FE 1920×1080·1366×768·1280×800·390×844 capture/overflow. 현재 브라우저 Chromium 자동범위이며 행사PC 최신Chrome/프로젝터·전체 탭 장시간 점검은 미검증. |
 | NF-11 | 부분 | UI-3과 U14의 키보드 자동범위. 실제 음성/난청·스크린리더·전체대비 미검증. |
@@ -188,7 +190,7 @@
 | T2 | 공란·불명 보수상향·앞순위 | 부분 | NOTES 집중26/26: 공란/불명/충돌→unknown/estimated/4등급·근거를 만들지 않음. DOM 우선순위 계산은 있음. Runtime 적용4/4·미확정 계획 재계산은 검증됐으나 공란 대상의 해당 앞순위 전체 시나리오 검증은 남음. |
 | T3 | 91일 플래그·통화 확인질문 | 부분 | DOM 90-day boundary·FE stale. 음성 지시문 확인질문 없음. |
 | T4 | 입원/시설입소/전출/복귀 X/V 분리 | 완료(모의) | DOM family exclusion·CALL consent/exclusion 취소; 실제 복귀 정보재확인 남음. |
-| T5 | 관할 외 탈락·모델0 | 완료(모의) | SOURCE16+통합9: exact 관할 필터 탈락·eligibility0·actualModelCalls0·reason 유지. 실제 모델 executor/공식 지역 매핑은 미검증. |
+| T5 | 관할 외 탈락·모델0 | 완료(모의) | SOURCE16+통합15: exact 관할 필터 탈락·eligibility0·actualModelCalls0·reason 유지. 실제 모델 executor/공식 지역 매핑은 미검증. |
 | T6 | 북서발화/서풍/북임도통제 우선·남측권고 | 부분 | DOM ETA/priority·DISP 통제 우회. 원문의 구역우선/남측권고 시나리오 검증 없음. |
 | T7 | 구체 학교도착 근거 evacuated | 완료(모의) | DOM plain yes/future/negation 검사 내 실제도착→safe assertion. 최신 fixture enum safe가 원문 evacuated를 표현. |
 | T8 | 네/되말/이동 의사 분리 | 완료(모의) | DOM plain yes…·CALL unclear5/moving15: 네=unclear/acked=false·되말 안내/이동=완료아님. |
@@ -208,7 +210,7 @@
 | T22 | 장비/운전자/정원/경로/복귀차량 | 완료(모의) | DISP 전체 guard·동반자와상·도로단절/교차·shelter정원·driver/crew·returning·road hold/resume·탑승조건변경. prefer 자동순서는 미완료. |
 | T23 | 모델 실패/거절/invalidJSON/원문 속 명령 | 부분 | GRAPH strict 결과/유한분기·DOM fabricated evidence reject. NOTES 원문 속 명령/위조·부정 인용은 집중 검증됐다. 실제/가짜모델adapter 교정1회/폴백·source/transcript 전체 정책 공격과 유한 종료 검증은 남음. |
 | T24 | demo0·hybrid2·미동의/녹음동의 | 부분 | API demo keys0·unknown/incomplete modes·signed hybrid injected adapter·recording disabled. 동의된 실기기2통화/저장동의 연동 없음. |
-| T25 | 관할/최신성/live실패/replay/캐시 | 완료(모의 계약) | SOURCE16+통합9+HTTP/저널4: 관할/시계/미래·낡음·append 실패/폴백·origin/mode/ID·cache key 격리·혼합/낡은 풍속 ETA hold·HTTP409/예약과 위치 유지·export/저널 재시작/종료 byte-stable. 실제 live 수집·모델 cache executor는 미구현. |
+| T25 | 관할/최신성/live실패/replay/캐시 | 완료(모의 계약) | SOURCE16+통합15+HTTP/저널10: 관할/시계/미래·낡음·append 실패/폴백·origin/mode/ID·cache key 격리·혼합/낡은 풍속 ETA hold·HTTP409/예약과 위치 유지·export/저널 재시작/종료 byte-stable. 미확정 계획/표시조건/최신 checkpoint·오류/await 중 변화/승인 뒤 자료 오염의 확정/큐0까지 검증. 실제 live 수집·모델 cache executor는 미구현. |
 | T26 | 풍하/풍상/횡·단위·변경·패리티 | 부분 | DOM ETA upwind/lateral/invalid. 바람 변경prog·독립패리티±0.5분·화선도달±20% 검증 없음. |
 | T27 | 미안전+방문·제외별도·동일snapshot | 완료(모의) | DOM immutable handover·DISP closed snapshot exact restore·FE handover/download. 실제 세션 종료 운영 남음. |
 | T28 | 두절중긴급/실제/예약→복구 | 부분 | DOM outage local emergency·CALL 불명slot·DISP 예약보존·FE 전체목록. 실제망재조정·정식출력 리허설없음. |
@@ -223,9 +225,9 @@
 | U3 | 1366폴드의 긴급/이장/5행·세부 합계 | 부분 | FE1366 fifth-row bounding box·큐·snapshot counts. pendingunknown/X/hold 전체 조합의 앞5칸 합계·폴드는 미검증. |
 | U4 | 7필터·재집계·이력·주기 | 부분 | FE48행/등급/90일 필터/확인 저장·DOM 이력. 7필터의 모든 변경 조합·운영 주기는 미완료. |
 | U5 | D/V/X·실제1+1·조원12·공용8·확정전0 | 부분 | FE offline full flow·45/3/0·8/8. 실제1+1 혼합 표시/수신은 없음. |
-| U6 | 48지도·HUD≤25%·경로·30fps | 부분 | FE48 markers·합성 경로/차량의 같은 map·면책·viewport capture. 새 지도·낡은 풍속 차단을 포함한 E2E20/20 통과. local preview 추가·HUD 면적 측정/30fps 미검증. |
-| U7 | 조 응답/단계/담당·차량·요약 | 부분 | FE 자원 카드·DISP 예약/단계·재배정 UI. 재호출/재배정/예약 포함 E2E20/20 통과·원문의 전체 숫자 세트 점검 남음. |
-| U8 | 소스8·JSON·origin·실패 반영 | 부분 | SOURCE16+통합9+HTTP/저널4·FE origin/mode/freshness/record ID·별도 실패/replay JSON. 실패7/8 유지·낡은 풍속 지도 HUD 차단도 최신20/20에서 통과. 전용 판단 타임라인 없음. |
+| U6 | 48지도·HUD≤25%·경로·30fps | 부분 | FE48 markers·합성 경로/차량의 같은 map·면책·viewport capture. 새 지도·낡은 풍속 차단을 포함한 E2E21/21 통과. local preview 추가·HUD 면적 측정/30fps 미검증. |
+| U7 | 조 응답/단계/담당·차량·요약 | 부분 | FE 자원 카드·DISP 예약/단계·재배정 UI. 재호출/재배정/예약 포함 E2E21/21 통과·원문의 전체 숫자 세트 점검 남음. |
+| U8 | 소스8·JSON·origin·실패 반영 | 부분 | SOURCE16+통합15+HTTP/저널10·FE origin/mode/freshness/record ID·별도 실패/replay JSON. 실패7/8 유지·낡은 풍속 지도 HUD 차단도 최신21/21에서 통과. 관측 없는 실패 record의 fixture 시각/요약 대체 금지·신규 미확정 계획 검증도 FE21/21에서 통과했다. 전용 판단 타임라인 없음. |
 | U9 | 도우미5문장·변경 로그 | 부분 | ASSIST 규칙5범주·동적 자원·통신 토글·human 순위/통신 로그 집중10/10 통과. FE의 최신 revision 전달 확인. 전체5문장 브라우저 리허설은 미검증. |
 | U10 | 해상도3·2열/1열·독립 스크롤 | 부분 | FE4 viewport overflow/capture·CSS breakpoint. 모든 탭의 독립 스크롤·행사 프로젝터 리허설은 미실시. |
 | U11 | D−K+방문·제외·녹음 없음·마스킹 export | 부분 | FE handover/frozen/download·DOM/DISP 불변 snapshot·모의 전사/녹음 없음. 실제 전사/ID/민감 마스킹·인쇄 시각 검증 남음. |
