@@ -1,2 +1,47 @@
 .DS_Store
 __pycache__/
+
+# Dependencies, build outputs, logs and local runtime data
+node_modules/
+dist/
+coverage/
+*.log
+*.pid
+.data/
+.phone/
+.tools/
+recordings/
+docs/PROPOSAL-SOURCE.txt
+
+# Local environment files and private keys
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+*.p12
+*.pfx
+
+# Local infrastructure state
+.deploy/
+.aws/
+*.tfstate
+*.tfstate.*
+*.tfvars
+*.tfvars.json
+
+node_modules/
+.env
+.env.*
+!.env.example
+.data/
+.tools/
+recordings/
+*.log
+*.pid
+*.pem
+*.key
+*.p12
+*.pfx
+dist/
+coverage/

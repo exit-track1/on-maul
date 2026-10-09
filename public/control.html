@@ -1,0 +1,100 @@
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>온 마을 · 가상 상황실</title>
+    <link rel="stylesheet" href="/style.css" />
+    <script type="module" src="/control.js"></script>
+  </head>
+  <body>
+    <header>
+      <a class="brand" href="/">온 마을 <span>가상 상황실</span></a>
+      <nav>
+        <a href="/" aria-current="page">상황실</a><a href="/telnyx">휴대전화</a
+        ><a href="/voice">브라우저 음성</a>
+      </nav>
+    </header>
+    <main>
+      <p class="eyebrow">48가구 · 8개 대기조 · 6대 차량 · 합성 데이터</p>
+      <h1>확인된 근거로,<br />다음 행동을 결정합니다.</h1>
+      <p>모의 다중 연락·SMS·배차·119 및 이장 인계입니다. 실제 신고·출동은 수행하지 않습니다.</p>
+      <p id="message" role="status" hidden></p>
+      <section>
+        <div id="metrics" class="stats"></div>
+        <p id="phase"></p>
+        <button data-command="watch">감시 시작</button
+        ><button data-command="propose" class="secondary">대응 순서 제안</button
+        ><button data-command="approve">담당자 발령 승인</button
+        ><a id="export" download="onmaul-handover.json" href="/api/disaster/export"
+          >인수인계 기록 내려받기</a
+        >
+        <details>
+          <summary>공공 데이터 fixture · 모의 관측</summary>
+          <pre id="sources"></pre>
+        </details>
+      </section>
+      <section>
+        <h2>대응 순서 · 모의 연락과 SMS</h2>
+        <p class="small">
+          다중 연락은 합성 시연입니다. 재시도 예약은 실제 발신을 실행하지 않습니다.
+        </p>
+        <div id="contacts"></div>
+      </section>
+      <section>
+        <h2>통화 종료 후 후속 요청</h2>
+        <p class="small">
+          실제 통화의 종료 확인 후 생성합니다. 단독 전화는 담당자 대상 연결이 필요하며 배차·출동은
+          모의 처리입니다.
+        </p>
+        <div id="follow-ups"></div>
+      </section>
+      <section>
+        <h2>가구 목록 · 수신 체험</h2>
+        <p class="small">
+          실제 전화는 동의한 TEST_PHONE 한 대로만 연결됩니다. 브라우저 입력 시험은 자동 안전 판단의
+          근거로 사용하지 않습니다.
+        </p>
+        <div class="scroll">
+          <table>
+            <thead>
+              <tr>
+                <th>가구</th>
+                <th>취약도</th>
+                <th>상태</th>
+                <th>위치</th>
+                <th>수신 체험</th>
+              </tr>
+            </thead>
+            <tbody id="households"></tbody>
+          </table>
+        </div>
+      </section>
+      <div class="columns">
+        <section>
+          <h2>대기조·차량 · 모의 배차</h2>
+          <div id="teams"></div>
+          <form id="dispatch">
+            <label
+              >도움 가구
+              <select id="dispatch-target"></select></label
+            ><label
+              >가상 차량
+              <select id="vehicle"></select></label
+            ><label><input id="road-blocked" type="checkbox" /> 통제 도로</label
+            ><button>모의 배차</button>
+          </form>
+          <div id="dispatches"></div>
+        </section>
+        <section>
+          <h2>판단 근거 · 감사 기록</h2>
+          <div id="runs"></div>
+          <ol id="audit" class="event-list"></ol>
+        </section>
+      </div>
+    </main>
+    <footer>
+      합성 시연 자료 · 안전 상태는 인증 전사와 대피소 조건을 검증한 자기 신고 기록입니다.
+    </footer>
+  </body>
+</html>

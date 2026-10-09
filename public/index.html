@@ -1,0 +1,141 @@
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>온 마을 · 테스트 전화</title>
+    <link rel="stylesheet" href="/style.css" />
+    <script type="module" src="/app.js"></script>
+  </head>
+  <body>
+    <header>
+      <a class="brand" href="/">온 마을 <span>전화 PoC</span></a>
+      <nav>
+        <a href="/">가상 상황실</a><a href="/telnyx" aria-current="page">휴대전화</a
+        ><a href="/voice">브라우저 음성</a>
+      </nav>
+    </header>
+    <main>
+      <div class="intro">
+        <p class="eyebrow">한국어 AI 통화 · 로컬 테스트</p>
+        <h1>한 통의 전화로,<br />지금의 상태를 확인합니다.</h1>
+        <p>실제 재난이 아닙니다. 실제 신고·출동·배차·문자 발송은 수행하지 않습니다.</p>
+      </div>
+      <p id="message" role="status" hidden></p>
+      <div class="columns">
+        <div>
+          <section>
+            <div class="section-title">
+              <span class="step">01</span>
+              <h2>연결 설정</h2>
+            </div>
+            <p class="muted">
+              API 키는 서버에만 보관합니다. 비밀 입력을 비우면 기존 값을 유지합니다.
+            </p>
+            <form id="settings">
+              <div id="fields" class="fields"></div>
+              <button type="submit">설정 저장</button
+              ><button id="clear-secrets" class="secondary" type="button">
+                저장된 API 키 삭제
+              </button>
+            </form>
+            <p id="env-fields" class="small"></p>
+          </section>
+          <section>
+            <div class="section-title">
+              <span class="step">02</span>
+              <h2>연결 확인과 발신</h2>
+            </div>
+            <div class="actions">
+              <button id="models" class="secondary">모델 접근 확인</button
+              ><button id="tunnel-start" class="secondary">공개 연결 시작</button
+              ><button id="tunnel-stop" class="secondary">공개 연결 중단</button>
+            </div>
+            <p id="tunnel-state" class="small"></p>
+            <p id="runtime-environment" class="small"></p>
+            <p class="small">
+              공개 터널은 콜백 포트 8788에만 연결합니다. 음성·Telnyx 연결 검사는 발신하지 않지만
+              짧은 Live 세션 요금이 발생할 수 있습니다.
+            </p>
+            <button id="connection" class="secondary">음성·Telnyx 연결 확인</button>
+            <button id="callback-check" class="secondary">공개 콜백만 재검사</button>
+            <div id="checks"></div>
+            <hr />
+            <p id="linked" class="small"></p>
+            <fieldset>
+              <legend>통화 시나리오</legend>
+              <label
+                ><input name="scenario" type="radio" value="resident" checked /> 주민 확인</label
+              ><label><input name="scenario" type="radio" value="standby" /> 대기조 확인</label>
+            </fieldset>
+            <label class="consent"
+              ><input id="consent" type="checkbox" /> 수신자가 저장된 휴대전화 한 대의 실제 테스트
+              전화에 동의했습니다.</label
+            >
+            <div class="actions">
+              <button id="dial">실제 테스트 발신</button
+              ><button id="hangup" class="danger" disabled>수동 통화 종료</button>
+            </div>
+            <p id="dial-reason" class="small" role="status"></p>
+            <p class="small">
+              다른 번호로 발신하려면 먼저 설정을 저장하세요. 모의 전화와 전사는 표시하지 않습니다.
+            </p>
+            <p class="small">
+              주민 통화: 위치 → 이동 가능 여부 → 몸 상태. 45초에 마무리를 시작하고 60초 안에
+              종료합니다. 테스트 안내 멘트는 생략합니다.
+            </p>
+          </section>
+        </div>
+        <div>
+          <section class="monitor">
+            <div class="section-title">
+              <span class="step">03</span>
+              <h2>통화 모니터</h2>
+              <span id="status" class="badge">대기</span>
+            </div>
+            <p id="target">설정된 수신번호 없음</p>
+            <div class="milestones">
+              <span id="m-created">발신 접수</span><span id="m-ringing">벨소리</span
+              ><span id="m-answered">수신 응답</span><span id="m-ended">종료</span>
+            </div>
+            <p id="notice" role="status">아직 발신 요청이 없습니다.</p>
+            <p id="ids" class="small"></p>
+            <p id="audio-stats" class="small"></p>
+            <p id="scenario-state" class="small"></p>
+            <div id="error" class="error" hidden></div>
+            <div id="resolve-panel" class="error" hidden>
+              <p>발신 또는 종료가 불명확합니다. Telnyx에서 활성 통화를 직접 확인하고 종료하세요.</p>
+              <label
+                ><input id="confirmed" type="checkbox" /> Telnyx에서 실제 종료를
+                확인했습니다.</label
+              ><button id="resolve" class="secondary">종료 확인 기록 · 잠금 해제</button>
+            </div>
+            <h3>실시간 전사</h3>
+            <p class="small">
+              “알겠어요”는 안내 확인입니다. 완료 기록은 수신자의 자기 신고이며 현장 검증 결과가
+              아닙니다.
+            </p>
+            <div id="transcript" class="transcript" aria-live="polite">
+              <p class="muted">실제 대화가 시작되면 여기에 표시됩니다.</p>
+            </div>
+          </section>
+          <section>
+            <h2>통화 상태 이벤트</h2>
+            <ol id="events" class="event-list"></ol>
+          </section>
+          <section>
+            <h2>통화 결과와 후속 요청</h2>
+            <p class="small">
+              최근 50건 · 위치와 원문 근거 · 수신자 자기 신고 · 서버 재시작 후에도 보존
+            </p>
+            <div id="outcomes"></div>
+          </section>
+        </div>
+      </div>
+    </main>
+    <footer>
+      온 마을 · OpenAI Live / Telnyx Call Control · 실제 외부 연결은 각 검사와 통화 이벤트로
+      확인합니다.
+    </footer>
+  </body>
+</html>

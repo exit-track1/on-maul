@@ -1,0 +1,43 @@
+{
+  "name": "onmaul",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "engines": {
+    "node": ">=24 <25"
+  },
+  "workspaces": [
+    "fe",
+    "server"
+  ],
+  "scripts": {
+    "dev": "node scripts/dev.mjs",
+    "build": "npm run build -w fe && npm run typecheck -w server",
+    "start": "node src/server.ts",
+    "test": "node --import tsx --test tests/*.test.ts shared/test/*.test.ts server/test/*.test.ts",
+    "test:e2e": "npm run test:e2e -w fe",
+    "check:skills": "python3 scripts/check_skill_policy.py",
+    "typecheck": "npm run typecheck -w fe && npm run typecheck -w server",
+    "start:server": "npm run start -w server",
+    "test:domain": "node --import tsx --test shared/test/*.test.ts server/test/*.test.ts",
+    "check": "tsc --noEmit",
+    "format": "prettier --write src tests public scripts/api-check-context.ts scripts/check-*.ts package.json tsconfig.json .prettierrc.json",
+    "format:check": "prettier --check src tests public scripts/api-check-context.ts scripts/check-*.ts package.json tsconfig.json .prettierrc.json",
+    "start:mock": "npm run start -w server",
+    "format:mock": "prettier --write fe/src fe/tests shared server scripts/dev.mjs",
+    "format:mock:check": "prettier --check fe/src fe/tests shared server scripts/dev.mjs",
+    "test:phone": "node --test tests/*.test.ts"
+  },
+  "devDependencies": {
+    "tsx": "4.20.6",
+    "@types/ws": "^8.18.1",
+    "@types/node": "^24.19.1",
+    "typescript": "^5.9.3",
+    "prettier": "^3.9.9"
+  },
+  "dependencies": {
+    "ws": "^8.18.3",
+    "zod": "^4.6.5",
+    "@langchain/langgraph": "^1.4.21"
+  }
+}
