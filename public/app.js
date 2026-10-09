@@ -139,7 +139,7 @@ async function outcomes() {
       node('strong', c.location),
       node(
         'p',
-        `${c.status === 'needs_review' ? '정정 · 재확인 필요' : ({ rescue: '구조 확인 요청', moving: '즉시 대피 안내', refused: '대피 거부 · 이장 연락 요청', review: '담당자 재확인 요청' }[c.kind] ?? '대피 완료 자기 신고')} · ${time(c.recordedAt)}`,
+        `${c.status === 'needs_review' ? '정정 · 재확인 필요' : ({ rescue: '구조 확인 요청', moving: '즉시 대피 안내', refused: '대피 거부 · 이장 연락 요청', review: '담당자 재확인 요청', standby: '대기조 확인 종료' }[c.kind] ?? '대피 완료 자기 신고')} · ${time(c.recordedAt)}`,
         'small',
       ),
       node('blockquote', c.evidence),

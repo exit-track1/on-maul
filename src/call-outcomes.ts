@@ -16,7 +16,7 @@ export const outcomeSchema = z.object({
     correction: z.string().optional(),
     targetId: z.string().optional(),
     scenarioCallId: z.string().optional(),
-    kind: z.enum(['evacuation', 'rescue', 'moving', 'refused', 'review']).optional(),
+    kind: z.enum(['evacuation', 'rescue', 'moving', 'refused', 'review', 'standby']).optional(),
     closingText: z.string().optional(),
     assessment: z
       .object({

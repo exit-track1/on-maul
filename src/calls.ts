@@ -16,6 +16,11 @@ import {
 import { LiveConnection, type SocketFactory } from './live.ts';
 import { AudioBridge, muLawRms } from './media.ts';
 import { classifyEvacuation, type Transcript } from './evacuation.ts';
+import {
+  classifyStandbyCompletion,
+  standbyFarewell,
+  type StandbyClassifier,
+} from './standby-completion.ts';
 import { CallOutcomeStore, type Completion } from './call-outcomes.ts';
 import {
   applyResidentAnswer,
@@ -97,6 +102,7 @@ type Run = {
   questionSpoken: boolean;
   shelterName: string;
   assess: ResidentClassifier;
+  assessStandby: StandbyClassifier;
   openingAudio: Buffer[];
   openingBytes: number;
   openingText: string;
@@ -219,6 +225,8 @@ export class CallManager extends EventEmitter {
       shelterName: '온빛 배움학교',
       assess: (c, text, assessment, question) =>
         classifyResident(c, text, assessment, question, this.fetcher),
+      assessStandby: (c, text, context) =>
+        classifyStandbyCompletion(c, text, context, this.fetcher),
       openingAudio: [],
       openingBytes: 0,
       openingText: '',
@@ -545,17 +553,17 @@ export class CallManager extends EventEmitter {
         run.scenarioTimer = this.after(run, scenarioWrapSeconds * 1000, () =>
           this.finishAssessment(run, true),
         );
-        run.scenarioDeadline = this.after(run, scenarioLimitSeconds * 1000, () => {
-          if (this.valid(run)) {
-            this.log(
-              run,
-              'scenario_deadline',
-              '60초 시나리오 제한. 안내 재생 상태를 보존하고 종료합니다.',
-            );
-            void this.stop('60초 시나리오 종료').catch(() => {});
-          }
-        });
       }
+      run.scenarioDeadline = this.after(run, scenarioLimitSeconds * 1000, () => {
+        if (this.valid(run)) {
+          this.log(
+            run,
+            'scenario_deadline',
+            '60초 시나리오 제한. 안내 재생 상태를 보존하고 종료합니다.',
+          );
+          void this.stop('60초 시나리오 종료').catch(() => {});
+        }
+      });
       this.log(run, 'answered', '서명된 수신 응답 확인. 사람 또는 음성사서함인지는 아직 모릅니다.');
       this.activate(run);
       if (!run.bridge && !run.mediaTimer)
@@ -759,7 +767,7 @@ export class CallManager extends EventEmitter {
         return;
       }
       const speech = muLawRms(Buffer.from(event.delta, 'base64')) > 100;
-      if (run.live?.controlled) {
+      if (run.live?.controlled || run.live?.concluding) {
         if (speech) run.outputLastSpeechAt = Date.now();
         // Retain short pauses and sentence tails, but don't queue idle Live silence
         // behind the cached opening or between questions.
@@ -828,18 +836,14 @@ export class CallManager extends EventEmitter {
     }
   }
   inputTranscript(run: Run, text: string) {
-    if (
-      !this.valid(run) ||
-      (run.view.scenario !== 'resident' && !run.linkedClassifier) ||
-      !run.bridge?.active
-    )
-      return;
+    if (!this.valid(run) || !run.bridge?.active) return;
     if (!run.buffer) run.bufferQuestion = run.questionSpoken ? run.questionLine : '';
     run.buffer = (run.buffer + text).slice(-4000);
     run.generation++;
     clearTimeout(run.inputTimer);
     if (
       run.view.completion?.status === 'reported' &&
+      run.view.scenario === 'resident' &&
       !['rescue', 'moving', 'refused', 'review'].includes(run.view.completion.kind ?? '') &&
       completionBlocked(run.buffer)
     ) {
@@ -889,7 +893,9 @@ export class CallManager extends EventEmitter {
         run.view.completion?.status !== 'reported';
       run.inputProcessing = true;
       const evacuation =
-        !run.view.assessment || /도착|완료|대피했/.test(utterance)
+        (run.view.scenario === 'resident' &&
+          (!run.view.assessment || /도착|완료|대피했/.test(utterance))) ||
+        (run.view.scenario === 'standby' && run.linkedClassifier)
           ? run.classify(
               run.config,
               utterance,
@@ -900,7 +906,9 @@ export class CallManager extends EventEmitter {
       void evacuation
         .then(async (report) => {
           if (!valid()) return;
-          if (report && utterance.includes(report.evidence)) {
+          if (run.view.scenario === 'standby') {
+            await this.assessStandbyAnswer(run, utterance, valid);
+          } else if (report && utterance.includes(report.evidence)) {
             run.buffer = '';
             this.complete(run, report);
           } else await this.assessAnswer(run, utterance, spokenQuestion, valid);
@@ -908,7 +916,9 @@ export class CallManager extends EventEmitter {
         .catch(async () => {
           if (valid()) {
             this.log(run, 'classification_failed', '대피 완료 판단 실패. 통화를 유지합니다.');
-            await this.assessAnswer(run, utterance, spokenQuestion, valid);
+            if (run.view.scenario === 'standby')
+              await this.assessStandbyAnswer(run, utterance, valid);
+            else await this.assessAnswer(run, utterance, spokenQuestion, valid);
           }
         })
         .finally(() => {
@@ -950,6 +960,33 @@ export class CallManager extends EventEmitter {
           '응답 분류 미확인. 구조로 추정하지 않고 다시 묻습니다.',
         );
         this.advanceAssessment(run, text, unknownResidentAnswer(), question);
+      }
+    }
+  }
+  async assessStandbyAnswer(run: Run, text: string, valid: () => boolean) {
+    try {
+      const result = await run.assessStandby(
+        run.config,
+        text,
+        structuredClone(run.view.transcript),
+      );
+      if (!valid()) return;
+      run.buffer = '';
+      if (result)
+        this.complete(run, {
+          location: '대기조 확인',
+          evidence: result.evidence,
+          kind: 'standby',
+          closingText: standbyFarewell,
+        });
+    } catch {
+      if (valid()) {
+        run.buffer = '';
+        this.log(
+          run,
+          'standby_classification_failed',
+          '대기조 확인 종료 판단 미확인. 대화를 유지합니다.',
+        );
       }
     }
   }
@@ -1012,7 +1049,7 @@ export class CallManager extends EventEmitter {
   ) {
     if (
       !this.valid(run) ||
-      run.view.scenario !== 'resident' ||
+      (run.view.scenario === 'standby' ? report.kind !== 'standby' : report.kind === 'standby') ||
       run.view.completion?.status === 'reported' ||
       !report.evidence.trim()
     )
