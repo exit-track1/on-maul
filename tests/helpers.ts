@@ -24,7 +24,8 @@ export class FakeSocket extends EventEmitter {
         if (
           this.autoOpening &&
           (event.content.includes('현재 산불로 인하여 대피하셔야 합니다.') ||
-            event.content.includes(standbyQuestions.participation))
+            event.content.includes(standbyQuestions.participation) ||
+            event.content.includes('박미숙 할머니께서 구조 요청을 하셨습니다.'))
         ) {
           this.autoOpening = false;
           this.push({

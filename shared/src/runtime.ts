@@ -25,7 +25,12 @@ import {
 } from './sources.ts';
 import { parseHouseholdNotes } from './household-notes.ts';
 import { cycleBudget, cycleTime, initialSimulation, type Simulation } from './cycle.ts';
-import { configureDemoStory, type Demonstration, type DemoStory } from './demo-story.ts';
+import {
+  configureDemoStory,
+  type Demonstration,
+  type DemoStory,
+  type DemoPhoneMode,
+} from './demo-story.ts';
 export type PlanItem = ReturnType<typeof orderedHouseholds>[number];
 export interface Plan {
   id: string;
@@ -67,6 +72,22 @@ export interface Call {
   finishedSim?: number;
   outcome?: 'answered' | 'noanswer' | 'unavailable' | 'pendingunknown' | 'excluded' | 'replaced';
   mockOutcome?: 'noanswer';
+  /** Applied only after the phone adapter has independently confirmed termination. */
+  phoneOutcome?: PhoneRuntimeOutcome;
+  phoneNotDialed?: boolean;
+  phoneConnected?: boolean;
+}
+export interface PhoneRuntimeUpdate {
+  phase: 'dialing' | 'talking' | 'pendingunknown';
+  providerId?: string | null;
+}
+export interface PhoneRuntimeOutcome {
+  ended: true;
+  kind: 'resident' | 'standby';
+  mobility?: 'needs_help' | 'possible' | 'refusal' | 'unknown';
+  standbyAvailable?: boolean;
+  emergency?: boolean;
+  evidence?: string;
 }
 export interface FirstPass {
   completedAt: string;
@@ -242,6 +263,8 @@ export class Runtime {
       this.state.data.households,
       this.state.scenario.householdStatuses,
     );
+    if (this.state.demonstration)
+      this.state.demonstration.phoneClockHeld = this.awaitingPhoneResults();
     return structuredClone(this.state);
   }
   restore(view: View) {
@@ -277,6 +300,7 @@ export class Runtime {
     this.state.firstPass ??= null;
     this.state.simulation ??= initialSimulation();
     this.state.demonstration ??= null;
+    if (this.state.demonstration) this.state.demonstration.phoneMode ??= 'mock';
     this.cycleRemainder = 0;
     this.cycleObservationMinute = Math.floor(this.state.simMinutes);
     this.cycleBaseTime = this.state.simulation.cycleId
@@ -384,6 +408,291 @@ export class Runtime {
     if (index >= 0) this.state.graphRuns[index] = { ...this.state.graphRuns[index], ...run };
     else this.state.graphRuns.push(run);
   }
+  private isLivePhoneTarget(id: string) {
+    const demonstration = this.state.demonstration;
+    return (
+      demonstration?.phoneMode === 'live' &&
+      (id === demonstration.residentId ||
+        (demonstration.story === 'squad' && id === demonstration.memberId))
+    );
+  }
+  private latestPhoneCall(id: string) {
+    return this.state.calls.findLast((call) => call.targetId === id && call.mode === 'telnyx');
+  }
+  private phoneRescueReady(id: string) {
+    const call = this.latestPhoneCall(id);
+    return (
+      call?.phase === 'finished' &&
+      call.phoneOutcome?.kind === 'resident' &&
+      call.phoneOutcome.mobility === 'needs_help' &&
+      call.phoneOutcome.emergency !== true
+    );
+  }
+  private phoneDispatchReady(id: string) {
+    if (!this.phoneRescueReady(id)) return false;
+    const demonstration = this.state.demonstration;
+    if (demonstration?.story !== 'squad' || demonstration.residentId !== id) return true;
+    const memberCall = demonstration.memberId ? this.latestPhoneCall(demonstration.memberId) : null;
+    return (
+      memberCall?.phase === 'finished' &&
+      memberCall.phoneOutcome?.kind === 'standby' &&
+      memberCall.phoneOutcome.standbyAvailable === true
+    );
+  }
+  /** The adapter starts these targets once the officer has confirmed and enabled playback. */
+  pendingPhoneTargets(): string[] {
+    const demonstration = this.state.demonstration;
+    if (demonstration?.phoneMode !== 'live' || !this.state.plan?.confirmed || this.state.frozen)
+      return [];
+    if (!this.latestPhoneCall(demonstration.residentId)) return [demonstration.residentId];
+    if (
+      demonstration.story === 'squad' &&
+      demonstration.memberId &&
+      this.phoneRescueReady(demonstration.residentId) &&
+      !this.latestPhoneCall(demonstration.memberId)
+    )
+      return [demonstration.memberId];
+    return [];
+  }
+  private awaitingPhoneResults() {
+    const demonstration = this.state.demonstration;
+    if (demonstration?.phoneMode !== 'live' || !this.state.plan?.confirmed) return false;
+    // Holding the clock preserves the selected playing/speed values. A human pause is
+    // therefore still respected when the adapter eventually delivers the outcome.
+    if (this.pendingPhoneTargets().length) return true;
+    return this.state.calls.some(
+      (call) =>
+        call.mode === 'telnyx' &&
+        this.isLivePhoneTarget(call.targetId) &&
+        (call.phase !== 'finished' || !call.phoneOutcome),
+    );
+  }
+  private unresolvedLiveCalls() {
+    return this.state.calls.some(
+      (call) =>
+        call.mode === 'telnyx' &&
+        (call.phase !== 'finished' ||
+          (this.isLivePhoneTarget(call.targetId) && !call.phoneOutcome)),
+    );
+  }
+  preparePhoneCall(targetId: string, requestId: string, revision = this.state.revision): View {
+    const existing = this.state.calls.find((call) => call.id === requestId);
+    if (existing) {
+      requireThat(
+        existing.mode === 'telnyx' && existing.targetId === targetId,
+        '발신 요청 ID가 다른 대상에 사용되었습니다.',
+        'request_conflict',
+      );
+      return this.view();
+    }
+    requireThat(
+      typeof requestId === 'string' && requestId.length > 0 && requestId.length <= 200,
+      '발신 요청 ID가 필요합니다.',
+      'invalid_request',
+    );
+    requireThat(
+      this.isLivePhoneTarget(targetId),
+      '현재 실전화 시연 대상을 선택하세요.',
+      'phone_target_guard',
+    );
+    requireThat(
+      !this.state.trips.some((trip) => trip.householdId === targetId),
+      '수송 임무가 진행 중인 대상입니다.',
+      'phone_target_guard',
+    );
+    const targetType = this.state.data.households.some((household) => household.id === targetId)
+      ? 'resident'
+      : 'member';
+    requireThat(
+      targetType === 'resident' ||
+        this.state.data.teams.some((team) => team.members.some((member) => member.id === targetId)),
+      '전화 대상이 없습니다.',
+      'not_found',
+    );
+    const attempt =
+      this.state.calls.filter((call) => call.targetId === targetId && call.mode === 'telnyx')
+        .length + 1;
+    this.reserveLive(targetId, targetType, requestId, revision);
+    const prepared = this.latestPhoneCall(targetId)!;
+    prepared.attempt = attempt;
+    prepared.purpose = attempt === 1 ? 'initial' : 'redial';
+    if (targetType === 'resident') this.status(targetId).attemptCount = attempt;
+    if (this.state.demonstration?.residentId === targetId)
+      this.state.demonstration.stage = 'dialing';
+    this.log(
+      '실전화 요청 준비·종료 확인 전 분류·배차 보류',
+      'system',
+      targetType === 'resident' ? targetId : undefined,
+    );
+    return this.view();
+  }
+  applyPhoneUpdate(requestId: string, update: PhoneRuntimeUpdate): View {
+    const call = this.state.calls.find((call) => call.id === requestId && call.mode === 'telnyx');
+    requireThat(call, '현재 사이클의 실전화 요청이 없습니다.', 'not_found');
+    if (call.phase === 'finished') return this.view();
+    this.open();
+    requireThat(
+      ['dialing', 'talking', 'pendingunknown'].includes(update.phase),
+      '전화 상태 입력 오류',
+      'invalid_phone_update',
+    );
+    const before = JSON.stringify(call),
+      previousStatus =
+        call.targetType === 'resident' ? JSON.stringify(this.status(call.targetId)) : '',
+      previousStage = this.state.demonstration?.stage;
+    if (update.providerId) call.providerId = update.providerId;
+    if (update.phase === 'talking') call.phoneConnected = true;
+    call.phase = update.phase === 'pendingunknown' ? 'pendingunknown' : 'calling';
+    if (call.targetType === 'resident') {
+      const status = this.status(call.targetId);
+      status.status = call.phase === 'calling' ? 'calling' : 'pendingunknown';
+      status.note =
+        update.phase === 'talking'
+          ? '실전화 연결·전사 수신 중·종료 확인 후 결과 적용'
+          : update.phase === 'pendingunknown'
+            ? '실전화 상태 불명·기존 요청 확인·자동 재발신 없음'
+            : '실전화 발신 중·응답과 종료 결과 대기';
+      if (this.isLivePhoneTarget(call.targetId) && this.state.demonstration)
+        this.state.demonstration.stage = update.phase === 'talking' ? 'talking' : 'dialing';
+    }
+    if (
+      before !== JSON.stringify(call) ||
+      previousStage !== this.state.demonstration?.stage ||
+      (call.targetType === 'resident' &&
+        previousStatus !== JSON.stringify(this.status(call.targetId)))
+    )
+      this.bump();
+    return this.view();
+  }
+  applyPhoneOutcome(requestId: string, outcome: PhoneRuntimeOutcome): View {
+    const call = this.state.calls.find((call) => call.id === requestId && call.mode === 'telnyx');
+    requireThat(call, '현재 사이클의 실전화 요청이 없습니다.', 'not_found');
+    if (call.phoneOutcome) return this.view();
+    this.open();
+    requireThat(
+      outcome.ended === true,
+      '실전화 종료 확인 후 결과를 적용하세요.',
+      'phone_not_ended',
+    );
+    requireThat(
+      outcome.kind === (call.targetType === 'resident' ? 'resident' : 'standby') &&
+        (outcome.mobility === undefined ||
+          ['needs_help', 'possible', 'refusal', 'unknown'].includes(outcome.mobility)) &&
+        (outcome.standbyAvailable === undefined || typeof outcome.standbyAvailable === 'boolean') &&
+        (outcome.emergency === undefined || typeof outcome.emergency === 'boolean') &&
+        (outcome.evidence === undefined ||
+          (typeof outcome.evidence === 'string' && outcome.evidence.length <= 2000)),
+      '실전화 결과 입력 오류',
+      'invalid_phone_outcome',
+    );
+    call.phase = 'finished';
+    call.finishedSim = this.state.simMinutes;
+    call.outcome =
+      outcome.kind === 'resident'
+        ? outcome.mobility && outcome.mobility !== 'unknown'
+          ? 'answered'
+          : 'pendingunknown'
+        : outcome.standbyAvailable === true
+          ? 'answered'
+          : outcome.standbyAvailable === false
+            ? 'unavailable'
+            : 'pendingunknown';
+    call.phoneOutcome = structuredClone(outcome);
+    if (outcome.evidence) call.text = outcome.evidence;
+    if (call.targetType === 'member') {
+      this.state.memberResponses[call.targetId] =
+        outcome.standbyAvailable === true
+          ? 'ok'
+          : outcome.standbyAvailable === false
+            ? 'no'
+            : 'waiting';
+      this.log(
+        `실전화 대원 종료 확인·${
+          outcome.standbyAvailable === true
+            ? '출동 가능 근거 확인'
+            : '출동 불가·불명 결과 검토·자동 배차 보류'
+        }`,
+      );
+    } else {
+      const status = this.status(call.targetId),
+        household = this.household(call.targetId);
+      this.cancelQueuedCalls(call.targetId, 'answered');
+      status.status =
+        outcome.emergency === true
+          ? 'e119'
+          : outcome.mobility === 'needs_help'
+            ? 'help'
+            : outcome.mobility === 'possible'
+              ? 'guided'
+              : outcome.mobility === 'refusal'
+                ? 'refuse'
+                : 'unclear';
+      status.note =
+        outcome.emergency === true
+          ? '실전화 긴급 호소·담당자 119/의료 대응 검토 필요·구조 완료 미확인'
+          : outcome.mobility === 'needs_help'
+            ? '실전화 종료·이동 지원 필요 확인·차량/대원/경로 검증 대기'
+            : outcome.mobility === 'possible'
+              ? '실전화 종료·자가 이동 가능 응답·출발/대피소 도착 미확인'
+              : outcome.mobility === 'refusal'
+                ? '실전화 종료·대피 거부 응답·담당자 후속 연락 검토'
+                : '실전화 종료·분류 근거 부족·담당자 검토 필요';
+      // Mobility is a capability report, not proof of understanding the evacuation instructions.
+      status.acked = false;
+      status.dispatchHold = outcome.emergency === true ? status.note : null;
+      status.lastChangedAt = this.state.scenario.displayTime;
+      status.callbackAtSim = null;
+      status.recheckOverdue = false;
+      if (outcome.mobility === 'needs_help') household.mobility = '보조';
+      if (outcome.mobility === 'possible') household.mobility = '자력';
+      if (this.isLivePhoneTarget(call.targetId) && this.state.demonstration)
+        this.state.demonstration.stage =
+          outcome.mobility === 'needs_help' && outcome.emergency !== true
+            ? 'requested'
+            : 'assessed';
+      this.log(status.note, 'assistant', call.targetId);
+    }
+    this.bump();
+    this.summarizeFirstPass();
+    return this.view();
+  }
+  /** uncertain=false requires proof that no provider call was created. It never redials. */
+  rejectPhoneCall(requestId: string, reason: string, uncertain = false): View {
+    const call = this.state.calls.find((call) => call.id === requestId && call.mode === 'telnyx');
+    requireThat(call, '현재 사이클의 실전화 요청이 없습니다.', 'not_found');
+    if (call.phoneOutcome) return this.view();
+    this.open();
+    requireThat(
+      typeof reason === 'string' && reason.length > 0 && reason.length <= 2000,
+      '전화 실패 근거가 필요합니다.',
+      'invalid_phone_outcome',
+    );
+    if (uncertain) {
+      this.applyPhoneUpdate(requestId, { phase: 'pendingunknown' });
+      this.log(`실전화 발신 여부 불명·기존 요청 확인 필요·${reason}`);
+      return this.view();
+    }
+    requireThat(
+      !call.providerId && !call.phoneConnected,
+      '전화망 생성·연결 근거가 있는 요청입니다. 실제 종료 확인 또는 결과 불명으로 보존하세요.',
+      'phone_not_ended',
+    );
+    this.applyPhoneOutcome(requestId, {
+      ended: true,
+      kind: call.targetType === 'resident' ? 'resident' : 'standby',
+      ...(call.targetType === 'resident' ? { mobility: 'unknown' as const } : {}),
+    });
+    call.phoneNotDialed = true;
+    call.outcome = 'unavailable';
+    if (call.targetType === 'resident') {
+      const status = this.status(call.targetId);
+      status.note = `실전화 발신 전 실패 확인·담당자 설정 검토·${reason}`;
+      status.dispatchHold = status.note;
+    }
+    this.log(`실전화 발신 전 실패 확인·외부 세션 없음·자동 재발신 없음·${reason}`);
+    this.bump();
+    return this.view();
+  }
   reserveLive(id: string, targetType: 'resident' | 'member', requestId: string, revision: number) {
     this.open();
     this.requireRevision(revision);
@@ -425,6 +734,12 @@ export class Runtime {
   settleLive(requestId: string, providerId: string | null, status: string) {
     const c = this.state.calls.find((c) => c.id === requestId);
     requireThat(c, '기존 발신 요청이 없습니다.');
+    if (c.phase === 'finished') return;
+    requireThat(
+      status !== 'mock' || !this.isLivePhoneTarget(c.targetId),
+      '실전화 시연 대상에 모의 어댑터 결과를 적용할 수 없습니다.',
+      'phone_result_required',
+    );
     c.providerId = providerId;
     c.phase =
       status === 'mock' ? 'finished' : status === 'initiated' ? 'calling' : 'pendingunknown';
@@ -454,6 +769,7 @@ export class Runtime {
   finishLive(requestId: string) {
     const c = this.state.calls.find((c) => c.id === requestId);
     requireThat(c, '기존 발신 요청이 없습니다.');
+    if (c.phase === 'finished') return;
     c.phase = 'finished';
     c.outcome ??= c.text ? 'answered' : 'pendingunknown';
     c.finishedSim = this.state.simMinutes;
@@ -622,7 +938,7 @@ export class Runtime {
     retryCount = 0,
   ) {
     // Follow-up playback belongs to the synthetic clock. Live dial is a separate explicit API.
-    if (previous?.mode === 'telnyx') return;
+    if (previous?.mode === 'telnyx' || this.isLivePhoneTarget(id)) return;
     const attempt =
       Math.max(0, ...this.state.calls.filter((c) => c.targetId === id).map((c) => c.attempt)) + 1;
     this.state.calls.push({
@@ -713,11 +1029,13 @@ export class Runtime {
   protected pump() {
     if (this.state.networkDown || !this.state.plan?.confirmed || this.state.frozen) return;
     while (
-      this.state.calls.filter((c) => ['calling', 'pendingunknown'].includes(c.phase)).length < 8
+      this.state.calls.filter((c) => ['calling', 'pendingunknown'].includes(c.phase)).length <
+      8 - this.pendingPhoneTargets().length
     ) {
       const queued = this.state.calls.filter(
         (c) =>
           c.phase === 'queued' &&
+          !this.isLivePhoneTarget(c.targetId) &&
           !this.active(c.targetId) &&
           (c.nextAt === null || c.nextAt <= this.state.simMinutes),
       );
@@ -766,6 +1084,11 @@ export class Runtime {
   }
   applyClassification(id: string, result: Classification) {
     this.open();
+    requireThat(
+      !this.isLivePhoneTarget(id),
+      '실전화 대상은 종료가 확인된 전화 결과로만 분류할 수 있습니다.',
+      'phone_result_required',
+    );
     const s = this.status(id),
       h = this.household(id);
     requireThat(h.callEligible && !s.temporaryExclusion, '발신 대상에서 제외된 가구입니다.');
@@ -807,19 +1130,29 @@ export class Runtime {
     if (action === 'cycle-start') {
       this.requireRevision(input.revision);
       requireThat(
-        !this.state.calls.some((call) => call.mode === 'telnyx' && call.phase !== 'finished'),
+        !this.unresolvedLiveCalls(),
         '실제 활성·결과 불명 세션을 먼저 종료·확인하세요.',
         'live_session',
       );
       const revision = this.state.revision;
       const story = input.demoStory ?? 'grandfather';
+      const phoneMode = input.phoneMode ?? 'mock';
       requireThat(
         story === 'grandfather' || story === 'squad',
         '시연 이야기는 grandfather 또는 squad입니다.',
         'invalid_story',
       );
+      requireThat(
+        phoneMode === 'mock' || phoneMode === 'live',
+        '전화 모드는 mock 또는 live입니다.',
+        'invalid_phone_mode',
+      );
       this.state = this.initial(DATA, 'idle');
-      this.state.demonstration = configureDemoStory(this.state.data, story as DemoStory);
+      this.state.demonstration = configureDemoStory(
+        this.state.data,
+        story as DemoStory,
+        phoneMode as DemoPhoneMode,
+      );
       this.state.revision = revision;
       this.state.simulation = {
         ...initialSimulation(),
@@ -858,10 +1191,7 @@ export class Runtime {
         DATA.scenarios.some((s) => s.id === id),
         '시나리오가 없습니다.',
       );
-      requireThat(
-        !this.state.calls.some((c) => c.mode === 'telnyx' && c.phase !== 'finished'),
-        '실제 세션을 먼저 종료·확인하세요.',
-      );
+      requireThat(!this.unresolvedLiveCalls(), '실제 세션을 먼저 종료·확인하세요.');
       const revision = this.state.revision + 1;
       this.state = this.initial(DATA, id);
       this.state.revision = revision;
@@ -954,6 +1284,7 @@ export class Runtime {
       }
       for (const x of p.order) {
         this.status(x.householdId).status = 'queued';
+        if (this.isLivePhoneTarget(x.householdId)) continue;
         this.state.calls.push({
           id: `CALL-${x.householdId}-1`,
           targetId: x.householdId,
@@ -968,7 +1299,8 @@ export class Runtime {
           retryCount: 0,
         });
       }
-      for (const m of this.state.data.teams.flatMap((t) => t.members))
+      for (const m of this.state.data.teams.flatMap((t) => t.members)) {
+        if (this.isLivePhoneTarget(m.id)) continue;
         this.state.calls.push({
           id: `CALL-${m.id}-1`,
           targetId: m.id,
@@ -986,6 +1318,7 @@ export class Runtime {
           purpose: 'initial',
           retryCount: 0,
         });
+      }
       this.log(`담당자 발령 확정 (모의)·주민 ${p.order.length}·조원 12·공용 8채널`, 'human');
       this.log(`방문 ${p.visit.length}가구 이장 방문 요청 기록 (모의)`);
       this.log('조원 12명 호출 문자 기록(모의)·실제 SMS 없음');
@@ -1432,10 +1765,7 @@ export class Runtime {
       );
     } else if (action === 'close') {
       requireThat(input.acknowledged === true, '미해결 인수인계 확인이 필요합니다.');
-      requireThat(
-        !this.state.calls.some((c) => c.mode === 'telnyx' && c.phase !== 'finished'),
-        '실제 통화 종료/결과 불명을 먼저 확인하세요.',
-      );
+      requireThat(!this.unresolvedLiveCalls(), '실제 통화 종료/결과 불명을 먼저 확인하세요.');
       this.log(
         `미해결 ${handover(this.state.data.households, this.state.scenario).length}건 인수인계 확인·종료 스냅샷`,
         'human',
@@ -1469,6 +1799,7 @@ export class Runtime {
       !this.state.plan?.confirmed ||
       this.state.networkDown ||
       this.state.frozen ||
+      this.awaitingPhoneResults() ||
       deltaMinutes === 0
     )
       return this.view();
@@ -1581,7 +1912,7 @@ export class Runtime {
       ) ||
       this.state.trips.some((trip) => !trip.heldReason) ||
       this.cycleLeaderDue.size > 0;
-    if (this.state.simMinutes >= 40 || !runnable) {
+    if (!this.unresolvedLiveCalls() && (this.state.simMinutes >= 40 || !runnable)) {
       this.state.simulation.phase = 'awaiting_handover';
       this.state.simulation.playing = false;
       this.state.simulation.endReason =
@@ -1594,6 +1925,7 @@ export class Runtime {
     if (before !== this.cycleEventStamp()) this.bump();
   }
   private finishCycleCall(call: Call) {
+    if (this.isLivePhoneTarget(call.targetId)) return;
     call.phase = 'finished';
     call.finishedSim = this.state.simMinutes;
     if (call.targetType === 'member') {
@@ -1720,6 +2052,8 @@ export class Runtime {
         safety = dispatchSafety(this.state, household.id);
       const demonstration = this.state.demonstration,
         hero = household.id === demonstration?.residentId;
+      if (hero && this.isLivePhoneTarget(household.id) && !this.phoneDispatchReady(household.id))
+        continue;
       const heroWaiting =
         demonstration && ['ready', 'dialing', 'talking', 'requested'].includes(demonstration.stage);
       const protectedCrew = new Set(
@@ -1788,6 +2122,7 @@ export class Runtime {
     const demonstration = this.state.demonstration;
     if (
       !demonstration ||
+      demonstration.phoneMode === 'live' ||
       demonstration.messages.some(
         (message) =>
           message.speaker === speaker &&
@@ -1805,7 +2140,7 @@ export class Runtime {
   }
   private syncDemonstration() {
     const demonstration = this.state.demonstration;
-    if (!demonstration) return;
+    if (!demonstration || demonstration.phoneMode === 'live') return;
     const call = this.state.calls.find(
       (call) =>
         call.mode === 'mock' &&
@@ -1839,6 +2174,7 @@ export class Runtime {
   private cycleLeaderContacts() {
     for (const status of this.state.scenario.householdStatuses) {
       if (status.temporaryExclusion) continue;
+      if (this.isLivePhoneTarget(status.householdId)) continue;
       if (
         this.state.calls.some(
           (call) =>
@@ -1903,6 +2239,7 @@ export class Runtime {
         const s = this.status(h.id);
         if (
           h.callEligible &&
+          !this.isLivePhoneTarget(h.id) &&
           !s.temporaryExclusion &&
           s.status === 'queued' &&
           !this.state.calls.some((c) => c.targetId === h.id && c.phase !== 'finished')
@@ -1968,6 +2305,11 @@ export class Runtime {
     }
   }
   private dispatch(id: string, vehicleId: string): boolean {
+    requireThat(
+      !this.isLivePhoneTarget(id) || this.phoneDispatchReady(id),
+      '실전화 종료와 이동 지원 요청이 확인된 뒤 배차하세요.',
+      'phone_result_required',
+    );
     const v = this.state.data.vehicles.find((v) => v.id === vehicleId);
     requireThat(v?.availableForTransport, '수송 불가 자원입니다.');
     const check = evaluateDispatch(this.state, id, vehicleId);

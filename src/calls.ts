@@ -365,6 +365,7 @@ export class CallManager extends EventEmitter {
       classifier?: CallClassifier;
       link?: { targetId: string; scenarioCallId: string };
       shelterName?: string;
+      standbyQuestion?: string;
     } = {},
   ) {
     this.validateStart(input);
@@ -387,7 +388,7 @@ export class CallManager extends EventEmitter {
     run.questionLine =
       run.view.scenario === 'resident'
         ? residentQuestion(residentAssessment(run.shelterName))
-        : standbyQuestions.participation;
+        : (options.standbyQuestion ?? standbyQuestions.participation);
     if (options.classifier) {
       run.classify = options.classifier;
       run.linkedClassifier = true;
@@ -1017,6 +1018,7 @@ export class CallManager extends EventEmitter {
           evidence: result.evidence,
           kind: 'standby',
           closingText: standbyFarewell,
+          standbyAssessment: structuredClone(result),
         });
     } catch {
       if (valid()) {
@@ -1084,7 +1086,8 @@ export class CallManager extends EventEmitter {
   }
   complete(
     run: Run,
-    report: Report & Partial<Pick<Completion, 'kind' | 'closingText' | 'assessment'>>,
+    report: Report &
+      Partial<Pick<Completion, 'kind' | 'closingText' | 'assessment' | 'standbyAssessment'>>,
   ) {
     if (
       !this.valid(run) ||

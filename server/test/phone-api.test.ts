@@ -1,0 +1,609 @@
+import test, { type TestContext } from 'node:test';
+import assert from 'node:assert/strict';
+import { EventEmitter } from 'node:events';
+import { randomUUID } from 'node:crypto';
+import { mkdtempSync, rmSync } from 'node:fs';
+import { tmpdir } from 'node:os';
+import { join } from 'node:path';
+import type { Server, IncomingHttpHeaders } from 'node:http';
+import { createApp } from '../src/app.ts';
+import { Config, type TelnyxPort } from '../src/telephony.ts';
+import { phoneOutcome } from '../src/phone-integration.ts';
+import type { PhonePort } from '../src/phone.ts';
+import type { SimulationTimer } from '../src/simulation.ts';
+import type { View } from '../../shared/src/runtime.ts';
+import { tripPosition } from '../../shared/src/dispatch.ts';
+import type {
+  PhoneCall,
+  PhoneCompletion,
+  PhoneState,
+  PhoneTargetId,
+  PhoneUpdate,
+} from '../../shared/src/phone.ts';
+
+const token = 'phone-api-test-operator-token-0000000000000000000000';
+const headers = { authorization: `Bearer ${token}` };
+const flush = () => new Promise<void>((resolve) => setImmediate(resolve));
+
+class FakeClock implements SimulationTimer {
+  milliseconds = 0;
+  callbacks = new Map<symbol, () => void>();
+  now = () => this.milliseconds;
+  setInterval(callback: () => void) {
+    const handle = Symbol('phone API simulation');
+    this.callbacks.set(handle, callback);
+    return handle;
+  }
+  clearInterval(handle: unknown) {
+    this.callbacks.delete(handle as symbol);
+  }
+  advance(milliseconds: number) {
+    this.milliseconds += milliseconds;
+    for (const callback of this.callbacks.values()) callback();
+  }
+}
+
+class FakePhone extends EventEmitter implements PhonePort {
+  readonly probeToken = 'phone-api-test-probe';
+  starts: { targetId: PhoneTargetId; requestId: string; shelterName?: string }[] = [];
+  events: unknown[] = [];
+  verificationCalls = 0;
+  stops = 0;
+  attachedServer?: Server;
+  disposed = false;
+  value: PhoneState = {
+    enabled: true,
+    ready: true,
+    busy: false,
+    notice: '테스트 음성 포트 준비',
+    calls: [],
+    targets: [
+      {
+        id: 'H012',
+        name: '반영환 할아버지',
+        scenario: 'resident',
+        configured: true,
+        phoneMasked: '010 •••• 0001',
+        consent: true,
+      },
+      {
+        id: 'H009',
+        name: '박미숙 할머니',
+        scenario: 'resident',
+        configured: true,
+        phoneMasked: '010 •••• 0002',
+        consent: true,
+      },
+      {
+        id: 'M01',
+        name: '반영환 대원',
+        scenario: 'standby',
+        configured: true,
+        phoneMasked: '010 •••• 0003',
+        consent: true,
+      },
+    ],
+  };
+  state() {
+    return structuredClone(this.value);
+  }
+  async start(targetId: PhoneTargetId, requestId: string, shelterName?: string) {
+    assert.equal(this.disposed, false);
+    assert.equal(this.value.busy, false);
+    this.starts.push({ targetId, requestId, shelterName });
+    const target = this.value.targets.find((candidate) => candidate.id === targetId)!;
+    const call: PhoneCall = {
+      id: randomUUID(),
+      requestId,
+      targetId,
+      targetName: target.name,
+      scenario: target.scenario,
+      providerId: `fake-provider-${requestId}`,
+      status: 'created',
+      blocked: true,
+      requestedAt: Date.now(),
+      answeredAt: null,
+      endedAt: null,
+      transcript: [],
+      notice: '발신 접수',
+    };
+    this.value.calls.push(call);
+    this.value.busy = true;
+    this.emit('update', { requestId, call: structuredClone(call) } satisfies PhoneUpdate);
+    return structuredClone(call);
+  }
+  update(targetId: PhoneTargetId, patch: Partial<PhoneCall>) {
+    const call = this.value.calls.findLast((candidate) => candidate.targetId === targetId)!;
+    assert.ok(call, `phone call for ${targetId} missing`);
+    Object.assign(call, structuredClone(patch));
+    this.value.busy = this.value.calls.some((candidate) => candidate.blocked);
+    this.emit('update', {
+      requestId: call.requestId,
+      call: structuredClone(call),
+    } satisfies PhoneUpdate);
+    return structuredClone(call);
+  }
+  async stop(callId?: string) {
+    const call =
+      this.value.calls.find((candidate) => candidate.id === callId) ?? this.value.calls.at(-1);
+    this.stops++;
+    if (call?.blocked) this.update(call.targetId, { status: 'ending', blocked: true });
+    return this.state();
+  }
+  resolveUnknown(callId: string, confirmed: boolean) {
+    const call = this.value.calls.find((candidate) => candidate.id === callId)!;
+    assert.equal(call.status, 'unknown');
+    assert.equal(confirmed, true);
+    this.update(call.targetId, { status: 'ended', blocked: false, endedAt: Date.now() });
+    return this.state();
+  }
+  verifyWebhook(_raw: Buffer, requestHeaders: IncomingHttpHeaders) {
+    this.verificationCalls++;
+    return requestHeaders['telnyx-signature-ed25519'] === 'fake-verified-signature';
+  }
+  webhook(event: unknown) {
+    this.events.push(event);
+  }
+  attachUpgrade(server: Server) {
+    this.attachedServer = server;
+  }
+  dispose() {
+    this.disposed = true;
+  }
+}
+
+function rescue(evidence = '다리가 아파 움직일 수 없어요. 차를 보내주세요.'): PhoneCompletion {
+  return {
+    status: 'reported',
+    kind: 'rescue',
+    location: '집',
+    evidence,
+    recordedAt: Date.now(),
+    playbackConfirmed: true,
+    assessment: {
+      stage: 'done',
+      location: '집',
+      shelterName: '온빛 배움학교',
+      mobility: 'needs_help',
+      condition: 'uncomfortable',
+      refusal: 'willing',
+      emergency: false,
+      answers: [{ question: '이동 가능하십니까?', text: evidence }],
+      reason: '스스로 이동 불가',
+    },
+  };
+}
+
+function squadReady(
+  vehicleEvidence = '차량 있습니다',
+  readinessEvidence = '지금 바로 출발합니다',
+): PhoneCompletion {
+  return {
+    status: 'reported',
+    kind: 'standby',
+    location: '대기조 확인',
+    evidence: readinessEvidence,
+    recordedAt: Date.now(),
+    playbackConfirmed: true,
+    standbyAssessment: {
+      state: 'ready',
+      participationEvidence: '참여 가능합니다',
+      vehicleEvidence,
+      readinessEvidence,
+      evidence: readinessEvidence,
+      confidence: 0.99,
+    },
+  };
+}
+
+async function fixture(t: TestContext, phone = new FakePhone()) {
+  const journal = mkdtempSync(join(tmpdir(), 'onmaul-phone-api-'));
+  const clock = new FakeClock();
+  const settings = Config.parse({ mode: 'hybrid', operatorToken: token });
+  let transportCalls = 0;
+  const port: TelnyxPort = {
+    async dial() {
+      transportCalls++;
+      throw new Error('external dial forbidden');
+    },
+    async hangup() {
+      transportCalls++;
+      throw new Error('external hangup forbidden');
+    },
+  };
+  let session = await createApp({
+    settings,
+    phone,
+    port,
+    journal,
+    simulation: { now: clock.now, timer: clock },
+  });
+  t.after(async () => {
+    await session.app.close();
+    rmSync(journal, { recursive: true, force: true });
+    assert.equal(clock.callbacks.size, 0);
+    assert.equal(transportCalls, 0, 'the legacy telephone transport must never be used');
+  });
+  const f = {
+    clock,
+    phone,
+    current: () => session,
+    post: (action: string, input: Record<string, unknown> = {}) =>
+      session.app.inject({
+        method: 'POST',
+        url: '/api/command',
+        headers,
+        payload: { action, input },
+      }),
+    async command(action: string, input: Record<string, unknown> = {}) {
+      const response = await f.post(action, input);
+      assert.equal(response.statusCode, 200, response.body);
+      return response.json<View>();
+    },
+    async state() {
+      const response = await session.app.inject({ url: '/api/state', headers });
+      assert.equal(response.statusCode, 200, response.body);
+      return response.json<View>();
+    },
+    async drain() {
+      await flush();
+      const view = await f.state();
+      await flush();
+      return view;
+    },
+    async advance(minutes: number) {
+      const before = await f.state();
+      clock.advance((minutes * 60000) / before.simulation.speed);
+      return f.state();
+    },
+    async start(
+      story: 'grandfather' | 'squad' = 'grandfather',
+      phoneMode: 'live' | 'mock' = 'live',
+    ) {
+      const before = await f.state();
+      const review = await f.command('cycle-start', {
+        revision: before.revision,
+        demoStory: story,
+        phoneMode,
+        phoneConsent: true,
+      });
+      assert.equal(phone.starts.length, 0);
+      await f.command('confirm', { revision: review.revision });
+      return f.drain();
+    },
+    async restart(recovered: FakePhone) {
+      await session.app.close();
+      session = await createApp({
+        settings,
+        phone: recovered,
+        port,
+        journal,
+        simulation: { now: clock.now, timer: clock },
+      });
+      return f.drain();
+    },
+  };
+  return f;
+}
+
+function householdStatus(view: View, id: string) {
+  return view.scenario.householdStatuses.find((status) => status.householdId === id)!;
+}
+
+test('API waits for current human checkpoint, applies rescue after carrier termination, and animates the ambulance', async (t) => {
+  const f = await fixture(t);
+  const before = await f.state();
+  const review = await f.command('cycle-start', {
+    revision: before.revision,
+    demoStory: 'grandfather',
+    phoneMode: 'live',
+    phoneConsent: true,
+  });
+  const checkpoint = review.graphRuns.find((run) => run.waiting)!;
+  assert.equal(f.phone.starts.length, 0);
+  assert.equal((await f.post('confirm', { revision: review.revision - 1 })).statusCode, 409);
+  assert.equal(f.phone.starts.length, 0);
+  await f.command('confirm', { revision: review.revision });
+  let view = await f.drain();
+  assert.deepEqual(
+    f.phone.starts.map((call) => call.targetId),
+    ['H012'],
+  );
+  assert.ok(f.phone.starts[0].shelterName);
+  assert.equal(f.phone.attachedServer, f.current().app.server);
+  assert.equal(view.graphRuns.find((run) => run.id === checkpoint.id)!.waiting, false);
+  assert.equal(
+    (await f.current().agents.plan.getState({ configurable: { thread_id: checkpoint.id } })).values
+      .approved,
+    true,
+  );
+  assert.equal(view.demonstration!.phoneClockHeld, true);
+  assert.equal(view.calls.filter((call) => call.targetId === 'H012').length, 1);
+
+  f.phone.update('H012', {
+    status: 'answered',
+    answeredAt: Date.now(),
+    transcript: [{ speaker: 'user', text: '차를 보내주세요' }],
+    completion: rescue(),
+    blocked: true,
+  });
+  view = await f.drain();
+  assert.equal(householdStatus(view, 'H012').status, 'calling');
+  assert.equal(view.demonstration!.stage, 'talking');
+  assert.equal((await f.advance(40)).simMinutes, 0);
+  assert.ok(!view.trips.some((trip) => trip.householdId === 'H012'));
+  f.phone.update('H012', { status: 'ending', blocked: true });
+  view = await f.drain();
+  assert.equal(householdStatus(view, 'H012').status, 'calling');
+  assert.ok(!view.calls.find((call) => call.targetId === 'H012')!.phoneOutcome);
+
+  f.phone.update('H012', { status: 'ended', blocked: false, endedAt: Date.now() });
+  view = await f.drain();
+  assert.equal(householdStatus(view, 'H012').status, 'help');
+  assert.equal(view.memberResponses.M02, 'waiting');
+  assert.equal(view.demonstration!.phoneClockHeld, false);
+  assert.ok(!view.trips.some((trip) => trip.householdId === 'H012'));
+  view = await f.advance(1);
+  const trip = view.trips.find((trip) => trip.householdId === 'H012')!;
+  assert.ok(trip);
+  assert.equal(trip.vehicleId, 'V01');
+  assert.equal(trip.driverRef, 'M02');
+  assert.equal(view.memberResponses.M02, 'ok');
+  assert.equal(view.demonstration!.stage, 'responding');
+  const current = tripPosition(trip, view.simMinutes);
+  view = await f.advance(0.5);
+  const moved = tripPosition(trip, view.simMinutes);
+  assert.notDeepEqual(moved, current);
+  assert.equal(f.phone.starts.length, 1);
+  const phoneState = await f.current().app.inject({ url: '/api/phone/state', headers });
+  assert.equal(phoneState.statusCode, 200);
+  assert.equal(phoneState.json<PhoneState>().calls[0].transcript[0].text, '차를 보내주세요');
+});
+
+test('squad API ends H009 before starting M01 and holds dispatch until the named member finishes', async (t) => {
+  const f = await fixture(t);
+  await f.start('squad');
+  assert.deepEqual(
+    f.phone.starts.map((call) => call.targetId),
+    ['H009'],
+  );
+  f.phone.update('H009', { status: 'answered', answeredAt: Date.now(), completion: rescue() });
+  await f.drain();
+  assert.equal(f.phone.starts.length, 1);
+  f.phone.update('H009', { status: 'ended', blocked: false, endedAt: Date.now() });
+  let view = await f.drain();
+  assert.deepEqual(
+    f.phone.starts.map((call) => call.targetId),
+    ['H009', 'M01'],
+  );
+  assert.equal(householdStatus(view, 'H009').status, 'help');
+  assert.equal(view.demonstration!.phoneClockHeld, true);
+  f.phone.update('M01', { status: 'answered', answeredAt: Date.now(), completion: squadReady() });
+  view = await f.drain();
+  assert.equal(view.memberResponses.M01, 'waiting');
+  assert.equal((await f.advance(40)).simMinutes, 0);
+  assert.ok(!view.trips.some((trip) => trip.householdId === 'H009'));
+  f.phone.update('M01', { status: 'ended', blocked: false, endedAt: Date.now() });
+  view = await f.drain();
+  assert.equal(view.memberResponses.M01, 'ok');
+  view = await f.advance(1);
+  const trip = view.trips.find((trip) => trip.householdId === 'H009')!;
+  assert.ok(trip);
+  assert.equal(trip.vehicleId, 'V04');
+  assert.equal(trip.driverRef, 'M01');
+  assert.ok(trip.crewMemberIds.length >= 2);
+  assert.ok(trip.crewMemberIds.every((id) => view.memberResponses[id] === 'ok'));
+  assert.equal(view.demonstration!.stage, 'responding');
+  assert.equal(f.phone.starts.length, 2);
+});
+
+test('mock playback creates no actual voice starts and phone endpoints require the operator token', async (t) => {
+  const f = await fixture(t);
+  await f.start('grandfather', 'mock');
+  await f.advance(10);
+  assert.equal(f.phone.starts.length, 0);
+  for (const request of [
+    { method: 'GET' as const, url: '/api/phone/state' },
+    { method: 'POST' as const, url: '/api/phone/hangup', payload: {} },
+    {
+      method: 'POST' as const,
+      url: '/api/phone/dial',
+      payload: { targetId: 'H012', consent: true, revision: 1 },
+    },
+  ]) {
+    const response = await f.current().app.inject(request);
+    assert.equal(response.statusCode, 401, response.body);
+  }
+  assert.equal(f.phone.stops, 0);
+  assert.equal(f.phone.starts.length, 0);
+});
+
+test('public callback skips operator auth only after signature verification and shares the dashboard probe', async (t) => {
+  const f = await fixture(t);
+  const probe = await f.current().app.inject(`/probe/${f.phone.probeToken}`);
+  assert.equal(probe.statusCode, 200);
+  assert.deepEqual(probe.json(), { onCallback: f.phone.probeToken });
+  const payload = { data: { id: 'test-webhook', event_type: 'call.answered', payload: {} } };
+  const invalid = await f
+    .current()
+    .app.inject({ method: 'POST', url: '/webhooks/telnyx', payload });
+  assert.equal(invalid.statusCode, 401);
+  assert.equal(f.phone.events.length, 0);
+  const valid = await f.current().app.inject({
+    method: 'POST',
+    url: '/webhooks/telnyx',
+    headers: { 'telnyx-signature-ed25519': 'fake-verified-signature' },
+    payload,
+  });
+  assert.equal(valid.statusCode, 200, valid.body);
+  assert.deepEqual(f.phone.events, [payload]);
+  assert.equal(f.phone.verificationCalls, 2);
+});
+
+test('missing consent, wrong story target, and stale revisions fail without starting a voice session', async (t) => {
+  const f = await fixture(t);
+  const before = await f.state();
+  const noConsent = await f.post('cycle-start', { revision: before.revision, phoneMode: 'live' });
+  assert.equal(noConsent.statusCode, 409);
+  assert.equal((await f.state()).revision, before.revision);
+  const review = await f.command('cycle-start', {
+    revision: before.revision,
+    phoneMode: 'live',
+    phoneConsent: true,
+  });
+  const dial = (targetId: PhoneTargetId, revision: number, consent = true) =>
+    f.current().app.inject({
+      method: 'POST',
+      url: '/api/phone/dial',
+      headers,
+      payload: { targetId, revision, consent },
+    });
+  assert.equal((await dial('H009', review.revision)).statusCode, 409);
+  assert.equal((await dial('H012', review.revision, false)).statusCode, 400);
+  assert.equal((await f.post('confirm', { revision: review.revision - 1 })).statusCode, 409);
+  assert.equal(f.phone.starts.length, 0);
+  assert.equal((await f.state()).calls.length, 0);
+
+  const unavailable = f.phone.value.targets.find((target) => target.id === 'M01')!;
+  unavailable.consent = false;
+  const missingTargetConsent = await f.post('cycle-start', {
+    revision: review.revision,
+    demoStory: 'squad',
+    phoneMode: 'live',
+    phoneConsent: true,
+  });
+  assert.equal(missingTargetConsent.statusCode, 409);
+  assert.equal(f.phone.starts.length, 0);
+});
+
+test('manual dial validates the current runtime revision and returns its bound request without blocking state reads', async (t) => {
+  const f = await fixture(t);
+  const before = await f.state();
+  const review = await f.command('cycle-start', {
+    revision: before.revision,
+    phoneMode: 'live',
+    phoneConsent: true,
+  });
+  f.phone.value.ready = false;
+  const confirmed = await f.command('confirm', { revision: review.revision });
+  assert.equal(f.phone.starts.length, 0);
+  f.phone.value.ready = true;
+  const stale = await f.current().app.inject({
+    method: 'POST',
+    url: '/api/phone/dial',
+    headers,
+    payload: { targetId: 'H012', revision: review.revision, consent: true },
+  });
+  assert.equal(stale.statusCode, 409, stale.body);
+  assert.equal(f.phone.starts.length, 0);
+  const response = await f.current().app.inject({
+    method: 'POST',
+    url: '/api/phone/dial',
+    headers,
+    payload: { targetId: 'H012', revision: confirmed.revision, consent: true },
+  });
+  assert.equal(response.statusCode, 200, response.body);
+  const result = response.json<{ requestId: string; view: View; phone: PhoneState }>();
+  assert.ok(result.requestId);
+  assert.ok(
+    result.view.calls.some((call) => call.id === result.requestId && call.targetId === 'H012'),
+  );
+  assert.equal(result.phone.busy, true);
+  await f.drain();
+  assert.equal(f.phone.starts.length, 1);
+  assert.equal(f.phone.starts[0].requestId, result.requestId);
+  const duplicate = await f.current().app.inject({
+    method: 'POST',
+    url: '/api/phone/dial',
+    headers,
+    payload: { targetId: 'H012', revision: (await f.state()).revision, consent: true },
+  });
+  assert.equal(duplicate.statusCode, 409, duplicate.body);
+  assert.equal(f.phone.starts.length, 1);
+});
+
+test('restart with unknown carrier state preserves hold; hangup acceptance cannot unlock reset', async (t) => {
+  const f = await fixture(t);
+  await f.start();
+  f.phone.update('H012', { status: 'answered', answeredAt: Date.now() });
+  await f.drain();
+  const active = f.phone.state().calls[0];
+  const stop = await f.current().app.inject({
+    method: 'POST',
+    url: '/api/phone/hangup',
+    headers,
+    payload: { callId: active.id },
+  });
+  assert.equal(stop.statusCode, 200, stop.body);
+  assert.equal(stop.json().phone.busy, true);
+  const held = await f.drain();
+  assert.equal((await f.post('cycle-start', { revision: held.revision })).statusCode, 409);
+  assert.ok(!held.trips.some((trip) => trip.householdId === 'H012'));
+  const recovered = new FakePhone();
+  recovered.value = f.phone.state();
+  Object.assign(recovered.value.calls[0], { status: 'unknown', blocked: true });
+  let view = await f.restart(recovered);
+  assert.equal(recovered.starts.length, 0);
+  assert.equal(view.demonstration!.phoneClockHeld, true);
+  assert.equal(view.calls.find((call) => call.id === active.requestId)!.phase, 'pendingunknown');
+  assert.equal((await f.advance(40)).simMinutes, 0);
+  assert.equal((await f.post('cycle-start', { revision: view.revision })).statusCode, 409);
+  const resolve = await f.current().app.inject({
+    method: 'POST',
+    url: '/api/phone/resolve',
+    headers,
+    payload: { callId: active.id, confirmedEnded: true },
+  });
+  assert.equal(resolve.statusCode, 200, resolve.body);
+  view = await f.drain();
+  assert.equal(householdStatus(view, 'H012').status, 'unclear');
+  assert.equal(view.demonstration!.phoneClockHeld, false);
+  assert.ok(!view.trips.some((trip) => trip.householdId === 'H012'));
+  assert.equal(recovered.starts.length, 0);
+});
+
+test('long recipient evidence is bounded for runtime without dropping a verified phone outcome', async (t) => {
+  const f = await fixture(t);
+  await f.start();
+  const completion = rescue('이동이 어렵습니다. '.repeat(400));
+  f.phone.update('H012', { status: 'ended', blocked: false, endedAt: Date.now(), completion });
+  const view = await f.drain();
+  assert.equal(householdStatus(view, 'H012').status, 'help');
+  const runtimeCall = view.calls.find((call) => call.targetId === 'H012')!;
+  assert.ok(runtimeCall.phoneOutcome);
+  assert.ok(runtimeCall.phoneOutcome.evidence!.length <= 2000);
+  assert.equal(f.phone.value.calls[0].completion!.evidence, completion.evidence);
+});
+
+test('standby mapping declines vague or negative vehicle/readiness claims and accepts immediate available transport', () => {
+  const call: PhoneCall = {
+    id: randomUUID(),
+    requestId: 'mapping',
+    targetId: 'M01',
+    targetName: '반영환 대원',
+    scenario: 'standby',
+    providerId: 'fake-provider',
+    status: 'ended',
+    blocked: false,
+    requestedAt: 1,
+    answeredAt: 2,
+    endedAt: 3,
+    transcript: [],
+    notice: '',
+  };
+  for (const vehicle of ['차량 없습니다', '차량 이용이 어렵습니다', '차량이 있을 수도 있습니다']) {
+    const mapped = phoneOutcome({ ...call, completion: squadReady(vehicle) });
+    assert.equal(mapped.standbyAvailable, false, vehicle);
+  }
+  for (const readiness of [
+    '10분 후 가능합니다',
+    '지금 바로 출발하지 못합니다',
+    '준비 시간은 아직 모르겠습니다',
+    '지금부터 30분 걸립니다',
+    '지금 바로는 출발 안 할 거예요',
+  ]) {
+    const mapped = phoneOutcome({ ...call, completion: squadReady('차량 있습니다', readiness) });
+    assert.equal(mapped.standbyAvailable, false, readiness);
+  }
+  assert.equal(phoneOutcome({ ...call, completion: squadReady() }).standbyAvailable, true);
+});

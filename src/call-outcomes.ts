@@ -18,6 +18,16 @@ export const outcomeSchema = z.object({
     scenarioCallId: z.string().optional(),
     kind: z.enum(['evacuation', 'rescue', 'moving', 'refused', 'review', 'standby']).optional(),
     closingText: z.string().optional(),
+    standbyAssessment: z
+      .object({
+        state: z.enum(['pending', 'ready', 'unavailable']),
+        participationEvidence: z.string(),
+        vehicleEvidence: z.string(),
+        readinessEvidence: z.string(),
+        evidence: z.string(),
+        confidence: z.number().min(0).max(1),
+      })
+      .optional(),
     assessment: z
       .object({
         stage: z.enum(['location', 'mobility', 'condition', 'done']),

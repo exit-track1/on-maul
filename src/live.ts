@@ -223,10 +223,15 @@ export class LiveConnection extends EventEmitter {
     });
     return id;
   }
-  greet(scenario: Scenario, line = residentQuestion(residentAssessment())) {
+  greet(scenario: Scenario, line?: string) {
     if (this.greetingSent || !this.sessionId || this.closing) return;
     this.greetingSent = true;
-    this.say(scenario === 'resident' ? line : standbyQuestions.participation);
+    this.say(
+      line ??
+        (scenario === 'resident'
+          ? residentQuestion(residentAssessment())
+          : standbyQuestions.participation),
+    );
   }
   say(line: string) {
     this.currentLine = line;

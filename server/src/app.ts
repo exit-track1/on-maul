@@ -22,6 +22,9 @@ import {
 import { canonicalJson } from '../../shared/src/sources.ts';
 import { AgentGraphs } from './agents.ts';
 import { SimulationClock, type SimulationClockOptions } from './simulation.ts';
+import { PhoneEngine, type PhoneEngineOptions, type PhonePort } from './phone.ts';
+import { registerPhoneIntegration } from './phone-integration.ts';
+import { AppError } from '../../src/domain.ts';
 import {
   Telephony,
   config,
@@ -55,6 +58,8 @@ export async function createApp(
     port?: TelnyxPort;
     journal?: string;
     simulation?: SimulationClockOptions;
+    phone?: PhonePort;
+    phoneOptions?: PhoneEngineOptions;
   } = {},
 ) {
   const settings = options.settings ?? config(),
@@ -62,6 +67,16 @@ export async function createApp(
     runtime = new Runtime(),
     agents = new AgentGraphs();
   const app = Fastify({ logger: false, bodyLimit: 65536 });
+  const phone =
+    options.phone ??
+    new PhoneEngine({
+      ...options.phoneOptions,
+      environment: {
+        ...(options.phoneOptions?.environment ?? process.env),
+        ON_EXECUTION_MODE: settings.mode,
+      },
+    });
+  let phoneIntegration: Awaited<ReturnType<typeof registerPhoneIntegration>> | undefined;
   const instanceId = randomUUID();
   app.addHook('onSend', async (_req, reply, payload) => {
     reply.header('x-onmaul-instance', instanceId);
@@ -176,8 +191,11 @@ export async function createApp(
   app.addHook('preHandler', async (req, reply) => {
     if (
       settings.mode === 'hybrid' &&
-      req.method === 'POST' &&
+      (req.method === 'POST' ||
+        (phone.state().enabled &&
+          ['/api/state', '/api/export.json'].includes(req.url.split('?')[0]))) &&
       req.url !== '/api/telnyx/webhook' &&
+      req.url !== '/webhooks/telnyx' &&
       req.headers.authorization !== `Bearer ${settings.operatorToken}`
     )
       await reply.code(401).send({ error: '담당자 토큰이 필요합니다.' });
@@ -185,14 +203,14 @@ export async function createApp(
   app.setErrorHandler((error, _req, reply) => {
     const e = error as Error;
     const status =
-      e instanceof DomainError
+      e instanceof DomainError || e instanceof AppError
         ? e.status
         : e instanceof z.ZodError || e instanceof SyntaxError
           ? 400
           : 500;
     void reply.code(status).send({
       error: status === 500 ? '요청을 처리하지 못했습니다.' : e.message,
-      code: e instanceof DomainError ? e.code : 'invalid_request',
+      code: e instanceof DomainError || e instanceof AppError ? e.code : 'invalid_request',
     });
   });
   let journalRevision: number | null = null;
@@ -231,6 +249,7 @@ export async function createApp(
       if (!runtime.view().graphRuns.some((g) => g.id === runId && g.waiting))
         runtime.addGraph(await agents.proposeReassignment(runId, proposal));
     }
+    phoneIntegration?.observe();
     journal();
   };
   const simulation = new SimulationClock(
@@ -248,8 +267,9 @@ export async function createApp(
     service: '온 마을 React mock API',
     executionMode: settings.mode,
     agent: '@langchain/langgraph',
-    inference: 'rules',
-    externalInferenceCalls: 0,
+    inference: phone.state().enabled ? 'rules+gpt-voice' : 'rules',
+    externalInferenceCalls: phone.state().enabled ? null : 0,
+    phoneEnabled: phone.state().enabled,
   }));
   app.get('/api/state', () => serialized(async () => runtime.view()));
   app.get('/api/export.json', async (_req, reply) => {
@@ -260,6 +280,16 @@ export async function createApp(
     await simulation.settle();
     try {
       if (action === 'cycle-start' || action === 'scenario') {
+        if (phone.state().busy)
+          throw new DomainError(
+            'live_session',
+            '진행 중이거나 종료 미확인인 실제 통화를 먼저 확인하세요.',
+          );
+        if (action === 'cycle-start' && input.phoneMode === 'live') {
+          if (input.phoneConsent !== true)
+            throw new DomainError('phone_consent', '실제 전화 시연 동의를 확인하세요.');
+          phoneIntegration!.assertReady(input.demoStory === 'squad' ? ['H009', 'M01'] : ['H012']);
+        }
         runtime.command(action, input);
         // Reset scenarios discard their prior plan snapshot. A prior graph thread can
         // never approve a new cycle, even if its target order happens to be identical.
@@ -386,6 +416,17 @@ export async function createApp(
       simulation.synchronize();
     }
   };
+  phoneIntegration = await registerPhoneIntegration({
+    app,
+    runtime,
+    phone,
+    serialized,
+    publish,
+    settle: () => simulation.settle(),
+    synchronize: () => simulation.synchronize(),
+    read,
+    operatorToken: settings.operatorToken,
+  });
   app.post('/api/command', async (req) =>
     serialized(async () => {
       const { action, input } = Envelope.parse(read(req.body));
@@ -397,6 +438,8 @@ export async function createApp(
   );
   app.post('/api/telephony/dial', async (req) =>
     serialized(async () => {
+      if (phone.state().enabled)
+        throw new DomainError('voice_endpoint', '음성 대화가 연결된 /api/phone/dial을 사용하세요.');
       const input = z
           .object({
             targetId: z.enum(['H012', 'M01']),
@@ -506,7 +549,7 @@ export async function createApp(
     mode: settings.mode,
     calls: [...liveCalls.values()],
     recording: 'disabled',
-    liveVoiceConversation: 'not_implemented_in_mock_api',
+    liveVoiceConversation: phone.state().enabled ? 'poc_call_manager' : 'disabled',
   }));
   app.post('/api/telephony/hangup', async (req) => {
     const { requestId } = z.object({ requestId: z.string() }).strict().parse(read(req.body));

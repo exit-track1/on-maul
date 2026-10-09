@@ -117,6 +117,7 @@ test('대기조 참여·차량·준비 시간 질문을 앱이 진행하고 준�
       }
     }
     assert.equal(s.manager.public().completion!.kind, 'standby');
+    assert.equal(s.manager.public().completion!.standbyAssessment!.state, 'ready');
     for (const question of Object.values(standbyQuestions))
       assert.equal(s.sockets[0].sent.filter((e) => e.content?.includes(question)).length, 1);
     assert.ok(s.sockets[0].sent.some((e) => e.content?.includes(standbyFarewell)));
@@ -247,6 +248,7 @@ test('대기조 마지막 준비 시간 응답 → 결과 저장 → 종료 안�
     assert.equal(s.manager.public().blocked, false);
     const restored = new CallManager(s.store, s.dir);
     assert.equal(restored.public().completion!.kind, 'standby');
+    assert.deepEqual(restored.public().completion!.standbyAssessment, ready);
     assert.equal(restored.outcomeStore.list()[0].callStatus, 'ended');
     restored.dispose();
   } finally {

@@ -1,8 +1,13 @@
 import type { Fixtures } from './types.ts';
 
 export type DemoStory = 'grandfather' | 'squad';
+export type DemoPhoneMode = 'mock' | 'live';
 export interface Demonstration {
   story: DemoStory;
+  /** Old snapshots without this field retain deterministic mock playback. */
+  phoneMode?: DemoPhoneMode;
+  /** Derived by Runtime.view; playback preference remains unchanged while waiting. */
+  phoneClockHeld?: boolean;
   residentId: 'H012' | 'H009';
   memberId: string | null;
   vehicleId: 'V01' | 'V04';
@@ -10,6 +15,7 @@ export interface Demonstration {
     | 'ready'
     | 'dialing'
     | 'talking'
+    | 'assessed'
     | 'requested'
     | 'responding'
     | 'boarding'
@@ -25,8 +31,16 @@ export interface Demonstration {
 }
 
 /** Deterministic overlay on the caller's private fixture clone; no I/O, timer, or state transition. */
-export function configureDemoStory(data: Fixtures, story: DemoStory): Demonstration {
-  if (!data.metadata.synthetic || !['grandfather', 'squad'].includes(story))
+export function configureDemoStory(
+  data: Fixtures,
+  story: DemoStory,
+  phoneMode: DemoPhoneMode = 'mock',
+): Demonstration {
+  if (
+    !data.metadata.synthetic ||
+    !['grandfather', 'squad'].includes(story) ||
+    !['mock', 'live'].includes(phoneMode)
+  )
     throw new TypeError('합성 시연 데이터와 지원하는 이야기가 필요합니다.');
   const residentId = story === 'grandfather' ? 'H012' : 'H009',
     vehicleId = story === 'grandfather' ? 'V01' : 'V04',
@@ -86,6 +100,7 @@ export function configureDemoStory(data: Fixtures, story: DemoStory): Demonstrat
 
   return {
     story,
+    phoneMode,
     residentId,
     memberId,
     vehicleId,
