@@ -279,16 +279,31 @@ export async function createApp(
   const command = async (action: string, input: Record<string, unknown>) => {
     await simulation.settle();
     try {
+      const actualPhoneOnly = phone.state().enabled;
+      if (
+        actualPhoneOnly &&
+        (['transcript', 'member-response', 'schedule-callback', 'plan'].includes(action) ||
+          (action === 'scenario' && !['idle', 'watch'].includes(String(input.id))))
+      )
+        throw new DomainError(
+          'actual_phone_only',
+          '실제 전화만 운영합니다. 메인 시연에서 실제 전화 결과를 사용하세요.',
+        );
       if (action === 'cycle-start' || action === 'scenario') {
         if (phone.state().busy)
           throw new DomainError(
             'live_session',
             '진행 중이거나 종료 미확인인 실제 통화를 먼저 확인하세요.',
           );
+        if (action === 'cycle-start' && actualPhoneOnly) {
+          if (input.phoneMode !== undefined && input.phoneMode !== 'live')
+            throw new DomainError('actual_phone_only', '전화 모드는 실제 전화로 고정됩니다.');
+          input = { ...input, phoneMode: 'live' };
+        }
         if (action === 'cycle-start' && input.phoneMode === 'live') {
           if (input.phoneConsent !== true)
             throw new DomainError('phone_consent', '실제 전화 시연 동의를 확인하세요.');
-          phoneIntegration!.assertReady(input.demoStory === 'squad' ? ['H009', 'M01'] : ['H012']);
+          phoneIntegration!.assertReady(input.demoStory === 'squad' ? ['M01'] : ['H012']);
         }
         runtime.command(action, input);
         // Reset scenarios discard their prior plan snapshot. A prior graph thread can
@@ -301,6 +316,8 @@ export async function createApp(
         runtime.command(action, input);
       } else if (action === 'confirm') {
         const before = runtime.view();
+        if (actualPhoneOnly && before.demonstration?.phoneMode !== 'live')
+          throw new DomainError('actual_phone_only', '실제 전화 메인 시연을 시작하세요.');
         if (before.plan?.confirmed) runtime.command(action, input);
         else {
           runtime.validatePlanConfirmation(input.revision);

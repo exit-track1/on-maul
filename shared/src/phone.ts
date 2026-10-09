@@ -1,4 +1,4 @@
-export type PhoneTargetId = 'H012' | 'H009' | 'M01';
+export type PhoneTargetId = 'H012' | 'M01';
 export type PhoneScenario = 'resident' | 'standby';
 export type PhoneStatus =
   'requesting' | 'created' | 'ringing' | 'answered' | 'ending' | 'ended' | 'failed' | 'unknown';

@@ -91,7 +91,7 @@ export async function registerPhoneIntegration(options: {
   let closed = false;
   const acceptsTarget = (view: View, targetId: PhoneTargetId) =>
     view.demonstration?.phoneMode === 'live' &&
-    (targetId === view.demonstration.residentId ||
+    ((view.demonstration.story === 'grandfather' && targetId === 'H012') ||
       (view.demonstration.story === 'squad' && targetId === 'M01'));
 
   const assertReady = (targetIds: PhoneTargetId[]) => {
@@ -262,7 +262,7 @@ export async function registerPhoneIntegration(options: {
       try {
         const input = z
           .object({
-            targetId: z.enum(['H012', 'H009', 'M01']),
+            targetId: z.enum(['H012', 'M01']),
             revision: z.number().int(),
             consent: z.literal(true),
           })

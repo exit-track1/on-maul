@@ -6,10 +6,10 @@ import { createServer } from 'node:http';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import WebSocket from 'ws';
-import { ConfigStore } from '../../src/config.ts';
+import { ConfigStore, writePrivate } from '../../src/config.ts';
 import { FakeSocket, flush, user } from '../../tests/helpers.ts';
 import { PhoneEngine, type PhoneEngineOptions } from '../src/phone.ts';
-import type { PhoneUpdate } from '../../shared/src/phone.ts';
+import type { PhoneTargetId, PhoneUpdate } from '../../shared/src/phone.ts';
 
 function setup(extra: Partial<PhoneEngineOptions> = {}, environment: Record<string, string> = {}) {
   const directory = mkdtempSync(join(tmpdir(), 'onmaul-dashboard-phone-'));
@@ -196,15 +196,15 @@ test('demo leaves settings and journals untouched and TEST_PHONE needs an explic
       REAL_RESIDENT_E164: '',
       REAL_GRANDMOTHER_E164: '',
       REAL_SQUAD_E164: '',
-      ON_PHONE_TEST_TARGET_ID: 'H009',
+      ON_PHONE_TEST_TARGET_ID: 'M01',
       ON_PHONE_TEST_CONSENT: 'yes',
     },
   );
   try {
     assert.equal(bound.engine.state().targets.filter((target) => target.configured).length, 1);
     await assert.rejects(bound.engine.start('H012', 'wrong-target'), /대상별/);
-    const call = await bound.engine.start('H009', 'bound-target');
-    assert.equal(call.targetId, 'H009');
+    const call = await bound.engine.start('M01', 'bound-target');
+    assert.equal(call.targetId, 'M01');
     assert.equal(bound.requests[0].body.to, '+821000000000');
   } finally {
     bound.cleanup();
@@ -219,6 +219,79 @@ test('wrong callback instance is rejected before a voice socket or a carrier req
     assert.equal(s.requests.length, 0);
     assert.equal(s.engine.state().busy, false);
     assert.equal(s.engine.state().calls.length, 0);
+  } finally {
+    s.cleanup();
+  }
+});
+
+test('H009 never becomes a phone target, even with legacy number, consent, and TEST_PHONE binding settings', async () => {
+  const s = setup(
+    {},
+    {
+      REAL_GRANDMOTHER_E164: '01000000002',
+      REAL_GRANDMOTHER_CONSENT: 'yes',
+      ON_PHONE_TEST_TARGET_ID: 'H009',
+      ON_PHONE_TEST_CONSENT: 'yes',
+    },
+  );
+  try {
+    assert.deepEqual(
+      s.engine.state().targets.map((target) => target.id),
+      ['H012', 'M01'],
+    );
+    await assert.rejects(s.engine.start('H009' as PhoneTargetId, 'forbidden-legacy'), /대상별/);
+    assert.equal(s.probeCount, 0);
+    assert.equal(s.requests.length, 0);
+    assert.equal(s.sockets.length, 0);
+  } finally {
+    s.cleanup();
+  }
+});
+
+test('legacy H009 history is hidden while its unresolved journal still blocks new calls', async () => {
+  const s = setup();
+  try {
+    await s.engine.start('H012', 'retained-call');
+    s.hook('call.hangup');
+    const retained = s.engine.state().calls[0];
+    const legacy = {
+      ...retained,
+      id: randomUUID(),
+      requestId: 'old-H009',
+      targetId: 'H009',
+      targetName: '박미숙 할머니',
+      status: 'unknown',
+      blocked: true,
+      endedAt: null,
+    };
+    s.engine.dispose();
+    writePrivate(join(s.activeDirectory, 'phone-history.json'), [retained, legacy]);
+    writePrivate(join(s.activeDirectory, 'active-call.json'), {
+      id: legacy.id,
+      phone: '+821000000002',
+      scenario: 'resident',
+      blocked: true,
+      status: 'unknown',
+      callControlId: 'legacy-provider-H009',
+    });
+    const restored = new PhoneEngine(s.options);
+    try {
+      assert.equal(restored.state().busy, true);
+      assert.deepEqual(
+        restored.state().calls.map((call) => call.targetId),
+        ['H012'],
+      );
+      assert.ok(!JSON.stringify(restored.state()).includes('박미숙'));
+      await assert.rejects(restored.start('H012', 'must-hold'), /진행 중/);
+      restored.resolveUnknown(legacy.id, true);
+      assert.equal(restored.state().busy, false);
+      assert.deepEqual(
+        restored.state().calls.map((call) => call.id),
+        [retained.id],
+      );
+    } finally {
+      restored.dispose();
+    }
   } finally {
     s.cleanup();
   }
@@ -244,7 +317,7 @@ test('voice transcript and classifier use configured models; outcome waits for f
     assert.equal(s.sockets[0].sent[0].session.audio.output.voice, 'marin');
     assert.equal(readFileSync(s.store.path, 'utf8'), savedConfig);
     assert.equal(s.store.value.TEST_PHONE, '+821000000000');
-    await assert.rejects(s.engine.start('H009', 'duplicate-live'), /진행 중/);
+    await assert.rejects(s.engine.start('M01', 'duplicate-live'), /진행 중/);
 
     s.media();
     s.hook('call.answered');
@@ -307,10 +380,13 @@ test('target bindings stay fixed across three calls; old provider events and sec
     const first = await s.engine.start('H012', 'request-1');
     const oldPayload = { ...s.requests[0].body, call_control_id: first.providerId };
     s.hook('call.hangup');
-    const second = await s.engine.start('H009', 'request-2');
+    const second = await s.engine.start('M01', 'request-2', '온빛 배움학교', '서구역 9번 집');
+    assert.equal(second.scenario, 'standby');
+    assert.match(s.engine.manager.current.questionLine, /서구역 9번 집/);
+    assert.doesNotMatch(s.engine.manager.current.questionLine, /8번 집/);
     s.engine.manager.current.view.transcript.push({
       speaker: 'user',
-      text: 'sk-test-phone-placeholder telnyx-phone-placeholder private-operator-test-token +821000000002 01000000002',
+      text: 'sk-test-phone-placeholder telnyx-phone-placeholder private-operator-test-token +821000000003 01000000003',
     });
     s.engine.manager.publish();
     s.engine.webhook({
@@ -318,17 +394,15 @@ test('target bindings stay fixed across three calls; old provider events and sec
     });
     assert.equal(s.engine.state().calls.find((call) => call.id === second.id)?.status, 'created');
     s.hook('call.hangup');
-    const third = await s.engine.start('M01', 'request-3', '온빛 배움학교', '서구역 9번 집');
-    assert.equal(third.scenario, 'standby');
-    assert.match(s.engine.manager.current.questionLine, /서구역 9번 집/);
-    assert.doesNotMatch(s.engine.manager.current.questionLine, /8번 집/);
+    const third = await s.engine.start('H012', 'request-3');
+    assert.equal(third.scenario, 'resident');
     assert.equal(s.requests.filter((request) => request.url.endsWith('/calls')).length, 3);
     assert.deepEqual(
       s.engine
         .state()
         .calls.map((call) => call.targetId)
         .sort(),
-      ['H009', 'H012', 'M01'],
+      ['H012', 'H012', 'M01'],
     );
     const publicState = JSON.stringify(s.engine.state());
     const history = readFileSync(join(s.activeDirectory, 'phone-history.json'), 'utf8');
@@ -336,8 +410,8 @@ test('target bindings stay fixed across three calls; old provider events and sec
       assert.ok(!content.includes('sk-test-phone-placeholder'));
       assert.ok(!content.includes('telnyx-phone-placeholder'));
       assert.ok(!content.includes('private-operator-test-token'));
-      assert.ok(!content.includes('+821000000002'));
-      assert.ok(!content.includes('01000000002'));
+      assert.ok(!content.includes('+821000000003'));
+      assert.ok(!content.includes('01000000003'));
     }
     assert.equal(s.engine.state().calls.find((call) => call.id === first.id)?.targetId, 'H012');
   } finally {
@@ -348,7 +422,7 @@ test('target bindings stay fixed across three calls; old provider events and sec
 test('dashboard active journal survives restart as unknown and only explicit end confirmation clears the lock', async () => {
   const s = setup();
   try {
-    const call = await s.engine.start('H009', 'restart-request');
+    const call = await s.engine.start('H012', 'restart-request');
     s.engine.manager.current.view.transcript.push({ speaker: 'user', text: '집에 있습니다.' });
     s.engine.manager.publish();
     s.engine.dispose();
@@ -356,7 +430,7 @@ test('dashboard active journal survives restart as unknown and only explicit end
     try {
       assert.equal(restored.state().busy, true);
       assert.equal(restored.state().calls[0].status, 'unknown');
-      assert.equal(restored.state().calls[0].targetId, 'H009');
+      assert.equal(restored.state().calls[0].targetId, 'H012');
       assert.throws(() => restored.resolveUnknown(call.id, false), /확인/);
       restored.resolveUnknown(call.id, true);
       assert.equal(restored.state().calls[0].status, 'ended');
@@ -448,7 +522,7 @@ test('signature validation and WSS media token attach to the same Node HTTP serv
   const base = `ws://127.0.0.1:${address.port}`;
   let media: WebSocket | undefined;
   try {
-    await s.engine.start('H009', 'socket-request');
+    await s.engine.start('H012', 'socket-request');
     const raw = Buffer.from(
       JSON.stringify({ data: { id: 'signed-test', event_type: 'call.answered', payload: {} } }),
     );

@@ -412,6 +412,14 @@ export class Runtime {
     const demonstration = this.state.demonstration;
     return (
       demonstration?.phoneMode === 'live' &&
+      ((demonstration.story === 'grandfather' && id === demonstration.residentId) ||
+        (demonstration.story === 'squad' && id === demonstration.memberId))
+    );
+  }
+  private isLiveStoryTarget(id: string) {
+    const demonstration = this.state.demonstration;
+    return (
+      demonstration?.phoneMode === 'live' &&
       (id === demonstration.residentId ||
         (demonstration.story === 'squad' && id === demonstration.memberId))
     );
@@ -429,9 +437,10 @@ export class Runtime {
     );
   }
   private phoneDispatchReady(id: string) {
-    if (!this.phoneRescueReady(id)) return false;
     const demonstration = this.state.demonstration;
-    if (demonstration?.story !== 'squad' || demonstration.residentId !== id) return true;
+    if (demonstration?.story !== 'squad' || demonstration.residentId !== id)
+      return this.phoneRescueReady(id);
+    if (!demonstration.residentRequestAssumed) return false;
     const memberCall = demonstration.memberId ? this.latestPhoneCall(demonstration.memberId) : null;
     return (
       memberCall?.phase === 'finished' &&
@@ -444,15 +453,9 @@ export class Runtime {
     const demonstration = this.state.demonstration;
     if (demonstration?.phoneMode !== 'live' || !this.state.plan?.confirmed || this.state.frozen)
       return [];
-    if (!this.latestPhoneCall(demonstration.residentId)) return [demonstration.residentId];
-    if (
-      demonstration.story === 'squad' &&
-      demonstration.memberId &&
-      this.phoneRescueReady(demonstration.residentId) &&
-      !this.latestPhoneCall(demonstration.memberId)
-    )
-      return [demonstration.memberId];
-    return [];
+    const targetId =
+      demonstration.story === 'squad' ? demonstration.memberId : demonstration.residentId;
+    return targetId && !this.latestPhoneCall(targetId) ? [targetId] : [];
   }
   private awaitingPhoneResults() {
     const demonstration = this.state.demonstration;
@@ -463,7 +466,7 @@ export class Runtime {
     return this.state.calls.some(
       (call) =>
         call.mode === 'telnyx' &&
-        this.isLivePhoneTarget(call.targetId) &&
+        this.isLiveStoryTarget(call.targetId) &&
         (call.phase !== 'finished' || !call.phoneOutcome),
     );
   }
@@ -472,7 +475,7 @@ export class Runtime {
       (call) =>
         call.mode === 'telnyx' &&
         (call.phase !== 'finished' ||
-          (this.isLivePhoneTarget(call.targetId) && !call.phoneOutcome)),
+          (this.isLiveStoryTarget(call.targetId) && !call.phoneOutcome)),
     );
   }
   preparePhoneCall(targetId: string, requestId: string, revision = this.state.revision): View {
@@ -517,7 +520,7 @@ export class Runtime {
     prepared.attempt = attempt;
     prepared.purpose = attempt === 1 ? 'initial' : 'redial';
     if (targetType === 'resident') this.status(targetId).attemptCount = attempt;
-    if (this.state.demonstration?.residentId === targetId)
+    if (this.isLivePhoneTarget(targetId) && this.state.demonstration)
       this.state.demonstration.stage = 'dialing';
     this.log(
       '실전화 요청 준비·종료 확인 전 분류·배차 보류',
@@ -555,6 +558,12 @@ export class Runtime {
       if (this.isLivePhoneTarget(call.targetId) && this.state.demonstration)
         this.state.demonstration.stage = update.phase === 'talking' ? 'talking' : 'dialing';
     }
+    if (
+      call.targetType === 'member' &&
+      this.isLivePhoneTarget(call.targetId) &&
+      this.state.demonstration
+    )
+      this.state.demonstration.stage = update.phase === 'talking' ? 'talking' : 'dialing';
     if (
       before !== JSON.stringify(call) ||
       previousStage !== this.state.demonstration?.stage ||
@@ -613,6 +622,20 @@ export class Runtime {
             : '출동 불가·불명 결과 검토·자동 배차 보류'
         }`,
       );
+      if (this.isLivePhoneTarget(call.targetId) && this.state.demonstration) {
+        this.state.demonstration.stage = 'requested';
+        if (this.state.demonstration.residentRequestAssumed) {
+          const resident = this.status(this.state.demonstration.residentId);
+          resident.dispatchHold =
+            outcome.standbyAvailable === true
+              ? null
+              : '대원 실전화 출동 불가·불명 결과·배차 보류·담당자 검토 필요';
+          resident.note =
+            outcome.standbyAvailable === true
+              ? '시연 가정: 박미숙 할머니 구조 요청 접수·반영환 대원 실전화 출동 가능 확인·수송 조건 검증 대기'
+              : '시연 가정: 박미숙 할머니 구조 요청 접수·대원 실전화 출동 불가·불명·구조 상태 미확인';
+        }
+      }
     } else {
       const status = this.status(call.targetId),
         household = this.household(call.targetId);
@@ -697,6 +720,16 @@ export class Runtime {
     this.open();
     this.requireRevision(revision);
     requireThat(
+      id !== 'H009',
+      '박미숙 할머니의 구조 요청은 시연 가정입니다. 실제 전화 대상이 아닙니다.',
+      'phone_target_guard',
+    );
+    requireThat(
+      this.state.demonstration?.phoneMode !== 'live' || this.isLivePhoneTarget(id),
+      '현재 시나리오의 실제 전화 대상만 발신할 수 있습니다.',
+      'phone_target_guard',
+    );
+    requireThat(
       this.state.plan?.confirmed && !this.state.networkDown,
       '최신 확정·통신 상태가 필요합니다.',
     );
@@ -736,7 +769,7 @@ export class Runtime {
     requireThat(c, '기존 발신 요청이 없습니다.');
     if (c.phase === 'finished') return;
     requireThat(
-      status !== 'mock' || !this.isLivePhoneTarget(c.targetId),
+      status !== 'mock' || !this.isLiveStoryTarget(c.targetId),
       '실전화 시연 대상에 모의 어댑터 결과를 적용할 수 없습니다.',
       'phone_result_required',
     );
@@ -791,12 +824,22 @@ export class Runtime {
       : { ...this.state.data.map.wind, speedMps: Number.NaN };
     return {
       order: orderedHouseholds(
-        h.filter((x) => x.callEligible && !s.get(x.id)?.temporaryExclusion),
+        h.filter(
+          (x) =>
+            x.callEligible &&
+            !s.get(x.id)?.temporaryExclusion &&
+            (this.state.demonstration?.phoneMode !== 'live' || this.isLivePhoneTarget(x.id)),
+        ),
         this.state.data.map.ignition,
         wind,
       ),
       visit: orderedHouseholds(
-        h.filter((x) => !x.callEligible && !s.get(x.id)?.temporaryExclusion),
+        h.filter(
+          (x) =>
+            this.state.demonstration?.phoneMode !== 'live' &&
+            !x.callEligible &&
+            !s.get(x.id)?.temporaryExclusion,
+        ),
         this.state.data.map.ignition,
         wind,
       ),
@@ -938,7 +981,7 @@ export class Runtime {
     retryCount = 0,
   ) {
     // Follow-up playback belongs to the synthetic clock. Live dial is a separate explicit API.
-    if (previous?.mode === 'telnyx' || this.isLivePhoneTarget(id)) return;
+    if (previous?.mode === 'telnyx' || this.state.demonstration?.phoneMode === 'live') return;
     const attempt =
       Math.max(0, ...this.state.calls.filter((c) => c.targetId === id).map((c) => c.attempt)) + 1;
     this.state.calls.push({
@@ -986,7 +1029,9 @@ export class Runtime {
       liveDurationSeconds: null,
     };
     this.log(
-      `1차 모의 확인 요약 ${targets.length}가구·결과 불명 ${targets.filter((t) => t.outcome === 'pendingunknown').length}·재발신/방문/구조 예약 유지`,
+      this.state.demonstration?.phoneMode === 'live'
+        ? `실전화 1차 확인 ${targets.length}가구·분류 근거 부족 ${targets.filter((t) => t.outcome === 'pendingunknown').length}·도착 확인과 구분`
+        : `1차 모의 확인 요약 ${targets.length}가구·결과 불명 ${targets.filter((t) => t.outcome === 'pendingunknown').length}·재발신/방문/구조 예약 유지`,
     );
   }
   private finishMember(c: Call, outcome: 'available' | 'unavailable' | 'noanswer') {
@@ -1007,6 +1052,7 @@ export class Runtime {
     }
   }
   private proposeUnavailableTeams() {
+    if (this.state.demonstration?.phoneMode === 'live') return;
     if (!this.state.plan?.confirmed || this.state.networkDown) return;
     for (const team of this.state.data.teams) {
       const responded = team.members.every((m) => this.state.memberResponses[m.id] !== 'waiting');
@@ -1027,6 +1073,7 @@ export class Runtime {
     }
   }
   protected pump() {
+    if (this.state.demonstration?.phoneMode === 'live') return;
     if (this.state.networkDown || !this.state.plan?.confirmed || this.state.frozen) return;
     while (
       this.state.calls.filter((c) => ['calling', 'pendingunknown'].includes(c.phase)).length <
@@ -1035,7 +1082,7 @@ export class Runtime {
       const queued = this.state.calls.filter(
         (c) =>
           c.phase === 'queued' &&
-          !this.isLivePhoneTarget(c.targetId) &&
+          !this.isLiveStoryTarget(c.targetId) &&
           !this.active(c.targetId) &&
           (c.nextAt === null || c.nextAt <= this.state.simMinutes),
       );
@@ -1085,7 +1132,7 @@ export class Runtime {
   applyClassification(id: string, result: Classification) {
     this.open();
     requireThat(
-      !this.isLivePhoneTarget(id),
+      this.state.demonstration?.phoneMode !== 'live',
       '실전화 대상은 종료가 확인된 전화 결과로만 분류할 수 있습니다.',
       'phone_result_required',
     );
@@ -1153,6 +1200,18 @@ export class Runtime {
         story as DemoStory,
         phoneMode as DemoPhoneMode,
       );
+      if (phoneMode === 'live') {
+        // These supporting crew members are a declared resource assumption. No call,
+        // transcript, answer event or provider receipt is created for them.
+        this.state.memberResponses[story === 'grandfather' ? 'M02' : 'M03'] = 'ok';
+      }
+      if (this.state.demonstration.residentRequestAssumed) {
+        const assumed = this.status(this.state.demonstration.residentId);
+        assumed.status = 'help';
+        assumed.acked = false;
+        assumed.note =
+          '시연 가정: 박미숙 할머니 구조 요청 접수·주민에게 실제 발신 없음·반영환 대원 응답 확인 대기';
+      }
       this.state.revision = revision;
       this.state.simulation = {
         ...initialSimulation(),
@@ -1182,6 +1241,16 @@ export class Runtime {
       this.log(
         '합성 주연 수송 후보 우선·대기 중 주연 차량/인력은 배경 자동 후보에서 제외·허구 예약 없음',
       );
+      if (this.state.demonstration.residentRequestAssumed)
+        this.log(
+          this.status(this.state.demonstration.residentId).note,
+          'system',
+          this.state.demonstration.residentId,
+        );
+      if (this.state.demonstration.transportCrewAssumed)
+        this.log(
+          `시연 수송 자원 가정: ${story === 'grandfather' ? '구급차 운전 담당 M02' : '대기조 지원 대원 M03'} 가용 확인·통화 응답 생성 없음`,
+        );
       this.bump();
       return this.view();
     }
@@ -1283,8 +1352,13 @@ export class Runtime {
         this.state.simulation.playing = true;
       }
       for (const x of p.order) {
+        if (
+          this.isLiveStoryTarget(x.householdId) &&
+          this.state.demonstration?.residentRequestAssumed
+        )
+          continue;
         this.status(x.householdId).status = 'queued';
-        if (this.isLivePhoneTarget(x.householdId)) continue;
+        if (this.state.demonstration?.phoneMode === 'live') continue;
         this.state.calls.push({
           id: `CALL-${x.householdId}-1`,
           targetId: x.householdId,
@@ -1300,7 +1374,7 @@ export class Runtime {
         });
       }
       for (const m of this.state.data.teams.flatMap((t) => t.members)) {
-        if (this.isLivePhoneTarget(m.id)) continue;
+        if (this.state.demonstration?.phoneMode === 'live') continue;
         this.state.calls.push({
           id: `CALL-${m.id}-1`,
           targetId: m.id,
@@ -1319,9 +1393,16 @@ export class Runtime {
           retryCount: 0,
         });
       }
-      this.log(`담당자 발령 확정 (모의)·주민 ${p.order.length}·조원 12·공용 8채널`, 'human');
-      this.log(`방문 ${p.visit.length}가구 이장 방문 요청 기록 (모의)`);
-      this.log('조원 12명 호출 문자 기록(모의)·실제 SMS 없음');
+      if (this.state.demonstration?.phoneMode === 'live')
+        this.log(
+          `담당자 발령 확정·실전화 대상 ${this.pendingPhoneTargets().join(', ')}·모의 전화 없음`,
+          'human',
+        );
+      else {
+        this.log(`담당자 발령 확정 (모의)·주민 ${p.order.length}·조원 12·공용 8채널`, 'human');
+        this.log(`방문 ${p.visit.length}가구 이장 방문 요청 기록 (모의)`);
+        this.log('조원 12명 호출 문자 기록(모의)·실제 SMS 없음');
+      }
       this.pump();
     } else if (action === 'comms') {
       this.state.networkDown = input.down === true;
@@ -1823,7 +1904,7 @@ export class Runtime {
     const now = this.state.simMinutes;
     const candidates = [Math.floor(now) + 1, 40];
     for (const call of this.state.calls) {
-      if (call.mode !== 'mock') continue;
+      if (call.mode !== 'mock' || this.state.demonstration?.phoneMode === 'live') continue;
       if (call.phase === 'calling') candidates.push((call.startedSim ?? now) + 1);
       if (
         call.phase === 'calling' &&
@@ -1895,6 +1976,7 @@ export class Runtime {
         status.recheckOverdue = true;
     for (const call of this.state.calls.filter(
       (call) =>
+        this.state.demonstration?.phoneMode !== 'live' &&
         call.mode === 'mock' &&
         call.phase === 'calling' &&
         (call.startedSim ?? this.state.simMinutes) + 1 <= this.state.simMinutes,
@@ -1908,7 +1990,10 @@ export class Runtime {
     this.pump();
     const runnable =
       this.state.calls.some(
-        (call) => call.mode === 'mock' && ['calling', 'queued'].includes(call.phase),
+        (call) =>
+          this.state.demonstration?.phoneMode !== 'live' &&
+          call.mode === 'mock' &&
+          ['calling', 'queued'].includes(call.phase),
       ) ||
       this.state.trips.some((trip) => !trip.heldReason) ||
       this.cycleLeaderDue.size > 0;
@@ -1925,7 +2010,7 @@ export class Runtime {
     if (before !== this.cycleEventStamp()) this.bump();
   }
   private finishCycleCall(call: Call) {
-    if (this.isLivePhoneTarget(call.targetId)) return;
+    if (this.state.demonstration?.phoneMode === 'live') return;
     call.phase = 'finished';
     call.finishedSim = this.state.simMinutes;
     if (call.targetType === 'member') {
@@ -2052,7 +2137,7 @@ export class Runtime {
         safety = dispatchSafety(this.state, household.id);
       const demonstration = this.state.demonstration,
         hero = household.id === demonstration?.residentId;
-      if (hero && this.isLivePhoneTarget(household.id) && !this.phoneDispatchReady(household.id))
+      if (hero && this.isLiveStoryTarget(household.id) && !this.phoneDispatchReady(household.id))
         continue;
       const heroWaiting =
         demonstration && ['ready', 'dialing', 'talking', 'requested'].includes(demonstration.stage);
@@ -2172,9 +2257,10 @@ export class Runtime {
       );
   }
   private cycleLeaderContacts() {
+    if (this.state.demonstration?.phoneMode === 'live') return;
     for (const status of this.state.scenario.householdStatuses) {
       if (status.temporaryExclusion) continue;
-      if (this.isLivePhoneTarget(status.householdId)) continue;
+      if (this.isLiveStoryTarget(status.householdId)) continue;
       if (
         this.state.calls.some(
           (call) =>
@@ -2239,7 +2325,7 @@ export class Runtime {
         const s = this.status(h.id);
         if (
           h.callEligible &&
-          !this.isLivePhoneTarget(h.id) &&
+          this.state.demonstration?.phoneMode !== 'live' &&
           !s.temporaryExclusion &&
           s.status === 'queued' &&
           !this.state.calls.some((c) => c.targetId === h.id && c.phase !== 'finished')
@@ -2306,7 +2392,7 @@ export class Runtime {
   }
   private dispatch(id: string, vehicleId: string): boolean {
     requireThat(
-      !this.isLivePhoneTarget(id) || this.phoneDispatchReady(id),
+      !this.isLiveStoryTarget(id) || this.phoneDispatchReady(id),
       '실전화 종료와 이동 지원 요청이 확인된 뒤 배차하세요.',
       'phone_result_required',
     );

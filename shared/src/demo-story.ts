@@ -8,6 +8,10 @@ export interface Demonstration {
   phoneMode?: DemoPhoneMode;
   /** Derived by Runtime.view; playback preference remains unchanged while waiting. */
   phoneClockHeld?: boolean;
+  /** Squad calls only the responder; the resident's request is an explicit demo assumption. */
+  residentRequestAssumed?: boolean;
+  /** Supporting transport crew availability is scenario setup, never a fabricated phone response. */
+  transportCrewAssumed?: boolean;
   residentId: 'H012' | 'H009';
   memberId: string | null;
   vehicleId: 'V01' | 'V04';
@@ -101,10 +105,12 @@ export function configureDemoStory(
   return {
     story,
     phoneMode,
+    residentRequestAssumed: story === 'squad' && phoneMode === 'live',
+    transportCrewAssumed: phoneMode === 'live',
     residentId,
     memberId,
     vehicleId,
-    stage: 'ready',
+    stage: story === 'squad' && phoneMode === 'live' ? 'requested' : 'ready',
     messages: [],
     synthetic: true,
   };

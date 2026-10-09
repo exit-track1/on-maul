@@ -36,15 +36,24 @@ function residentOutcome(
 }
 
 for (const story of ['grandfather', 'squad'] as const) {
-  test(`${story} live playback reserves a shared channel and waits without synthetic core calls`, () => {
+  test(`${story} live playback plans only its actual target and creates zero mock calls`, () => {
     const { runtime, confirmed, residentId } = start(story);
     assert.equal(confirmed.demonstration!.phoneMode, 'live');
     assert.equal(confirmed.demonstration!.phoneClockHeld, true);
-    assert.equal(confirmed.demonstration!.stage, 'ready');
-    assert.deepEqual(runtime.pendingPhoneTargets(), [residentId]);
-    assert.equal(confirmed.calls.filter((call) => call.phase === 'calling').length, 7);
-    assert.ok(!confirmed.calls.some((call) => call.targetId === residentId));
-    if (story === 'squad') assert.ok(!confirmed.calls.some((call) => call.targetId === 'M01'));
+    assert.equal(confirmed.demonstration!.stage, story === 'squad' ? 'requested' : 'ready');
+    assert.deepEqual(runtime.pendingPhoneTargets(), [story === 'squad' ? 'M01' : residentId]);
+    assert.equal(confirmed.calls.length, 0);
+    assert.deepEqual(
+      confirmed.plan!.order.map((item) => item.householdId),
+      story === 'squad' ? [] : ['H012'],
+    );
+    assert.deepEqual(confirmed.plan!.visit, []);
+    if (story === 'squad') {
+      assert.equal(confirmed.demonstration!.residentRequestAssumed, true);
+      assert.equal(status(confirmed, 'H009').status, 'help');
+      assert.match(status(confirmed, 'H009').note, /시연 가정/u);
+      assert.ok(!confirmed.calls.some((call) => call.targetId === 'H009'));
+    }
     assert.deepEqual(runtime.tickCycle(500), confirmed);
     assert.deepEqual(confirmed.demonstration!.messages, []);
     assert.equal(confirmed.simulation.playing, true);
@@ -52,13 +61,26 @@ for (const story of ['grandfather', 'squad'] as const) {
   });
 }
 
+test('H009 is an assumed rescue request and cannot be prepared or reserved as an actual call', () => {
+  const { runtime, confirmed } = start('squad');
+  assert.throws(() => runtime.preparePhoneCall('H009', 'forbidden-resident'), /실전화 시연 대상/u);
+  assert.throws(
+    () => runtime.reserveLive('H009', 'resident', 'legacy-forbidden', confirmed.revision),
+    /실제 전화 대상이 아닙니다/u,
+  );
+  assert.deepEqual(runtime.view(), confirmed);
+  assert.deepEqual(runtime.pendingPhoneTargets(), ['M01']);
+  assert.equal(runtime.tickCycle(40).simMinutes, 0);
+  assert.equal(runtime.view().calls.length, 0);
+});
+
 test('live request, connected phase and verified outcome are idempotent and do not classify early', () => {
   const { runtime, residentId } = start();
   const prepared = runtime.preparePhoneCall(residentId, 'request-one');
   assert.equal(prepared.demonstration!.stage, 'dialing');
   assert.equal(
     prepared.calls.filter((call) => ['calling', 'pendingunknown'].includes(call.phase)).length,
-    8,
+    1,
   );
   assert.deepEqual(runtime.preparePhoneCall(residentId, 'request-one', -1), prepared);
   assert.throws(() => runtime.preparePhoneCall('M02', 'request-one'), /다른 대상/u);
@@ -105,11 +127,12 @@ test('live request, connected phase and verified outcome are idempotent and do n
   assert.deepEqual(runtime.applyPhoneUpdate('request-one', { phase: 'dialing' }), ended);
 });
 
-test('verified grandfather rescue starts an ambulance only after crew confirmation and completes on route evidence', () => {
+test('verified grandfather rescue uses declared transport resources without crew calls and completes on route evidence', () => {
   const { runtime, residentId } = start();
   const id = request(runtime, residentId);
   const ended = residentOutcome(runtime, id);
-  assert.equal(ended.memberResponses.M02, 'waiting');
+  assert.equal(ended.memberResponses.M02, 'ok');
+  assert.equal(ended.demonstration!.transportCrewAssumed, true);
   assert.ok(!ended.trips.some((trip) => trip.householdId === residentId));
   const dispatched = runtime.tickCycle(1);
   const trip = dispatched.trips.find((trip) => trip.householdId === residentId)!;
@@ -133,11 +156,14 @@ test('verified grandfather rescue starts an ambulance only after crew confirmati
   assert.equal(status(arrived, residentId).status, 'rescued');
   assert.deepEqual(arrived.demonstration!.messages, []);
   assert.equal(arrived.calls.filter((call) => call.targetId === residentId).length, 1);
+  assert.equal(arrived.calls.length, 1);
+  assert.ok(arrived.calls.every((call) => call.mode === 'telnyx'));
 });
 
 test('squad rescue waits for actual named-member termination and two confirmed crew members', () => {
   const { runtime, residentId } = start('squad');
-  residentOutcome(runtime, request(runtime, residentId));
+  assert.equal(status(runtime.view(), residentId).status, 'help');
+  assert.equal(runtime.view().demonstration!.residentRequestAssumed, true);
   assert.deepEqual(runtime.pendingPhoneTargets(), ['M01']);
   assert.equal(runtime.view().demonstration!.phoneClockHeld, true);
   assert.equal(runtime.tickCycle(40).simMinutes, 0);
@@ -162,14 +188,16 @@ test('squad rescue waits for actual named-member termination and two confirmed c
   assert.ok(trip.crewMemberIds.length >= 2);
   assert.ok(trip.crewMemberIds.every((id) => view.memberResponses[id] === 'ok'));
   assert.equal(view.demonstration!.stage, 'responding');
-  assert.equal(view.calls.filter((call) => ['H009', 'M01'].includes(call.targetId)).length, 2);
+  assert.equal(view.calls.length, 1);
+  assert.equal(view.calls[0].targetId, 'M01');
+  assert.equal(view.calls[0].mode, 'telnyx');
+  assert.ok(!view.calls.some((call) => call.targetId === 'H009'));
   assert.deepEqual(view.demonstration!.messages, []);
 });
 
 for (const available of [false, undefined]) {
   test(`unavailable or unconfirmed named-member response (${available}) never dispatches or redials`, () => {
     const { runtime, residentId } = start('squad');
-    residentOutcome(runtime, request(runtime, residentId));
     runtime.applyPhoneOutcome(request(runtime, 'M01'), {
       ended: true,
       kind: 'standby',
@@ -180,6 +208,7 @@ for (const available of [false, undefined]) {
     assert.ok(!view.completedTrips.some((trip) => trip.householdId === residentId));
     assert.ok(!view.shelterAdmissions.some((admission) => admission.householdId === residentId));
     assert.equal(view.memberResponses.M01, available === false ? 'no' : 'waiting');
+    assert.match(status(view, residentId).dispatchHold!, /대원 실전화.*배차 보류/u);
     assert.equal(view.calls.filter((call) => call.targetId === 'M01').length, 1);
     assert.deepEqual(runtime.pendingPhoneTargets(), []);
     assert.equal(view.demonstration!.stage, 'requested');
@@ -189,7 +218,7 @@ for (const available of [false, undefined]) {
 
 for (const mobility of ['possible', 'refusal', 'unknown'] as const) {
   test(`resident ${mobility} assessment does not imply rescue, arrival, departure or synthetic follow-up`, () => {
-    const { runtime, residentId } = start('squad');
+    const { runtime, residentId } = start();
     residentOutcome(runtime, request(runtime, residentId), mobility);
     assert.deepEqual(runtime.pendingPhoneTargets(), []);
     const view = runtime.tickCycle(40);

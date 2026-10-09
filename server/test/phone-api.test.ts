@@ -67,14 +67,6 @@ class FakePhone extends EventEmitter implements PhonePort {
         consent: true,
       },
       {
-        id: 'H009',
-        name: '박미숙 할머니',
-        scenario: 'resident',
-        configured: true,
-        phoneMasked: '010 •••• 0002',
-        consent: true,
-      },
-      {
         id: 'M01',
         name: '반영환 대원',
         scenario: 'standby',
@@ -340,7 +332,12 @@ test('API waits for current human checkpoint, applies rescue after carrier termi
   f.phone.update('H012', { status: 'ended', blocked: false, endedAt: Date.now() });
   view = await f.drain();
   assert.equal(householdStatus(view, 'H012').status, 'help');
-  assert.equal(view.memberResponses.M02, 'waiting');
+  assert.equal(
+    view.memberResponses.M02,
+    'ok',
+    'ambulance operator availability is an explicit demo resource assumption',
+  );
+  assert.ok(!view.calls.some((call) => call.targetId === 'M02'));
   assert.equal(view.demonstration!.phoneClockHeld, false);
   assert.ok(!view.trips.some((trip) => trip.householdId === 'H012'));
   view = await f.advance(1);
@@ -360,22 +357,15 @@ test('API waits for current human checkpoint, applies rescue after carrier termi
   assert.equal(phoneState.json<PhoneState>().calls[0].transcript[0].text, '차를 보내주세요');
 });
 
-test('squad API ends H009 before starting M01 and holds dispatch until the named member finishes', async (t) => {
+test('squad API assumes the H009 rescue request and calls only M01, holding dispatch until termination', async (t) => {
   const f = await fixture(t);
   await f.start('squad');
   assert.deepEqual(
     f.phone.starts.map((call) => call.targetId),
-    ['H009'],
+    ['M01'],
   );
-  f.phone.update('H009', { status: 'answered', answeredAt: Date.now(), completion: rescue() });
-  await f.drain();
-  assert.equal(f.phone.starts.length, 1);
-  f.phone.update('H009', { status: 'ended', blocked: false, endedAt: Date.now() });
   let view = await f.drain();
-  assert.deepEqual(
-    f.phone.starts.map((call) => call.targetId),
-    ['H009', 'M01'],
-  );
+  assert.ok(!view.calls.some((call) => call.targetId === 'H009'));
   assert.equal(householdStatus(view, 'H009').status, 'help');
   assert.equal(view.demonstration!.phoneClockHeld, true);
   f.phone.update('M01', { status: 'answered', answeredAt: Date.now(), completion: squadReady() });
@@ -394,14 +384,29 @@ test('squad API ends H009 before starting M01 and holds dispatch until the named
   assert.ok(trip.crewMemberIds.length >= 2);
   assert.ok(trip.crewMemberIds.every((id) => view.memberResponses[id] === 'ok'));
   assert.equal(view.demonstration!.stage, 'responding');
-  assert.equal(f.phone.starts.length, 2);
+  assert.equal(f.phone.starts.length, 1);
 });
 
-test('mock playback creates no actual voice starts and phone endpoints require the operator token', async (t) => {
+test('enabled voice rejects mock cycles and phone endpoints require the operator token', async (t) => {
   const f = await fixture(t);
-  await f.start('grandfather', 'mock');
-  await f.advance(10);
+  const before = await f.state();
+  const blocked = await f.post('cycle-start', {
+    revision: before.revision,
+    demoStory: 'grandfather',
+    phoneMode: 'mock',
+  });
+  assert.equal(blocked.statusCode, 409, blocked.body);
+  assert.equal(blocked.json().code, 'actual_phone_only');
   assert.equal(f.phone.starts.length, 0);
+  for (const action of ['transcript', 'member-response', 'schedule-callback', 'plan']) {
+    const response = await f.post(action, {});
+    assert.equal(response.statusCode, 409, response.body);
+    assert.equal(response.json().code, 'actual_phone_only');
+  }
+  const staticCalls = await f.post('scenario', { id: 'active' });
+  assert.equal(staticCalls.statusCode, 409, staticCalls.body);
+  assert.equal(staticCalls.json().code, 'actual_phone_only');
+  assert.equal((await f.state()).revision, before.revision);
   for (const request of [
     { method: 'GET' as const, url: '/api/phone/state' },
     { method: 'POST' as const, url: '/api/phone/hangup', payload: {} },
@@ -416,6 +421,16 @@ test('mock playback creates no actual voice starts and phone endpoints require t
   }
   assert.equal(f.phone.stops, 0);
   assert.equal(f.phone.starts.length, 0);
+});
+
+test('disabled test harness retains mock playback with zero voice starts', async (t) => {
+  const phone = new FakePhone();
+  phone.value.enabled = false;
+  phone.value.ready = false;
+  const f = await fixture(t, phone);
+  await f.start('grandfather', 'mock');
+  await f.advance(10);
+  assert.equal(phone.starts.length, 0);
 });
 
 test('public callback skips operator auth only after signature verification and shares the dashboard probe', async (t) => {
@@ -458,7 +473,14 @@ test('missing consent, wrong story target, and stale revisions fail without star
       headers,
       payload: { targetId, revision, consent },
     });
-  assert.equal((await dial('H009', review.revision)).statusCode, 409);
+  assert.equal((await dial('M01', review.revision)).statusCode, 409);
+  const assumedResidentDial = await f.current().app.inject({
+    method: 'POST',
+    url: '/api/phone/dial',
+    headers,
+    payload: { targetId: 'H009', revision: review.revision, consent: true },
+  });
+  assert.equal(assumedResidentDial.statusCode, 400);
   assert.equal((await dial('H012', review.revision, false)).statusCode, 400);
   assert.equal((await f.post('confirm', { revision: review.revision - 1 })).statusCode, 409);
   assert.equal(f.phone.starts.length, 0);

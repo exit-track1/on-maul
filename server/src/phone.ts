@@ -26,14 +26,13 @@ import type {
 
 const definitions = [
   { id: 'H012', name: '반영환 할아버지', scenario: 'resident', env: 'REAL_RESIDENT' },
-  { id: 'H009', name: '박미숙 할머니', scenario: 'resident', env: 'REAL_GRANDMOTHER' },
   { id: 'M01', name: '반영환 대원', scenario: 'standby', env: 'REAL_SQUAD' },
 ] as const;
 const explicitYes = (value?: string) => /^(?:yes|true|1)$/i.test(value?.trim() ?? '');
 const callSchema = z.object({
   id: z.uuid(),
   requestId: z.string().min(1).max(200),
-  targetId: z.enum(['H012', 'H009', 'M01']),
+  targetId: z.enum(['H012', 'M01']),
   targetName: z.string().max(100),
   scenario: z.enum(['resident', 'standby']),
   providerId: z.string().max(500).nullable(),
@@ -217,10 +216,19 @@ export class PhoneEngine extends EventEmitter implements PhonePort {
     if (!existsSync(this.path)) return;
     try {
       const history = z
-        .array(callSchema)
+        .array(z.unknown())
         .max(200)
         .parse(JSON.parse(readFileSync(this.path, 'utf8')));
-      for (const raw of history) {
+      for (const stored of history) {
+        // Old PoC data may contain this assumed rescue subject; never expose it as a phone target.
+        if (
+          stored &&
+          typeof stored === 'object' &&
+          'targetId' in stored &&
+          stored.targetId === 'H009'
+        )
+          continue;
+        const raw = callSchema.parse(stored);
         const definition = definitions.find((target) => target.id === raw.targetId)!;
         if (raw.scenario !== definition.scenario) throw new Error('history target mismatch');
         const call: PhoneCall = this.scrubValue({ ...raw, targetName: definition.name });
