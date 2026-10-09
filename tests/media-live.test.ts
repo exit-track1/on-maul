@@ -139,6 +139,80 @@ test('입력 버퍼·backpressure 제한과 잘못된 audio 거절', async () =>
   }
   await flush();
 });
+test('누락된 chunk가 연속되어도 매번 100ms 무음을 끼우거나 음성 입력을 쌓아두지 않음', async (t) => {
+  t.mock.timers.enable({ apis: ['Date', 'setInterval'] });
+  const s = await ready(),
+    socket = new FakeSocket();
+  const bridge = new AudioBridge(
+    socket as unknown as WebSocket,
+    s.live,
+    assert.fail,
+    () => {},
+    () => {},
+  );
+  try {
+    const expected: Buffer[] = [];
+    for (let index = 0; index < 100; index++) {
+      const frame = Buffer.alloc(160, index % 64);
+      expected.push(frame);
+      bridge.input(index * 2 + 1, frame.toString('base64'));
+      t.mock.timers.tick(20);
+    }
+    t.mock.timers.tick(80);
+    const forwarded = s.socket.sent
+      .filter((e) => e.type === 'session.input_audio.append')
+      .map((e) => Buffer.from(e.audio, 'base64'))
+      .filter((frame) => muLawRms(frame) > 100);
+    assert.deepEqual(Buffer.concat(forwarded), Buffer.concat(expected));
+    assert.equal(bridge.inputBytes, 16000);
+    assert.equal(bridge.inputReceivedBytes, 16000);
+    assert.equal(bridge.inputSignalBytes, 16000);
+    assert.equal(bridge.dropped, 99);
+    assert.equal(bridge.inputBufferedMs, 0);
+    assert.equal(bridge.clears, 0);
+  } finally {
+    bridge.dispose();
+    s.live.dispose();
+    t.mock.timers.reset();
+  }
+});
+test('40ms 내 재정렬된 패킷을 보존하고 이미 전달한 중복은 버림', async (t) => {
+  t.mock.timers.enable({ apis: ['Date', 'setInterval'] });
+  const s = await ready(),
+    socket = new FakeSocket();
+  const bridge = new AudioBridge(
+    socket as unknown as WebSocket,
+    s.live,
+    assert.fail,
+    () => {},
+    () => {},
+  );
+  try {
+    const frame = (value: number) => Buffer.alloc(160, value).toString('base64');
+    bridge.input(1, frame(1));
+    t.mock.timers.tick(40);
+    bridge.input(3, frame(3));
+    t.mock.timers.tick(20);
+    bridge.input(2, frame(2));
+    t.mock.timers.tick(40);
+    bridge.input(2, frame(8));
+    t.mock.timers.tick(20);
+    const forwarded = s.socket.sent
+      .filter((e) => e.type === 'session.input_audio.append')
+      .map((e) => Buffer.from(e.audio, 'base64'))
+      .filter((packet) => muLawRms(packet) > 100);
+    assert.deepEqual(
+      forwarded.map((packet) => packet[0]),
+      [1, 2, 3],
+    );
+    assert.equal(bridge.inputBytes, 480);
+    assert.equal(bridge.dropped, 0);
+  } finally {
+    bridge.dispose();
+    s.live.dispose();
+    t.mock.timers.reset();
+  }
+});
 test('출력은 120ms 버퍼와 60ms 패킷으로 원문 순서를 보존하고 짧은 조각에 무음을 끼우지 않음', async (t) => {
   t.mock.timers.enable({ apis: ['Date'] });
   const s = await ready(),

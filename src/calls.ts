@@ -67,6 +67,11 @@ export type CallView = {
   notice: string;
   error: { code: string; message: string; action: string } | null;
   audioInSeconds: number;
+  audioInputSignalSeconds: number;
+  audioInputReceivedSeconds: number;
+  audioInputLastAt: number;
+  audioInputBufferedMs: number;
+  audioInputDropped: number;
   audioOutSeconds: number;
   audioClears: number;
   audioUnderruns: number;
@@ -152,6 +157,11 @@ function idle(): CallView {
     notice: '설정을 저장하고 연결을 확인하세요.',
     error: null,
     audioInSeconds: 0,
+    audioInputSignalSeconds: 0,
+    audioInputReceivedSeconds: 0,
+    audioInputLastAt: 0,
+    audioInputBufferedMs: 0,
+    audioInputDropped: 0,
     audioOutSeconds: 0,
     audioClears: 0,
     audioUnderruns: 0,
@@ -593,6 +603,20 @@ export class CallManager extends EventEmitter {
       timingSafeEqual(Buffer.from(token), Buffer.from(run.token))
     );
   }
+  syncAudioStats(run: Run) {
+    const bridge = run.bridge;
+    if (!bridge) return;
+    run.view.audioInSeconds = bridge.inputBytes / 8000;
+    run.view.audioInputSignalSeconds = bridge.inputSignalBytes / 8000;
+    run.view.audioInputReceivedSeconds = bridge.inputReceivedBytes / 8000;
+    run.view.audioInputLastAt = bridge.inputLastAt;
+    run.view.audioInputBufferedMs = bridge.inputBufferedMs;
+    run.view.audioInputDropped = bridge.dropped;
+    run.view.audioOutSeconds = bridge.outputBytes / 8000;
+    run.view.audioClears = bridge.clears;
+    run.view.audioUnderruns = bridge.outputUnderruns;
+    run.view.audioBufferedMs = bridge.outputBufferedMs;
+  }
   attachMedia(socket: WebSocket) {
     const run = this.current;
     if (!this.mediaAllowed(run.token)) {
@@ -634,11 +658,7 @@ export class CallManager extends EventEmitter {
           () => this.playbackCleared(run),
           () => {
             if (this.valid(run)) {
-              run.view.audioInSeconds = run.bridge!.inputBytes / 8000;
-              run.view.audioOutSeconds = run.bridge!.outputBytes / 8000;
-              run.view.audioClears = run.bridge!.clears;
-              run.view.audioUnderruns = run.bridge!.outputUnderruns;
-              run.view.audioBufferedMs = run.bridge!.outputBufferedMs;
+              this.syncAudioStats(run);
               this.emit('update', this.public());
             }
           },
@@ -1147,6 +1167,7 @@ export class CallManager extends EventEmitter {
     clearTimeout(run.farewellTimer);
   }
   clean(run: Run) {
+    this.syncAudioStats(run);
     run.openingReject?.(new AppError('opening_cancelled', '첫 질문 준비 취소', 409));
     for (const t of run.timers) clearTimeout(t);
     run.timers.clear();

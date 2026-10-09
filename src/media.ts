@@ -25,6 +25,10 @@ export class AudioBridge {
   stopped = false;
   clears = 0;
   inputBytes = 0;
+  inputSignalBytes = 0;
+  inputReceivedBytes = 0;
+  inputLastAt = 0;
+  inputBufferedMs = 0;
   outputBytes = 0;
   dropped = 0;
   outputUnderruns = 0;
@@ -34,7 +38,7 @@ export class AudioBridge {
   pending = new Map<number, Buffer>();
   next: number | null = null;
   private firstAt = 0;
-  private gapAt = 0;
+  private arrivals = new Map<number, number>();
   private loud = 0;
   private quiet = 0;
   private speaking = false;
@@ -88,6 +92,9 @@ export class AudioBridge {
     }
     this.firstAt ||= Date.now();
     this.pending.set(chunk, buffer);
+    this.arrivals.set(chunk, Date.now());
+    this.inputReceivedBytes += buffer.length;
+    this.inputLastAt = Date.now();
   }
   appendOutput(audio: string) {
     if (!this.active || this.stopped || !validAudio(audio)) return false;
@@ -138,32 +145,37 @@ export class AudioBridge {
     if (this.next === null && this.pending.size && now - this.firstAt >= 40)
       this.next = Math.min(...this.pending.keys());
     if (this.next !== null) {
-      for (let count = 0; count < 20 && this.pending.has(this.next); count++) {
-        const buffer = this.pending.get(this.next)!;
-        this.pending.delete(this.next++);
-        this.inputQueue = Buffer.concat([this.inputQueue, buffer]);
-        this.gapAt = 0;
-      }
-      if (this.pending.size && !this.pending.has(this.next)) {
-        this.gapAt ||= now;
-        if (now - this.gapAt >= 100) {
+      for (let count = 0; count < 20 && this.pending.size; count++) {
+        if (!this.pending.has(this.next)) {
           const first = Math.min(...this.pending.keys());
+          // Bound reordering by packet arrival, not by a new delay for every hole.
+          // Several missing chunk IDs must not stretch speech with repeated silence.
+          if (now - this.arrivals.get(first)! < 40) break;
           this.dropped += first - this.next;
           this.next = first;
-          this.gapAt = 0;
         }
+        const buffer = this.pending.get(this.next)!;
+        this.pending.delete(this.next);
+        this.arrivals.delete(this.next++);
+        this.inputQueue = Buffer.concat([this.inputQueue, buffer]);
       }
     }
     let frame = silence;
+    let inputSize = 0;
     if (this.inputQueue.length) {
       const size = Math.min(160, this.inputQueue.length);
+      inputSize = size;
       frame = Buffer.alloc(160, 255);
       this.inputQueue.copy(frame, 0, 0, size);
       this.inputQueue = this.inputQueue.subarray(size);
       this.inputBytes += size;
     }
     this.live.send({ type: 'session.input_audio.append', audio: frame.toString('base64') });
-    if (muLawRms(frame) > 1200) {
+    const rms = muLawRms(frame);
+    if (rms > 100) this.inputSignalBytes += inputSize;
+    this.inputBufferedMs =
+      (this.inputQueue.length + [...this.pending.values()].reduce((n, b) => n + b.length, 0)) / 8;
+    if (rms > 1200) {
       this.quiet = 0;
       if (++this.loud >= 3 && !this.speaking) {
         this.speaking = true;
@@ -234,6 +246,7 @@ export class AudioBridge {
     clearInterval(this.timer);
     this.clear();
     this.pending.clear();
+    this.arrivals.clear();
     this.inputQueue = Buffer.alloc(0);
   }
 }

@@ -122,6 +122,31 @@ test('수신 전과 첫 안내 2초 대기에도 실제 입력 패킷을 소비�
     t.mock.timers.reset();
   }
 });
+test('전화 종료 직전 입력 신호·전달량·패킷 공백 통계를 보존한다', async (t) => {
+  const s = setup();
+  t.mock.timers.enable({ apis: ['setTimeout', 'setInterval', 'Date'] });
+  try {
+    await s.manager.start(params);
+    const socket = media(s.manager);
+    hook(s.manager, 'call.answered');
+    const audio = Buffer.alloc(160, 0).toString('base64');
+    socket.push({ event: 'media', media: { track: 'inbound', chunk: '1', payload: audio } });
+    t.mock.timers.tick(40);
+    socket.push({ event: 'media', media: { track: 'inbound', chunk: '3', payload: audio } });
+    t.mock.timers.tick(60);
+    hook(s.manager, 'call.hangup');
+    const view = s.manager.public();
+    assert.equal(view.status, 'ended');
+    assert.equal(view.audioInputSignalSeconds, 0.04);
+    assert.equal(view.audioInputReceivedSeconds, 0.04);
+    assert.equal(view.audioInSeconds, 0.04);
+    assert.equal(view.audioInputDropped, 1);
+    assert.equal(view.audioInputBufferedMs, 0);
+  } finally {
+    s.cleanup();
+    t.mock.timers.reset();
+  }
+});
 test('완료 저장 → 오디오 큐 → 고유 mark → 1회 hangup → 서명된 최종 종료와 복원', async (t) => {
   const s = setup();
   t.mock.timers.enable({ apis: ['setTimeout', 'Date'] });
