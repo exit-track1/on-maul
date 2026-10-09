@@ -26,6 +26,7 @@ export interface PanelProps {
   view: View;
   run: Run;
   open: (id: string) => void;
+  offlineTestTools?: boolean;
 }
 export function StateTag({ view, id }: { view: View; id: string }) {
   const h = view.data.households.find((h) => h.id === id)!,
@@ -457,7 +458,12 @@ export function Calls({ view, run, open }: PanelProps) {
     </div>
   );
 }
-export function Resources({ view, run, open }: PanelProps) {
+export function Resources({
+  view,
+  run,
+  open,
+  offlineTestTools = false,
+}: PanelProps) {
   const [targets, setTargets] = useState<Record<string, string>>({});
   const responses = Object.values(view.memberResponses);
   const pendingReassignments = view.reassignments.filter(
@@ -513,39 +519,44 @@ export function Resources({ view, run, open }: PanelProps) {
                         ? `재호출 ${view.calls.findLast((c) => c.targetId === m.id && c.phase === 'queued')?.retryCount ?? 0}/2 대기`
                         : '호출 전/대기'
                       : view.memberResponses[m.id] === 'ok'
-                        ? '모의 가능 응답'
-                        : '모의 불가 응답'}
+                        ? offlineTestTools
+                          ? '모의 가능 응답'
+                          : '출동 가능'
+                        : offlineTestTools
+                          ? '모의 불가 응답'
+                          : '출동 불가'}
                   </small>
-                  {view.calls
-                    .filter(
-                      (c) =>
-                        c.targetId === m.id &&
-                        c.targetType === 'member' &&
-                        c.phase === 'calling' &&
-                        c.mode === 'mock',
-                    )
-                    .map((c) => (
-                      <div key={c.id}>
-                        <small>
-                          최초 포함 시도 {c.attempt} · 재호출{' '}
-                          {c.retryCount ?? 0}/2
-                        </small>
-                        <Btn
-                          size="sm"
-                          kind="outline"
-                          disabled={view.frozen || view.networkDown}
-                          onClick={() =>
-                            void run('member-response', {
-                              callId: c.id,
-                              outcome: 'noanswer',
-                            })
-                          }
-                          aria-label={`${m.id} 모의 무응답`}
-                        >
-                          무응답 시연
-                        </Btn>
-                      </div>
-                    ))}
+                  {offlineTestTools &&
+                    view.calls
+                      .filter(
+                        (c) =>
+                          c.targetId === m.id &&
+                          c.targetType === 'member' &&
+                          c.phase === 'calling' &&
+                          c.mode === 'mock',
+                      )
+                      .map((c) => (
+                        <div key={c.id}>
+                          <small>
+                            최초 포함 시도 {c.attempt} · 재호출{' '}
+                            {c.retryCount ?? 0}/2
+                          </small>
+                          <Btn
+                            size="sm"
+                            kind="outline"
+                            disabled={view.frozen || view.networkDown}
+                            onClick={() =>
+                              void run('member-response', {
+                                callId: c.id,
+                                outcome: 'noanswer',
+                              })
+                            }
+                            aria-label={`${m.id} 모의 무응답`}
+                          >
+                            무응답 시연
+                          </Btn>
+                        </div>
+                      ))}
                 </li>
               ))}
             </ul>

@@ -9,7 +9,6 @@ import type {
 
 const people: { id: PhoneTargetId; name: string; detail: string }[] = [
   { id: 'H012', name: '반영환 할아버지', detail: '구급차 지원' },
-  { id: 'H009', name: '박미숙 할머니', detail: '5분대기조 지원' },
   { id: 'M01', name: '반영환 대원', detail: '출동 가능 여부' },
 ];
 
@@ -71,7 +70,7 @@ interface Props {
   offline: boolean;
   connected: boolean;
   pending: boolean;
-  activeResidentId: 'H012' | 'H009';
+  activeTargetId: PhoneTargetId;
   run: (
     action: 'dial' | 'hangup' | 'resolve',
     input: Record<string, unknown>,
@@ -86,17 +85,17 @@ export function CallHistory({
   offline,
   connected,
   pending,
-  activeResidentId,
+  activeTargetId,
   run,
   focus,
 }: Props) {
-  const [targetId, setTargetId] = useState<PhoneTargetId>(activeResidentId);
+  const [targetId, setTargetId] = useState<PhoneTargetId>(activeTargetId);
   const [callId, setCallId] = useState('');
   const [consent, setConsent] = useState(false);
   const [confirmedEnded, setConfirmedEnded] = useState(false);
   useEffect(() => {
-    setTargetId(activeResidentId);
-  }, [activeResidentId]);
+    setTargetId(activeTargetId);
+  }, [activeTargetId]);
   useEffect(() => {
     setConsent(false);
     setConfirmedEnded(false);
@@ -143,6 +142,7 @@ export function CallHistory({
     consent &&
     !pending &&
     demonstration?.phoneMode === 'live' &&
+    targetId === (demonstration.story === 'grandfather' ? 'H012' : 'M01') &&
     view.plan?.confirmed &&
     !view.frozen &&
     !view.networkDown,

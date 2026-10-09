@@ -81,6 +81,7 @@ function Drawer({
   view,
   run,
   close,
+  offlineTestTools = false,
 }: {
   id: string;
   view: View;
@@ -89,6 +90,7 @@ function Drawer({
     input?: Record<string, unknown>,
   ) => Promise<View | null>;
   close: () => void;
+  offlineTestTools?: boolean;
 }) {
   const h = view.data.households.find((h) => h.id === id)!;
   const s = view.scenario.householdStatuses.find((s) => s.householdId === id)!;
@@ -198,19 +200,23 @@ function Drawer({
             ))}
           </select>
         </label>
-        <label className="checkbox">
-          <input
-            type="checkbox"
-            checked={consent}
-            onChange={(e) => setConsent(e.target.checked)}
-            disabled={view.frozen}
-          />
-          합성 데이터의 발신 동의
-        </label>
-        <p className="muted">
-          필드 저장만으로 확인일을 갱신하지 않습니다. 실수신자의 동의를 대신하지
-          않습니다.
-        </p>
+        {offlineTestTools && (
+          <label className="checkbox">
+            <input
+              type="checkbox"
+              checked={consent}
+              onChange={(e) => setConsent(e.target.checked)}
+              disabled={view.frozen}
+            />
+            합성 데이터의 발신 동의
+          </label>
+        )}
+        {offlineTestTools && (
+          <p className="muted">
+            필드 저장만으로 확인일을 갱신하지 않습니다. 실수신자의 동의를
+            대신하지 않습니다.
+          </p>
+        )}
         <Btn
           size="sm"
           kind="outline"
@@ -221,56 +227,70 @@ function Drawer({
         >
           필드 저장
         </Btn>
-        <h3>30초 모의 확인</h3>
-        <p>
-          {h.sourceType} · {h.lastCheckedAt ?? '확인일 없음'}
-          <br />
-          <span className="flag">
-            {staleReason(h.lastCheckedAt, view.data.metadata.referenceDate) ??
-              '90일 내 유효'}
-          </span>
-        </p>
-        <label>
-          확인 출처
-          <select value={source} onChange={(e) => setSource(e.target.value)}>
-            {['담당자', '생활지원사', '이장', '보건지소', '가족', '통화'].map(
-              (x) => (
-                <option key={x}>{x}</option>
-              ),
-            )}
-          </select>
-        </label>
-        <fieldset>
-          <legend>직접 확인한 필드</legend>
-          {[
-            ['mobility', '거동'],
-            ['phoneKind', '연락 수단'],
-            ['cohabitant', '동거'],
-            ['consentToCall', '동의'],
-            ['devices', '필요 장비'],
-          ].map(([key, label]) => (
-            <label className="checkbox" key={key}>
-              <input
-                type="checkbox"
-                checked={fields.includes(key)}
-                onChange={(e) =>
-                  setFields(
-                    e.target.checked
-                      ? [...fields, key]
-                      : fields.filter((f) => f !== key),
-                  )
-                }
-              />
-              {label}
+        {offlineTestTools && (
+          <>
+            <h3>30초 모의 확인</h3>
+            <p>
+              {h.sourceType} · {h.lastCheckedAt ?? '확인일 없음'}
+              <br />
+              <span className="flag">
+                {staleReason(
+                  h.lastCheckedAt,
+                  view.data.metadata.referenceDate,
+                ) ?? '90일 내 유효'}
+              </span>
+            </p>
+            <label>
+              확인 출처
+              <select
+                value={source}
+                onChange={(e) => setSource(e.target.value)}
+              >
+                {[
+                  '담당자',
+                  '생활지원사',
+                  '이장',
+                  '보건지소',
+                  '가족',
+                  '통화',
+                ].map((x) => (
+                  <option key={x}>{x}</option>
+                ))}
+              </select>
             </label>
-          ))}
-        </fieldset>
-        <Btn
-          disabled={view.frozen || fields.length === 0}
-          onClick={() => void run('check', { id, source, fields })}
-        >
-          모의 확인 저장
-        </Btn>
+            <fieldset>
+              <legend>직접 확인한 필드</legend>
+              {[
+                ['mobility', '거동'],
+                ['phoneKind', '연락 수단'],
+                ['cohabitant', '동거'],
+                ['consentToCall', '동의'],
+                ['devices', '필요 장비'],
+              ].map(([key, label]) => (
+                <label className="checkbox" key={key}>
+                  <input
+                    type="checkbox"
+                    checked={fields.includes(key)}
+                    onChange={(e) =>
+                      setFields(
+                        e.target.checked
+                          ? [...fields, key]
+                          : fields.filter((f) => f !== key),
+                      )
+                    }
+                  />
+                  {label}
+                </label>
+              ))}
+            </fieldset>
+            <Btn
+              disabled={view.frozen || fields.length === 0}
+              onClick={() => void run('check', { id, source, fields })}
+            >
+              모의 확인 저장
+            </Btn>
+          </>
+        )}
         <h3>확인 이력</h3>
         {view.data.checkLogs
           .filter((l) => l.householdId === id)
@@ -430,7 +450,6 @@ export default function App() {
     [demoStory, setDemoStory] = useState<'grandfather' | 'squad'>(
       'grandfather',
     ),
-    [phoneMode, setPhoneMode] = useState<'mock' | 'live'>('mock'),
     [phoneConsent, setPhoneConsent] = useState(false),
     [operatorToken, setOperatorToken] = useState(''),
     [logPane, setLogPane] = useState<'log' | 'phone'>('log'),
@@ -502,14 +521,11 @@ export default function App() {
   const cycleLocked = ['review', 'running', 'awaiting_handover'].includes(
     simulation.phase,
   );
-  const selectedPhoneMode = cycleLocked
-    ? (demonstration?.phoneMode ?? phoneMode)
-    : phoneMode;
   const selectedDemoStory = cycleLocked
     ? (demonstration?.story ?? demoStory)
     : demoStory;
   const phoneTargetIds =
-    selectedDemoStory === 'grandfather' ? ['H012'] : ['H009', 'M01'];
+    selectedDemoStory === 'grandfather' ? ['H012'] : ['M01'];
   const phoneReady = Boolean(
     !connection.offline &&
     connection.phoneConnected &&
@@ -533,8 +549,6 @@ export default function App() {
   const demoResidentId =
     demonstration?.residentId ??
     (activeStory === 'grandfather' ? 'H012' : 'H009');
-  const demoName =
-    activeStory === 'grandfather' ? '반영환 할아버지' : '박미숙 할머니';
   const available = connection.offline || connection.connected;
   const decision =
     simulation.phase === 'awaiting_handover'
@@ -550,7 +564,12 @@ export default function App() {
               : leaders
                 ? `이장 연결·결과 ${leaders}건`
                 : null;
-  const props = { view, run, open: setSelected };
+  const props = {
+    view,
+    run,
+    open: setSelected,
+    offlineTestTools: connection.offline,
+  };
   const readings = sourceReadings(view);
   const time = new Intl.DateTimeFormat('ko-KR', {
     timeZone: 'Asia/Seoul',
@@ -560,13 +579,35 @@ export default function App() {
   }).format(new Date(view.scenario.displayTime));
   function decisionClick() {
     if (simulation.phase === 'awaiting_handover') setModal('close');
-    else if (failed) setTab('calls');
-    else if (view.plan && !view.plan.confirmed) setModal('confirm');
+    else if (failed) {
+      setTab('calls');
+      if (!connection.offline) setLogPane('log');
+    } else if (view.plan && !view.plan.confirmed) setModal('confirm');
     else if (view.scenario.mode === 'watch') void run('plan');
     else if (view.reassignments.some((p) => p.status === 'pending'))
       setTab('resources');
-    else setTab('calls');
+    else {
+      setTab('calls');
+      if (!connection.offline) setLogPane('log');
+    }
   }
+  const phoneHistory = (
+    <CallHistory
+      view={view}
+      phone={phone}
+      error={connection.phoneError}
+      offline={connection.offline}
+      connected={connection.connected && connection.phoneConnected}
+      pending={pending}
+      activeTargetId={activeStory === 'grandfather' ? 'H012' : 'M01'}
+      run={runPhone}
+      focus={(id) => {
+        setTab('map');
+        setLogPane('phone');
+        setFocusRequest({ id, sequence: performance.now() });
+      }}
+    />
+  );
   return (
     <div className="app-shell">
       <header className="app-header">
@@ -607,31 +648,33 @@ export default function App() {
               </div>
             </details>
           )}
-          <details className="static-scene-tools">
-            <summary>정적 장면 점검</summary>
-            <label>
-              시연 장면
-              <select
-                aria-label="시연 장면"
-                value={view.scenario.id}
-                onChange={(e) => void run('scenario', { id: e.target.value })}
-                disabled={pending || !available}
-              >
-                {!view.data.scenarios.some(
-                  (s) => s.id === view.scenario.id,
-                ) && (
-                  <option value={view.scenario.id} disabled>
-                    현재 연속 시연
-                  </option>
-                )}
-                {view.data.scenarios.map((s) => (
-                  <option key={s.id} value={s.id}>
-                    {s.label}
-                  </option>
-                ))}
-              </select>
-            </label>
-          </details>
+          {connection.offline && (
+            <details className="static-scene-tools">
+              <summary>정적 장면 점검</summary>
+              <label>
+                시연 장면
+                <select
+                  aria-label="시연 장면"
+                  value={view.scenario.id}
+                  onChange={(e) => void run('scenario', { id: e.target.value })}
+                  disabled={pending || !available}
+                >
+                  {!view.data.scenarios.some(
+                    (s) => s.id === view.scenario.id,
+                  ) && (
+                    <option value={view.scenario.id} disabled>
+                      현재 연속 시연
+                    </option>
+                  )}
+                  {view.data.scenarios.map((s) => (
+                    <option key={s.id} value={s.id}>
+                      {s.label}
+                    </option>
+                  ))}
+                </select>
+              </label>
+            </details>
+          )}
           <Pill tone="soft">
             {connection.offline
               ? '브라우저 단독 mock'
@@ -650,7 +693,7 @@ export default function App() {
                     setMessage('서버 연결됨');
                   })
                   .catch(() =>
-                    setMessage('mock 서버를 실행하세요: npm run dev'),
+                    setMessage('Node 서버 연결을 확인하세요: npm run dev'),
                   )
               }
             >
@@ -674,9 +717,9 @@ export default function App() {
                 <small>
                   {id === 'event'
                     ? view.plan?.confirmed
-                      ? liveDemonstration
-                        ? '실제 전화 연동'
-                        : '모의 발신 진행'
+                      ? connection.offline
+                        ? '오프라인 검증'
+                        : '실제 전화 연동'
                       : '담당자 확정 대기'
                     : '현재 단계'}
                 </small>
@@ -698,7 +741,9 @@ export default function App() {
         <div className="sidebar-bottom">
           <p>48가구 · 4개 대기조</p>
           <p>
-            {liveDemonstration ? '동의한 데모 수신자 통화' : '실제 수신자 없음'}
+            {connection.offline
+              ? '오프라인 검증 도구'
+              : '동의한 수신자에게 실제 전화'}
             <br />
             명단·지도는 합성 데이터
           </p>
@@ -729,27 +774,13 @@ export default function App() {
                 }}
               >
                 <option value="grandfather">반영환 할아버지 · 구급차</option>
-                <option value="squad">박미숙 할머니 · 5분대기조</option>
+                <option value="squad">반영환 대원 · 박미숙 할머니 구조</option>
               </select>
             </label>
-            <label className="cycle-story-select">
-              전화 모드
-              <select
-                aria-label="전화 모드"
-                value={selectedPhoneMode}
-                disabled={pending || cycleLocked}
-                onChange={(event) => {
-                  setPhoneMode(event.target.value as 'mock' | 'live');
-                  setPhoneConsent(false);
-                }}
-              >
-                <option value="mock">모의 통화</option>
-                <option value="live" disabled={!phoneReady}>
-                  실제 전화
-                </option>
-              </select>
-            </label>
-            {selectedPhoneMode === 'live' && (
+            <Pill size="sm" tone="soft">
+              실제 전화
+            </Pill>
+            {!cycleLocked && phoneReady && (
               <label className="checkbox cycle-phone-consent">
                 <input
                   type="checkbox"
@@ -766,8 +797,9 @@ export default function App() {
               disabled={
                 pending ||
                 !available ||
-                (selectedPhoneMode === 'live' &&
-                  (!phoneReady || !phoneConsent || Boolean(phone?.busy))) ||
+                !phoneReady ||
+                !phoneConsent ||
+                Boolean(phone?.busy) ||
                 ['review', 'running', 'awaiting_handover'].includes(
                   simulation.phase,
                 )
@@ -776,14 +808,14 @@ export default function App() {
                 void command('cycle-start', {
                   revision: view.revision,
                   demoStory,
-                  phoneMode: selectedPhoneMode,
-                  phoneConsent: selectedPhoneMode === 'live' && phoneConsent,
+                  phoneMode: 'live',
+                  phoneConsent,
                 }).then((next) => {
                   if (next) {
                     setModal('confirm');
                     setTab('map');
                     setMobile('canvas');
-                    if (selectedPhoneMode === 'live') setLogPane('phone');
+                    setLogPane('phone');
                     setFocusRequest({
                       id:
                         next.demonstration?.residentId ??
@@ -902,6 +934,15 @@ export default function App() {
           <span className="aux-count">
             방문 {c.visit} · 임시 제외 {c.temporarilyExcluded}
           </span>
+          {!phoneReady && (
+            <small className="act" role="status">
+              {connection.offline
+                ? '서버 연결 필요 · 실제 전화 시작 불가'
+                : phone?.enabled === false
+                  ? '실제 전화 서버 비활성 · 시작 불가'
+                  : '전화 연결 준비 필요 · 시연 시작 불가'}
+            </small>
+          )}
           {decision && !view.frozen && (
             <button className="decision-pill" onClick={decisionClick}>
               {decision} →
@@ -961,20 +1002,7 @@ export default function App() {
             id="log-panel-phone"
             aria-labelledby="log-tab-phone"
           >
-            <CallHistory
-              view={view}
-              phone={phone}
-              error={connection.phoneError}
-              offline={connection.offline}
-              connected={connection.connected && connection.phoneConnected}
-              pending={pending}
-              activeResidentId={demoResidentId as 'H012' | 'H009'}
-              run={runPhone}
-              focus={(id) => {
-                setTab('map');
-                setFocusRequest({ id, sequence: performance.now() });
-              }}
-            />
+            {phoneHistory}
           </div>
         ) : (
           <div
@@ -1000,8 +1028,8 @@ export default function App() {
               </h3>
               <p>
                 {view.plan?.confirmed
-                  ? '이동 중·차량 출동·119 모의 접수는 안전 완료가 아닙니다.'
-                  : '담당자 확정 전에는 실제·가상 발신이 없습니다.'}
+                  ? '이동·출동 기록은 현장 안전 확인과 구분합니다.'
+                  : '담당자 확정 전에는 실제 전화가 걸리지 않습니다.'}
               </p>
             </div>
             {simulation.phase === 'awaiting_handover' && (
@@ -1017,7 +1045,7 @@ export default function App() {
                 <p className="muted">{simulation.endReason}</p>
               </Card>
             )}
-            {view.scenario.mode === 'watch' && (
+            {connection.offline && view.scenario.mode === 'watch' && (
               <Card>
                 <span className="eyebrow">규칙 제안 · 합성 경보</span>
                 <h3>북서 구역 대피 지시 시연</h3>
@@ -1124,12 +1152,19 @@ export default function App() {
           {c.visit}
         </div>
         <div className="quick-actions">
-          {view.scenario.mode === 'idle' && (
+          {connection.offline && view.scenario.mode === 'idle' && (
             <Btn onClick={() => void run('watch')}>감시 시작</Btn>
           )}
           {view.scenario.mode === 'event' && (
             <>
-              <Btn kind="outline" size="sm" onClick={() => setTab('calls')}>
+              <Btn
+                kind="outline"
+                size="sm"
+                onClick={() => {
+                  setTab('calls');
+                  if (!connection.offline) setLogPane('log');
+                }}
+              >
                 통화 현황
               </Btn>
               <Btn kind="outline" size="sm" onClick={() => setTab('resources')}>
@@ -1172,13 +1207,18 @@ export default function App() {
               aria-selected={tab === t.id}
               aria-controls={`panel-${t.id}`}
               tabIndex={tab === t.id ? 0 : -1}
-              onClick={() => setTab(t.id)}
+              onClick={() => {
+                setTab(t.id);
+                if (t.id === 'calls' && !connection.offline) setLogPane('log');
+              }}
               onKeyDown={(e) => {
                 if (e.key === 'ArrowRight' || e.key === 'ArrowLeft') {
                   e.preventDefault();
                   const next =
                     tabs[(i + (e.key === 'ArrowRight' ? 1 : 5)) % 6].id;
                   setTab(next);
+                  if (next === 'calls' && !connection.offline)
+                    setLogPane('log');
                   document.getElementById(`tab-${next}`)?.focus();
                 }
               }}
@@ -1203,7 +1243,14 @@ export default function App() {
               plannedPosition={plannedPosition}
             />
           ) : tab === 'calls' ? (
-            <Calls {...props} />
+            connection.offline ? (
+              <Calls {...props} />
+            ) : (
+              <>
+                {<Counters view={view} />}
+                {phoneHistory}
+              </>
+            )
           ) : tab === 'resources' ? (
             <Resources {...props} />
           ) : tab === 'households' ? (
@@ -1241,31 +1288,37 @@ export default function App() {
           id={selected}
           view={view}
           run={command}
+          offlineTestTools={connection.offline}
           close={() => setSelected(null)}
         />
       )}{' '}
       {modal === 'confirm' && view.plan && (
         <Dialog
           title={
-            liveDemonstration
-              ? '발령 순서 검토·실제 전화 확정'
-              : '발령 순서 검토·모의 확정'
+            connection.offline
+              ? '오프라인 검증·발령 순서'
+              : '발령 순서 검토·실제 전화 확정'
           }
           close={() => setModal(null)}
         >
           <div className="modal-body">
             <p>
-              전화 {view.plan.order.length} · 방문 {view.plan.visit.length} ·
-              임시 제외 {view.plan.excluded.length}
+              {connection.offline
+                ? `전화 ${view.plan.order.length}`
+                : '실제 발신 대상 1명'}{' '}
+              · 방문 {view.plan.visit.length} · 임시 제외{' '}
+              {view.plan.excluded.length}
             </p>
             <p>
-              {liveDemonstration
-                ? `${demoName}${activeStory === 'squad' ? '·반영환 대원' : ''}에게 등록된 번호로 실제 전화를 겁니다. 다른 가구와 지도 이동은 모의 시연입니다.`
-                : '공용 최대 8채널 · 전체 모의 발신 · 실제 SMS·119 없음'}
+              {connection.offline
+                ? '브라우저 안에서만 검증하는 오프라인 도구입니다.'
+                : activeStory === 'squad'
+                  ? '박미숙 할머니의 구조 요청이 이미 접수된 상황입니다. 반영환 대원에게만 등록된 번호로 실제 전화를 겁니다.'
+                  : '반영환 할아버지에게 등록된 번호로 실제 전화를 겁니다.'}
               <br />
               이장 연결·결과와 조 재배정은 담당자 결정입니다.
             </p>
-            {liveDemonstration && (
+            {!connection.offline && (
               <label className="checkbox">
                 <input
                   type="checkbox"
@@ -1333,7 +1386,8 @@ export default function App() {
                 pending ||
                 view.networkDown ||
                 view.plan.confirmed ||
-                (liveDemonstration && (!phoneReady || !phoneConsent))
+                (!connection.offline &&
+                  (!liveDemonstration || !phoneReady || !phoneConsent))
               }
               onClick={() =>
                 void command('confirm', { revision: view.revision }).then(
@@ -1341,15 +1395,15 @@ export default function App() {
                     if (v) {
                       setModal(null);
                       setTab(v.simulation.cycleId ? 'map' : 'calls');
-                      if (liveDemonstration) setLogPane('phone');
+                      if (!connection.offline) setLogPane('phone');
                     }
                   },
                 )
               }
             >
-              {liveDemonstration
-                ? '확정하고 실제 전화 발신'
-                : '확정하고 모의 발신 시작'}
+              {connection.offline
+                ? '확정하고 모의 발신 시작'
+                : '확정하고 실제 전화 발신'}
             </Btn>
           </div>
         </Dialog>

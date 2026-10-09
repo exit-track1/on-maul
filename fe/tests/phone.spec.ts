@@ -28,19 +28,110 @@ test.afterEach(async ({ page }) => {
   expect(unexpectedRequests.get(page)).toEqual([]);
 });
 
+test('squad uses only the responder phone and assumes the grandmother rescue request is already received', async ({
+  page,
+}) => {
+  const runtime = new Runtime();
+  const phone = configuredPhone();
+  phone.targets = phone.targets.filter((target) => target.id === 'M01');
+  const commands: { action: string; input: Record<string, unknown> }[] = [];
+  await page.route('**/api/phone/bootstrap', (route) =>
+    route.fulfill({ json: { enabled: true, token: 'fixture-squad' } }),
+  );
+  await page.route('**/api/state', (route) =>
+    route.fulfill({ json: runtime.view() }),
+  );
+  await page.route('**/api/phone/state', (route) =>
+    route.fulfill({ json: phone }),
+  );
+  await page.route('**/api/command', async (route) => {
+    const body = route.request().postDataJSON() as {
+      action: string;
+      input: Record<string, unknown>;
+    };
+    commands.push(body);
+    runtime.command(body.action, body.input);
+    if (body.action === 'confirm') {
+      expect(runtime.pendingPhoneTargets()).toEqual(['M01']);
+      const call = fixtureCall('M01');
+      call.transcript = [
+        {
+          speaker: 'assistant',
+          text: '박미숙 할머니 구조에 참여하실 수 있나요?',
+        },
+        { speaker: 'user', text: '네. 지금 차량을 가지고 출동할 수 있습니다.' },
+      ];
+      runtime.preparePhoneCall('M01', call.requestId, runtime.view().revision);
+      runtime.applyPhoneUpdate(call.requestId, { phase: 'talking' });
+      phone.calls = [call];
+      phone.busy = true;
+    }
+    await route.fulfill({ json: runtime.view() });
+  });
+  await page.goto('/');
+  await expect(page.getByText('서버 연결', { exact: true })).toBeVisible();
+  await page.getByLabel('메인 시연', { exact: true }).selectOption('squad');
+  await page.getByRole('tab', { name: '통화 내역', exact: true }).click();
+  const history = page.getByTestId('call-history');
+  await expect(
+    history.getByRole('button', { name: '반영환 대원', exact: false }),
+  ).toHaveAttribute('aria-pressed', 'true');
+  await expect(
+    history.getByRole('button', { name: '박미숙 할머니', exact: false }),
+  ).toHaveCount(0);
+  await expect(page.getByLabel('전화 모드', { exact: true })).toHaveCount(0);
+  await expect(page.locator('details.static-scene-tools')).toHaveCount(0);
+  await page
+    .getByLabel('선택한 시연 대상의 실제 발신 동의를 확인했습니다', {
+      exact: true,
+    })
+    .check();
+  await expect(page.getByTestId('cycle-start')).toBeEnabled();
+  await page.getByTestId('cycle-start').click();
+  const dialog = page.getByRole('dialog');
+  await expect(dialog).toContainText('실제 발신 대상 1명');
+  await expect(dialog).toContainText(
+    '박미숙 할머니의 구조 요청이 이미 접수된 상황',
+  );
+  await expect(dialog).toContainText('반영환 대원에게만');
+  await page
+    .getByRole('button', { name: '확정하고 실제 전화 발신', exact: true })
+    .click();
+  await expect(history.getByTestId('actual-call-record')).toHaveAttribute(
+    'data-status',
+    'answered',
+  );
+  await expect(
+    history.getByRole('list', { name: '반영환 대원 실제 통화 전사' }),
+  ).toContainText('출동할 수 있습니다');
+  expect(commands[0]).toMatchObject({
+    action: 'cycle-start',
+    input: { demoStory: 'squad', phoneMode: 'live', phoneConsent: true },
+  });
+  expect(runtime.view().demonstration?.residentRequestAssumed).toBe(true);
+  expect(runtime.view().calls.some((call) => call.mode === 'mock')).toBe(false);
+  expect(runtime.view().calls.some((call) => call.targetId === 'H009')).toBe(
+    false,
+  );
+  await page.getByRole('tab', { name: '통화', exact: true }).click();
+  await expect(
+    page.getByText('모의 전사·분류 시연', { exact: true }),
+  ).toHaveCount(0);
+  await expect(
+    page.getByRole('button', { name: '모의 1분 진행', exact: true }),
+  ).toHaveCount(0);
+  await page.getByRole('tab', { name: '자원·5분대기조', exact: true }).click();
+  await expect(page.getByRole('button', { name: /모의 무응답/ })).toHaveCount(
+    0,
+  );
+});
+
 for (const actor of [
   {
     id: 'H012' as const,
     name: '반영환 할아버지',
     story: 'grandfather',
     moving: '대피 중',
-    completed: '대피 완료',
-  },
-  {
-    id: 'H009' as const,
-    name: '박미숙 할머니',
-    story: 'squad',
-    moving: '구조 중',
     completed: '대피 완료',
   },
   {
@@ -62,18 +153,8 @@ for (const actor of [
     });
     runtime.command('confirm', { revision: runtime.view().revision });
     const call = fixtureCall(actor.id);
-    const residentId = actor.story === 'grandfather' ? 'H012' : 'H009';
-    runtime.preparePhoneCall(
-      residentId,
-      call.requestId,
-      runtime.view().revision,
-    );
+    runtime.preparePhoneCall(actor.id, call.requestId, runtime.view().revision);
     const view = runtime.view();
-    if (actor.id === 'M01') {
-      const prepared = view.calls.find((entry) => entry.id === call.requestId)!;
-      prepared.targetId = 'M01';
-      prepared.targetType = 'member';
-    }
     view.demonstration!.stage = 'evacuating';
     call.status = 'ended';
     call.endedAt = call.answeredAt! + 30_000;
@@ -196,11 +277,7 @@ test('localhost bootstrap configures bearer reads without putting its token in t
   });
   await page.goto('/');
   await expect(page.getByText('서버 연결', { exact: true })).toBeVisible();
-  await expect(
-    page
-      .getByLabel('전화 모드', { exact: true })
-      .locator('option[value="live"]'),
-  ).not.toHaveAttribute('disabled');
+  await expect(page.getByLabel('전화 모드', { exact: true })).toHaveCount(0);
   await expect(page.locator('body')).not.toContainText('fixture-local-auto');
   await expect(page.getByLabel('운영자 토큰', { exact: true })).toHaveValue('');
   expect(authenticated.length).toBeGreaterThanOrEqual(2);
@@ -227,14 +304,6 @@ function configuredPhone(): PhoneState {
         consent: true,
       },
       {
-        id: 'H009',
-        name: '박미숙 할머니',
-        scenario: 'resident',
-        configured: true,
-        phoneMasked: '010-****-0009',
-        consent: true,
-      },
-      {
         id: 'M01',
         name: '반영환 대원',
         scenario: 'standby',
@@ -247,17 +316,12 @@ function configuredPhone(): PhoneState {
   };
 }
 
-function fixtureCall(targetId: 'H012' | 'H009' | 'M01' = 'H012'): PhoneCall {
+function fixtureCall(targetId: 'H012' | 'M01' = 'H012'): PhoneCall {
   return {
     id: `SESSION-${targetId}`,
     requestId: `REQUEST-${targetId}`,
     targetId,
-    targetName:
-      targetId === 'H012'
-        ? '반영환 할아버지'
-        : targetId === 'H009'
-          ? '박미숙 할머니'
-          : '반영환 대원',
+    targetName: targetId === 'H012' ? '반영환 할아버지' : '반영환 대원',
     scenario: targetId === 'M01' ? 'standby' : 'resident',
     providerId: null,
     status: 'answered',
@@ -287,11 +351,9 @@ async function enterToken(page: Page) {
   await page
     .getByRole('button', { name: '연결 설정 적용', exact: true })
     .click();
-  await expect(
-    page
-      .getByLabel('전화 모드', { exact: true })
-      .locator('option[value="live"]'),
-  ).not.toHaveAttribute('disabled');
+  await expect(page.locator('.phone-settings-body')).toContainText(
+    '실제 전화 연결 준비 완료',
+  );
   await page.getByText('전화 연결 설정', { exact: true }).click();
 }
 
@@ -305,13 +367,8 @@ test('call history shows actual records only, keeps the map on the right and mak
   });
   await page.clock.install();
   await page.goto('/index.html?demo=1');
-  await expect(
-    page.getByLabel('전화 모드').locator('option[value="live"]'),
-  ).toHaveAttribute('disabled', '');
-  await page.getByTestId('cycle-start').click();
-  await page
-    .getByRole('button', { name: '확정하고 모의 발신 시작', exact: true })
-    .click();
+  await expect(page.getByLabel('전화 모드', { exact: true })).toHaveCount(0);
+  await expect(page.getByTestId('cycle-start')).toBeDisabled();
   await page.clock.runFor(2200);
   await page.getByRole('tab', { name: '통화 내역', exact: true }).click();
   const history = page.getByTestId('call-history');
@@ -390,7 +447,6 @@ test('real mode requires operator setup and explicit consent, then shows polled 
   await expect(page.getByText('서버 연결', { exact: true })).toBeVisible();
   expect(phoneReads).toEqual([]);
   await enterToken(page);
-  await page.getByLabel('전화 모드', { exact: true }).selectOption('live');
   await expect(page.getByTestId('cycle-start')).toBeDisabled();
   await page
     .getByLabel('선택한 시연 대상의 실제 발신 동의를 확인했습니다', {
