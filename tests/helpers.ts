@@ -5,6 +5,7 @@ import { join } from 'node:path';
 import type WebSocket from 'ws';
 import { ConfigStore } from '../src/config.ts';
 import { CallManager } from '../src/calls.ts';
+import { standbyQuestions } from '../src/standby-completion.ts';
 export class FakeSocket extends EventEmitter {
   readyState = 1;
   bufferedAmount = 0;
@@ -23,7 +24,7 @@ export class FakeSocket extends EventEmitter {
         if (
           this.autoOpening &&
           (event.content.includes('현재 산불로 인하여 대피하셔야 합니다.') ||
-            event.content.includes('가상의 구조 요청에 참여 가능하신가요?'))
+            event.content.includes(standbyQuestions.participation))
         ) {
           this.autoOpening = false;
           this.push({

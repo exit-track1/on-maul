@@ -14,7 +14,7 @@ import { setup, media, hook, user, output, flush, FakeSocket } from './helpers.t
 import { muLawRms } from '../src/media.ts';
 
 const context: Transcript[] = [
-  { speaker: 'assistant', text: '가상의 구조 요청에 참여 가능하신가요?' },
+  { speaker: 'assistant', text: standbyQuestions.participation },
   { speaker: 'user', text: '어, 네. 지금 참여 가능합니다. 지금 어디로 이동하면 될까요' },
   { speaker: 'assistant', text: '좋습니다. 그럼 차량 이용이 가능하신가요?' },
   { speaker: 'user', text: '네, 렉스턴 차량 이용할게요' },

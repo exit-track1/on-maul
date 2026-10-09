@@ -5,7 +5,8 @@ import type { Transcript } from './evacuation.ts';
 
 export const standbyFarewell = '확인했습니다. 감사합니다. 통화를 종료하겠습니다.';
 export const standbyQuestions = {
-  participation: '가상의 구조 요청에 참여 가능하신가요?',
+  participation:
+    '박미숙 할머니께서 구조 요청을 하셨습니다. w조 집결지 8번 집으로 이동 가능하십니까?',
   vehicle: '차량 이용이 가능하신가요?',
   readiness: '출발까지 얼마나 걸리시나요?',
 };
