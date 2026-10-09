@@ -11,7 +11,7 @@
 - **미구현**: 현재 React mock 구현에서 대응 기능을 확인하지 못했다.
 - **미검증**: 코드·설정 또는 검증 계획은 있으나 해당 실행·리허설 증거가 없다.
 
-부모 Codex의 최종 실제 출력은 **모의 shared/server 도메인134/134**, **FE21/21** 통과다. `npm test` 전체 **189/189 통과**는 별도 전화 PoC를 포함한 해당 실행 시점의 결과이며 이후 다른 채팅의 변경까지 검증한 증거가 아니다. 명단 규칙 파서16+건강 근거 등급10 집중26/26, Runtime 적용4/4, source contract16/16·monitoring15+HTTP/API10 합동25/25, 도우미10/10도 통과했다. 기본 build(Vite38modules), FE 및 마지막 서버 강화 후 typecheck, mock 범위 Prettier, `git diff --check`, 공식 스킬 정책 활성1/보관4가 통과했다. 기본 번들 JS `index-BbAEbTbN.js`·CSS `index-DUk4wsRt.css`를 독립4181포트 preview에서 검증한 FE21/21(starter18+지도3)에는 소스 실패·미확정 계획·새 지도·도우미·명단 적용·예약·재배정·후속 확인·조원 재호출·4뷰포트가 포함된다. 전체 테스트 수는 원문 요구 수 또는 T/U 전체 통과율이 아니다.
+최신 주연/연속 사이클 커밋 `4de00828`의 실제 출력은 **shared/server165/165**, **독립 preview FE22/22**, **실제 HTTP 서버 결합2/2** 통과다. build40modules·FE/server 타입·mock Prettier·diff·공식 스킬 활성1/보관4도 통과했다. 기존 수동 마감134/134·FE21/21와 별도 root 전화 PoC를 포함한189/189는 이전 실행 기록이다. 이번 최신 검증은 root 전화 PoC 전체를 재실행한 결과가 아니다. 요구 상태 개수와 전체 T/U 완료 판정은 이 제한된 시연 추가만으로 바꾸지 않았다.
 
 source P2 보완도 검증됐다. source-fail/collect로 미확정 계획의 ETA·근거 조건이 바뀔 때만 최신 재검토로 갱신하고 무관한 수집은 담당자 수동 순서를 유지한다. 확정 전 표시조건 전체를 재검증하며 서버는 이전 계획 checkpoint를 supersede하고 최신 검토 checkpoint를 만든다. 실제 표시계획과 checkpoint를 resume 전후 대조하고 그래프 오류·await 중 source 변화·승인 뒤 자료 오염에서는 확정/큐0을 유지한다. FE는 관측 없는 실패 record에 fixture 시각/요약을 대신 넣지 않고 불명을 표시하며 fallback은 별도 record로 원문 실패를 보존한다. 실패 시45행 도달 불명·공용 채널0/8, fallback ETA 복원 후 담당자 확정 흐름도 FE21/21에서 통과했다.
 
@@ -25,7 +25,8 @@ source P2 보완도 검증됐다. source-fail/collect로 미확정 계획의 ETA
 | DISP | `shared/src/dispatch.ts`, `shared/src/routing.ts`, `shared/test/dispatch.test.ts`: 합성 도로 연결·통제 우회·3구간 시간·예약·정원·인원·재배정·보류/복구·종료 복원 |
 | GRAPH | `server/src/agents.ts`, `server/test/server.test.ts`: 실제 `StateGraph`, `MemorySaver`, `interrupt`, `Command({resume})`; 계획·전사·재배정 그래프 |
 | API | `server/src/app.ts`, `server/src/telephony.ts`, `server/test/server.test.ts`: 직렬 상태 변경·demo 외부 호출 0·Telnyx allowlist/동의·서명·중복·불명 |
-| FE | `fe/src/App.tsx`, `fe/src/tabs/Panels.tsx`, `fe/src/components/map/{EvacuationMap.tsx,model.ts,map.css}`, `fe/src/styles/global.css`, `fe/tests/starter.spec.ts`, `fe/tests/map.spec.ts`:21/21 통과·6탭·명단·결정·두절·인수인계·뷰포트·키보드 |
+| FE | `fe/src/App.tsx`, `fe/src/mock/client.ts`, `fe/src/tabs/Panels.tsx`, map component·CSS, `fe/tests/{starter,map,cycle,cycle-server}.spec.ts`: 단독22/22+HTTP2/2·6탭·명단·확정/인계·뷰포트·키보드·주연 집/대화·배차 이동·완료 |
+| CYCLE | `shared/src/cycle.ts`, `shared/src/demo-story.ts`, `shared/src/runtime.ts`, cycle16/16·helper6/6·server cycle API9/9·FE offline1/1·HTTP2/2: 한 시계·분수 경계·12/30/60×·일시정지·재시작/이장 결과 우선·사람 확정/종료·두 주연 call/dispatch/입소·미해결 보존·외부0 |
 | DATA | `fixtures/*.json`, `shared/src/types.ts`, DOM fixture 검사: seed 20261009, 기준일 2026-10-09, Asia/Seoul, 자체 합성 스키마 |
 
 실전화 도구 `src/`·`public/`는 **별도 전화 PoC**다. 그 내부의 8팀·6차량은 React mock의 48가구·4조/12명·10자원과 합쳐진 모델이 아니다. 별도 전화 PoC 테스트는 mock 48가구 전체 연동 또는 실제 휴대폰 수신의 증거가 아니다.
@@ -51,7 +52,7 @@ source P2 보완도 검증됐다. source-fail/collect로 미확정 계획의 ETA
 
 | ID | 상태 | 현재 근거와 남은 기준 |
 | --- | --- | --- |
-| W-1 | 부분 | Runtime watch→watch·발신0·FE 감시 시작과 지도. 8개 실제/재생 수집기의 시뮬 주기 스케줄러는 없음. |
+| W-1 | 부분 | Runtime watch·발신0와 CYCLE 명시 합성 관측8/매sim분 갱신. 실제8개 adapter의 source별 주기 스케줄러는 미완료. |
 | W-2 | 부분 | SOURCE·Runtime collectSources: own demo 스키마8·원 관측시각 불변·새 수집 record append·모의 live 실패/별도 replay fallback·error/origin/mode/시각/근거 ID 보존. 실제8종 collector와 공식 응답 봉투/업무코드·실수신은 미완료. |
 | W-3 | 완료(모의 규칙) | SOURCE16/16: 명시적 정규화 관할 태그 exact match 후 재난 키워드 또는 풍속≥10/진화율하락≥10%p/수위관심/특보경보 검사. 관할 외는 eligibility0·actualModelCalls0, 탈락 이유 보존. 실제 지역/기관 관할 매핑은 미검증. |
 | W-4 | 부분 | SOURCE cache key가 policy/관할/원문/payload fingerprint/source/sample/scenario/dataset/mode/origin을 격리; 충돌 fingerprint도 원문으로 구분. 모델 실행 예정 eligibility와 actualModelCalls0 분리. strict AI-0 adapter·실제 cache 실행·교정/비용/사용량은 없음. |
@@ -82,7 +83,7 @@ source P2 보완도 검증됐다. source-fail/collect로 미확정 계획의 ETA
 | C-1 | 부분 | DOM/Runtime pump 공용8·대상당1·주민/조원 교대·생성 불명 포함. API 벨30초/응답120초 실제 타이머 코드. 모의1분 진행은 구현됐으나 전 턴 벨0.5분/1–1.5분 계약·배속 독립 실기기 타이머 리허설은 미검증. |
 | C-2 | 부분 | 최신 Telnyx 공식 SDK dial/hangup·H012/M01 환경 allowlist·별도 동의·서명 webhook·provider ID 보존·주입 adapter 테스트. mock API의 양방향 음성 agent/전사/tool 브리지와 실제 수신은 미완료. 별도 전화 PoC와의 상태 통합도 미완료. |
 | C-3 | 미구현 | 원문의 확정 거절만 대체 경로 허용한다는 요구는 보존. 최신 Telnyx 선택에서 별도 대체 공급자 경로/거절 확정 정책은 없음. 결과 불명 무재발신은 API가 입증한다. |
-| C-4 | 부분 | Runtime advance의 결정론적 합성 발화·classification 검증·fixture 전사14케이스 범주. 원문 21 scripts/script_map·44가구의 턴별 offset 재생과 혼합44+실제1 시간 계약은 미완료. |
+| C-4 | 부분 | CYCLE 두 주연의 연결/통화/다리 통증/대원 응답 합성 텍스트·기타 가구의 목적별 허구 발화/후속 확인을 검증했다. 원문21scripts/script_map·턴별 음성 offset·혼합44+실제1 계약은 미완료. |
 | C-5 | 완료(모의) | CALL resident retry: 최초+추가8회, 대기0/1/2/3분·문자1기록·상한 뒤 미해결 유지·종단전0·동의/제외/완료 취소. 실제 번호 재발신 시계/전화망 리허설은 미검증. |
 | C-6 | 부분 | DOM 현재 도착/장소/되말/응급 우선·무근거 결과 거절, CALL unclear5/moving15·예약 대체/취소, DISP 동반자·정원. 전체 주민7종 live strict 도구/질문/가구/attempt/session 결합·배차 요청 큐·음성 반환은 남음. |
 | C-7 | 부분 | FE 이장 요청/수동 결과·Runtime leader-request/result·이동확인≠안전·15분 재확인. 거부2회/불신 신원 재고지·설득1회 음성 정책, 연락불가 자동 방문/재배정 제안의 전체 흐름은 남음. |
@@ -114,11 +115,11 @@ source P2 보완도 검증됐다. source-fail/collect로 미확정 계획의 ETA
 | --- | --- | --- |
 | D-1 | 부분 | Runtime 직접 dispatch/reassignment와 DISP 같은 가구 열린 임무1·장비/예약 검증. 별도 needs/priority/event_id 배차 큐·emergency/high/normal+rank/ETA 순서·중복 필요 갱신은 미구현. |
 | D-2 | 부분 | DISP 장비·동반자 포함 좌석·접근성·대피소정원·운전자/지원·구역/대상ETA·경로·귀환차량 차단. 자동 구급차 우선 후보/배차 큐·1분 대기 재검증·선호/면차량/인접 전체 우선정책은 미완료. |
-| D-3 | 완료(모의) | DISP 합성 연결 도로를 구성하고 통제 구간 제거·교차점 연결·경로없음 금지·pickup/shelter/return waypoints/시각·40km/h·대기3/와상6분. **가구/집결지→가장 가까운 개방도로 접근은 ≤250px 합성 가정**이며 현실 도로/주행 허가 검증이 아니다. FE 위치는 같은 trip 경로/시각을 계산한다. 새 지도에는 local preview가 추가됐지만 서버 권위 연속 시계/30fps는 미검증. |
+| D-3 | 완료(모의) | DISP 개방 도로 연결·통제 제외·3구간/40km/h/탑승 대기3·6분·좌표 계산. CYCLE HTTP2/2는 서버 시각으로 움직이는 같은 경로·탑승·입소를 검증했다. ≤250px 도로 접근과 주연 좌표는 합성 가정이며 30fps 측정은 남았다. |
 | D-4 | 완료(모의) | DISP 단계 시간/보고 검사: 출동→도착→탑승→대피소→복귀, 귀환중 가용 아님·복귀 완료 예약 해제·대피소 인원은 계속 점유. 복귀 취소 후 즉시 다음 임무는 구현하지 않았으므로 복귀까지 기다린다. |
-| D-5 | 부분 | FE 로컬SVG 48점·6도로/통제·3대피소·면사무소·4집결지·발화/영향영역·풍향·임무 경로/차량 위치·상태단어/형태. 새 지도 컴포넌트의 사람/차량 local preview·지형/연기·레이어·키보드 조작·정지/종료·낡은 풍속 차단은 지도3개와 전체21/21 검증을 통과했다. 서버 시계와의 연속 보간/30fps·전체 상세 수용 기준은 미완료. |
+| D-5 | 부분 | FE48점·도로/통제·대피소·집결지·화점/예상영역/풍향·주연 집 강조·실제 합성trip차량/경로/좌표 애니메이션. 단독22/22+HTTP2/2 통과. 30fps와 전체 상세 수용 기준은 미완료. |
 | D-6 | 부분 | FE map/model.ts의 firePerimeter가 DOM eta를 쓰고 비공식 예상영역 면책. 고정 바람 경계도달±20%·바람 변경 재추정·invalid 풍속 렌더링/연속효과 검증은 없음. |
-| D-7 | 부분 | FE HUD/범례·상태 숫자·합성풍향·가구 팝오버/Drawer·면책·모의1분 버튼. 새 지도의 레이어/HUD/배속 local preview는 지도3개와 전체21/21 검증을 통과했다. 실제 POST 시뮬 시계·T+/ha/선두속도·조건시각/불명·HUD≤25% 측정은 미완료. |
+| D-7 | 부분 | CYCLE 공용 POST 재생/일시정지/12·30·60×·T+·지도/집계·종료를 실제 HTTP2/2에서 검증했다. 정적 장면 preview는 보조 점검. ha/선두속도·조건시각/불명·HUD≤25% 측정은 미완료. |
 | D-8 | 부분 | DOM1px=2m·풍향+180·풍상3/횡2·invalid wind=null·구역최소·대칭/풍상 검사, SOURCE wind freshness/context gate. 바람 변경 누적 prog·reestimated·서버/FE 독립 패리티±0.5분 미완료. 공유 TS 함수는 독립 패리티 검증이 아니다. |
 | D-9 | 완료(모의) | DISP 동일 trip ID로 가구/차량/운전자/조/지원인원/대피소좌석 예약·중복/인원부족/returning 차단·출발/탑승/도착 재검증·복귀해제. 취소/반려는 예약 전이며 현재 실행 임무의 강제 취소/대체 API는 없음. |
 
@@ -169,8 +170,8 @@ source P2 보완도 검증됐다. source-fail/collect로 미확정 계획의 ETA
 | UI-4 | 부분 | FE 합성/모의/규칙/비공식면책·자동119 접수≠구조·이장수동. 실API/replay/실음성 경로의 데이터·태그 계약은 미완료. |
 | NF-1 | 완료(모의) | 최신 TS 선택: `npm ci` 뒤 `npm run dev` 한 명령으로 FE5173+mock8090; build+start:mock 단일 정적서빙·외부키 없이 동작. 원문 Python 실행명령은 최신 사용자 선택으로 대체. |
 | NF-2 | 부분 | `?demo=1` FE local Runtime·자동API/외부요청0 검사. 이미 제공된 정적 번들로 백엔드없이 조작 가능. 원문의 JSONL 시간순 자동재생·배포 번들의 완전한 네트워크차단 시작 검증은 없음. |
-| NF-3 | 미검증 | 로컬<300ms·44가구 최초결과12×≤4분·30fps 이상 측정없음. 권위 시계는 명시적1분 버튼이다. 새 지도의80ms local preview는 상태 실행을 진전시키지 않으며30fps/서버 시계 연속 보간 증거가 아니다. JSONL 기록은 API 일부 구현. |
-| NF-4 | 부분 | DATA seed/referenceDate·Runtime deterministic mock·서버/FE shared 계산. 새 지도 preview는 브라우저 표시 시각만 바꾼다. 연속 서버 권위 시계·FE 보간·바람 변경 누적·실제/시뮬 시계 전체 검증은 미완료. |
+| NF-3 | 미검증 | 공용 서버 단조250ms/FE225ms 구독과 HTTP2/2 기능은 검증됐다. <300ms·혼합44가구12×≤4분·30fps 성능 목표의 측정은 미실시다. |
+| NF-4 | 부분 | CYCLE 분수 pulse/bulk 동등·중복/역행 방지·서버/FE 같은 상태·실제 전화 시계 분리·정지/두절/종료·재시작/이장 취소 우선 검증. 바람 변경 누적/독립 패리티·실전화와 혼합 전체 성능은 미완료. |
 | NF-5 | 부분 | `server/.env.example`: demo/hybrid·Telnyx키/connection/publickey/HTTPS·담당토큰·동의번호2개·journal; unknown mode 거부 검사. 모델/source/속도/재발신/상한/지역/실제상한 설정 계약은 없음. |
 | NF-6 | 부분 | API 로컬CORS·64KiB 본문·strict envelope·서명/시각·별도env번호·credential 없는 export·hybrid토큰. 모든 입력 길이/strict 세부 payload·journal/export 전화/전사 마스킹·지시문 최소화·배포 보안 검증은 남음. |
 | NF-7 | 부분 | API `snapshot.json`, `webhooks.json`, `events.jsonl`·logger false·0600/0700 생성·source HTTP/저널10/10이 실패/풍속 근거와 예약/위치/종료 export 보존 입증. 정식 records/events 분리·wall/sim/evidence 연계·전체 민감로그 마스킹 검증은 남음. |
@@ -225,7 +226,7 @@ source P2 보완도 검증됐다. source-fail/collect로 미확정 계획의 ETA
 | U3 | 1366폴드의 긴급/이장/5행·세부 합계 | 부분 | FE1366 fifth-row bounding box·큐·snapshot counts. pendingunknown/X/hold 전체 조합의 앞5칸 합계·폴드는 미검증. |
 | U4 | 7필터·재집계·이력·주기 | 부분 | FE48행/등급/90일 필터/확인 저장·DOM 이력. 7필터의 모든 변경 조합·운영 주기는 미완료. |
 | U5 | D/V/X·실제1+1·조원12·공용8·확정전0 | 부분 | FE offline full flow·45/3/0·8/8. 실제1+1 혼합 표시/수신은 없음. |
-| U6 | 48지도·HUD≤25%·경로·30fps | 부분 | FE48 markers·합성 경로/차량의 같은 map·면책·viewport capture. 새 지도·낡은 풍속 차단을 포함한 E2E21/21 통과. local preview 추가·HUD 면적 측정/30fps 미검증. |
+| U6 | 부분 | FE48 markers·주연 집/차량/대피소 전체보기·same trip 경로/시각·단독22/22+HTTP2/2. HUD 면적/30fps 측정은 미검증. |
 | U7 | 조 응답/단계/담당·차량·요약 | 부분 | FE 자원 카드·DISP 예약/단계·재배정 UI. 재호출/재배정/예약 포함 E2E21/21 통과·원문의 전체 숫자 세트 점검 남음. |
 | U8 | 소스8·JSON·origin·실패 반영 | 부분 | SOURCE16+통합15+HTTP/저널10·FE origin/mode/freshness/record ID·별도 실패/replay JSON. 실패7/8 유지·낡은 풍속 지도 HUD 차단도 최신21/21에서 통과. 관측 없는 실패 record의 fixture 시각/요약 대체 금지·신규 미확정 계획 검증도 FE21/21에서 통과했다. 전용 판단 타임라인 없음. |
 | U9 | 도우미5문장·변경 로그 | 부분 | ASSIST 규칙5범주·동적 자원·통신 토글·human 순위/통신 로그 집중10/10 통과. FE의 최신 revision 전달 확인. 전체5문장 브라우저 리허설은 미검증. |
@@ -270,6 +271,6 @@ source P2 보완도 검증됐다. source-fail/collect로 미확정 계획의 ETA
 
 ## 종료하지 않은 목표
 
-현재 완료된 것은 합성 자료와 표에 적은 모의 동작이다. React 19 + Node TypeScript + Telnyx + 실제 LangGraph 전체 제품의 목표를 유지한다. 모델 adapter와 모든 추론 그래프, 공식 source 관할/허용치/지시와 실제 수집 계약, 엄격한 live 도구/전화망 통합, 구급차 요청/우선 배차 큐, 연속 시계/30fps/4분 성능, durable checkpoint와 전체 T/U 검증이 남았다.
+현재 최신 추가 범위는 화재 발생→대피/인수인계의 연속 사이클과 두 주연 모의 구조 시연이다. 원문의 실전화/음성·추론·공공 adapter·운영 배차 큐·30fps/4분 성능·durable checkpoint와 전체 T/U 조건은 후속 항목이다. 이번 작업은 그 전체 구현을 재개한 것이 아니다.
 
 동의된 실제 수신자2명, 키/권한·공개 HTTPS·수신 기기·녹음/보관 정책의 실제 리허설, 4분 영상과 휴대폰 수신 장면, 행사 등록/최종 제출도 **미검증 또는 미완료**다. 이 문서 감사에서 실모델·실전화·정부 API를 호출하거나 커밋·푸시하지 않았다. 실제 `/review` 실행을 확인하지 않았으므로 Codex 코드검토 발견 사례만 별도 기록한다.
