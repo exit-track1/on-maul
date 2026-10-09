@@ -342,6 +342,18 @@ export class Runtime {
         t.heldReason = '이전 스냅샷의 경로 미검증·담당자 확인 필요';
         t.heldAtSim = this.state.simMinutes;
       }
+    // Older releases stopped active rescue transport at the default 40-minute deadline.
+    // Reopen that cycle for explicit recovery/resume, keeping its existing trip and passengers.
+    if (
+      this.state.simulation.phase === 'awaiting_handover' &&
+      this.state.simMinutes >= 40 &&
+      this.state.simulation.endReason?.startsWith('합성 40분 도달') &&
+      this.liveCycleWork()
+    ) {
+      this.state.simulation.phase = 'running';
+      this.state.simulation.endReason = null;
+      this.extendLiveCycleDuration(this.state.simMinutes);
+    }
     this.state.networkDown = true;
     for (const c of this.state.calls)
       if (c.mode === 'telnyx' && c.phase !== 'finished') {
@@ -474,6 +486,25 @@ export class Runtime {
         call.mode === 'telnyx' &&
         (call.phase !== 'finished' ||
           (this.isLiveStoryTarget(call.targetId) && !call.phoneOutcome)),
+    );
+  }
+  private liveCycleWork() {
+    return (
+      this.state.demonstration?.phoneMode === 'live' &&
+      (this.awaitingPhoneResults() ||
+        this.unresolvedLiveCalls() ||
+        this.state.trips.some((trip) => !trip.heldReason && trip.legs))
+    );
+  }
+  private extendLiveCycleDuration(requestedMinutes: number) {
+    if (!this.liveCycleWork()) return;
+    this.state.simulation.durationMinutes = Math.max(
+      this.state.simulation.durationMinutes,
+      40,
+      Math.ceil(requestedMinutes),
+      ...this.state.trips
+        .filter((trip) => !trip.heldReason && trip.legs)
+        .map((trip) => Math.ceil(trip.returnSim)),
     );
   }
   preparePhoneCall(targetId: string, requestId: string, revision = this.state.revision): View {
@@ -1908,7 +1939,13 @@ export class Runtime {
       deltaMinutes === 0
     )
       return this.view();
-    const budget = cycleBudget(this.state.simMinutes, deltaMinutes, this.cycleRemainder);
+    this.extendLiveCycleDuration(this.state.simMinutes + deltaMinutes);
+    const budget = cycleBudget(
+      this.state.simMinutes,
+      deltaMinutes,
+      this.cycleRemainder,
+      this.state.simulation.durationMinutes,
+    );
     this.cycleRemainder = budget.remainder;
     if (budget.target === this.state.simMinutes) return this.view();
     this.cycleBaseTime ??=
@@ -1926,7 +1963,7 @@ export class Runtime {
   }
   private nextCycleBoundary() {
     const now = this.state.simMinutes;
-    const candidates = [Math.floor(now) + 1, 40];
+    const candidates = [Math.floor(now) + 1, this.state.simulation.durationMinutes];
     for (const call of this.state.calls) {
       if (call.mode !== 'mock' || this.state.demonstration?.phoneMode === 'live') continue;
       if (call.phase === 'calling') candidates.push((call.startedSim ?? now) + 1);
@@ -2024,7 +2061,7 @@ export class Runtime {
     if (
       !this.awaitingPhoneResults() &&
       !this.unresolvedLiveCalls() &&
-      (this.state.simMinutes >= 40 || !runnable)
+      ((this.state.simMinutes >= 40 && !this.liveCycleWork()) || !runnable)
     ) {
       this.state.simulation.phase = 'awaiting_handover';
       this.state.simulation.playing = false;

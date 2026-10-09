@@ -858,7 +858,8 @@ export default function App() {
           </span>
           <div className="cycle-progress-wrap">
             <output data-testid="cycle-time">
-              T+{Math.floor(view.simMinutes)}분 <small>/ 40분</small>
+              T+{Math.floor(view.simMinutes)}분{' '}
+              <small>/ {simulation.durationMinutes}분</small>
             </output>
             <progress
               data-testid="cycle-progress"

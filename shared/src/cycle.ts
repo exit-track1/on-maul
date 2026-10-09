@@ -3,7 +3,7 @@ export interface Simulation {
   phase: 'idle' | 'review' | 'running' | 'awaiting_handover' | 'ended';
   playing: boolean;
   speed: 12 | 30 | 60;
-  durationMinutes: 40;
+  durationMinutes: number;
   endReason: string | null;
 }
 
@@ -24,9 +24,12 @@ export const CYCLE_UNITS_PER_MINUTE = 1_000_000;
 export function cycleTime(minutes: number): number {
   return Math.round(minutes * CYCLE_UNITS_PER_MINUTE) / CYCLE_UNITS_PER_MINUTE;
 }
-export function cycleBudget(current: number, delta: number, remainder = 0) {
+export function cycleBudget(current: number, delta: number, remainder = 0, limit = 40) {
   const requested = delta * CYCLE_UNITS_PER_MINUTE + remainder;
   const units = Math.floor(requested + 1e-9);
-  const target = Math.min(40, cycleTime(current + units / CYCLE_UNITS_PER_MINUTE));
-  return { target, remainder: target === 40 ? 0 : Math.max(0, requested - units) };
+  const target = Math.max(
+    current,
+    Math.min(limit, cycleTime(current + units / CYCLE_UNITS_PER_MINUTE)),
+  );
+  return { target, remainder: target === limit ? 0 : Math.max(0, requested - units) };
 }
