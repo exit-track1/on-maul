@@ -352,14 +352,16 @@ export function Calls({ view, run, open }: PanelProps) {
           </b>{' '}
           · 주민·조원 교대
         </span>
-        <Btn
-          size="sm"
-          kind="outline"
-          disabled={!view.plan?.confirmed || view.networkDown || view.frozen}
-          onClick={() => void run('advance')}
-        >
-          모의 1분 진행
-        </Btn>
+        {!view.simulation.cycleId && (
+          <Btn
+            size="sm"
+            kind="outline"
+            disabled={!view.plan?.confirmed || view.networkDown || view.frozen}
+            onClick={() => void run('advance')}
+          >
+            모의 1분 진행
+          </Btn>
+        )}
       </div>
       <div className="filters">
         {[

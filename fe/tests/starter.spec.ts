@@ -1,5 +1,14 @@
 import { test, expect } from '@playwright/test';
+import type { Page } from '@playwright/test';
 const demo = '/index.html?demo=1';
+
+async function chooseScene(page: Page, id: string) {
+  const tools = page.locator('details.static-scene-tools');
+  if ((await tools.getAttribute('open')) === null)
+    await tools.getByText('정적 장면 점검', { exact: true }).click();
+  await page.getByLabel('시연 장면', { exact: true }).selectOption(id);
+}
+
 test('roster 48 rows, seven filters, drawer history and explicit check', async ({
   page,
 }) => {
@@ -68,7 +77,7 @@ test('same counts across all six tabs and 48 keyboard-accessible map markers', a
   page,
 }) => {
   await page.goto(demo);
-  await page.getByLabel('시연 장면', { exact: true }).selectOption('active');
+  await chooseScene(page, 'active');
   await expect(page.getByTestId('household-marker')).toHaveCount(48);
   await expect(page.locator('svg [role=button]')).toHaveCount(48);
   for (const label of [
@@ -185,7 +194,7 @@ test('stale replay wind remains stale after collection and the map keeps ETA unk
   page,
 }) => {
   await page.goto(demo);
-  await page.getByLabel('시연 장면', { exact: true }).selectOption('late');
+  await chooseScene(page, 'late');
   await expect(page.locator('.map-hud')).toContainText('바람 근거 불명/낡음');
   await expect(page.locator('svg')).toContainText('ETA 불명');
   await page.getByRole('tab', { name: '데이터 소스', exact: true }).click();
@@ -232,7 +241,7 @@ test('handover includes moving and dispatch, freezes snapshot and exports matchi
   page,
 }) => {
   await page.goto(demo);
-  await page.getByLabel('시연 장면', { exact: true }).selectOption('active');
+  await chooseScene(page, 'active');
   await page
     .getByRole('button', { name: '기록으로 종료', exact: true })
     .click();
@@ -269,7 +278,7 @@ test('human reassignment approval shows reserved route and vehicle on the same m
   page,
 }) => {
   await page.goto(demo);
-  await page.getByLabel('시연 장면', { exact: true }).selectOption('active');
+  await chooseScene(page, 'active');
   await page.getByRole('tab', { name: '자원·5분대기조', exact: true }).click();
   await page
     .getByLabel('남구역 대기조 재배정 대상', { exact: true })
@@ -325,7 +334,7 @@ test('moving callback is visible and explicit arrival removes its reservation', 
   page,
 }) => {
   await page.goto(demo);
-  await page.getByLabel('시연 장면', { exact: true }).selectOption('active');
+  await chooseScene(page, 'active');
   await page.getByRole('tab', { name: '통화', exact: true }).click();
   await page.getByText('모의 전사·분류 시연', { exact: true }).click();
   await page
@@ -397,7 +406,7 @@ for (const [width, height] of [
     page.on('pageerror', (e) => errors.push(e.message));
     await page.setViewportSize({ width, height });
     await page.goto(demo);
-    await page.getByLabel('시연 장면', { exact: true }).selectOption('active');
+    await chooseScene(page, 'active');
     await expect(page.getByTestId('household-marker')).toHaveCount(48);
     expect(
       await page.evaluate(

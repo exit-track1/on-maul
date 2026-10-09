@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState, type ReactNode } from 'react';
+import { useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
 import { Btn, Card, Pill, Ring } from './components';
 import { Client } from './mock/client';
 import {
@@ -15,6 +15,7 @@ import {
 import { handover, staleReason } from '../../shared/src/domain.ts';
 import type { View } from '../../shared/src/runtime.ts';
 import { parseHouseholdNotes } from '../../shared/src/household-notes.ts';
+import { configureDemoStory } from '../../shared/src/demo-story.ts';
 import {
   sourceReadings,
   validReplayCount,
@@ -32,6 +33,23 @@ const modes = {
   watch: '감시',
   event: '발생 대응',
   record: '기록',
+};
+const cyclePhases = {
+  idle: '시연 준비',
+  review: '발령 검토',
+  running: '대피 진행',
+  awaiting_handover: '인수인계 대기',
+  ended: '종료',
+};
+const demoStages = {
+  ready: '구조 시연 준비',
+  dialing: '모의 확인 전화',
+  talking: '모의 통화 중',
+  requested: '구조 요청',
+  responding: '구조 차량 출동 중',
+  boarding: '탑승 확인',
+  evacuating: '탑승·대피 중',
+  completed: '대피 완료',
 };
 function Dialog({
   title,
@@ -413,7 +431,14 @@ function Drawer({
 }
 export default function App() {
   const [client] = useState(() => new Client()),
-    [view, setView] = useState(() => client.local.view()),
+    [view, setView] = useState(() => client.snapshot().view),
+    [connection, setConnection] = useState(() => client.snapshot()),
+    [focusRequest, setFocusRequest] = useState<
+      { id: string; sequence: number; fit?: boolean } | undefined
+    >(),
+    [demoStory, setDemoStory] = useState<'grandfather' | 'squad'>(
+      'grandfather',
+    ),
     [tab, setTab] = useState<Tab>('map'),
     [modal, setModal] = useState<'confirm' | 'close' | 'assistant' | null>(
       null,
@@ -424,17 +449,10 @@ export default function App() {
     [mobile, setMobile] = useState<'canvas' | 'log'>('canvas'),
     [pending, setPending] = useState(false);
   useEffect(() => {
-    if (new URLSearchParams(location.search).get('demo') === '1') return;
-    let active = true;
-    void client
-      .connect()
-      .then((v) => {
-        if (active) setView(v);
-      })
-      .catch(() => {});
-    return () => {
-      active = false;
-    };
+    return client.subscribe((snapshot) => {
+      setView(snapshot.view);
+      setConnection(snapshot);
+    });
   }, [client]);
   async function command(
     action: string,
@@ -468,17 +486,61 @@ export default function App() {
     leaders = view.scenario.householdStatuses.filter(
       (s) => ['refuse', 'visiting'].includes(s.status) && !s.temporaryExclusion,
     ).length;
-  const decision = failed
-    ? `119 인계 오류 ${failed}건`
-    : view.plan && !view.plan.confirmed
-      ? '확정 대기'
-      : view.scenario.mode === 'watch'
-        ? '발령 절차 시작'
-        : view.reassignments.some((p) => p.status === 'pending')
-          ? `재배정 승인 ${view.reassignments.filter((p) => p.status === 'pending').length}건`
-          : leaders
-            ? `이장 연결·결과 ${leaders}건`
-            : null;
+  const simulation = view.simulation;
+  const demonstration = view.demonstration;
+  const plannedPosition = useMemo(() => {
+    if (view.demonstration || view.scenario.mode !== 'idle') return undefined;
+    const data = structuredClone(view.data);
+    const planned = configureDemoStory(data, demoStory);
+    return data.households.find(
+      (household) => household.id === planned.residentId,
+    )!.demoPosition;
+  }, [view.demonstration, view.scenario.mode, view.data, demoStory]);
+  const activeStory = demonstration?.story ?? demoStory;
+  const demoResidentId =
+    demonstration?.residentId ??
+    (activeStory === 'grandfather' ? 'H012' : 'H009');
+  const demoName =
+    activeStory === 'grandfather' ? '반영환 할아버지' : '박미숙 할머니';
+  const demoStage = demonstration?.stage ?? 'ready';
+  const demoVehicle =
+    demonstration?.vehicleId ?? (activeStory === 'grandfather' ? 'V01' : 'V04');
+  const demoTrip = view.trips.find(
+    (trip) => trip.householdId === demoResidentId,
+  );
+  const demoTeam = view.data.teams.find((team) =>
+    team.members.some((member) => member.id === demonstration?.memberId),
+  );
+  const demoMemberResponse = demonstration?.memberId
+    ? view.memberResponses[demonstration.memberId]
+    : undefined;
+  const residentMessage = demonstration?.messages.findLast(
+    (entry) => entry.speaker === 'resident',
+  );
+  const recentMessages = new Set(
+    demonstration?.messages
+      .filter((entry) => entry.speaker !== 'resident')
+      .slice(-2),
+  );
+  const demoMessages =
+    demonstration?.messages.filter(
+      (entry) => entry === residentMessage || recentMessages.has(entry),
+    ) ?? [];
+  const available = connection.offline || connection.connected;
+  const decision =
+    simulation.phase === 'awaiting_handover'
+      ? '미해결 인수인계·종료'
+      : failed
+        ? `119 인계 오류 ${failed}건`
+        : view.plan && !view.plan.confirmed
+          ? '확정 대기'
+          : view.scenario.mode === 'watch'
+            ? '발령 절차 시작'
+            : view.reassignments.some((p) => p.status === 'pending')
+              ? `재배정 승인 ${view.reassignments.filter((p) => p.status === 'pending').length}건`
+              : leaders
+                ? `이장 연결·결과 ${leaders}건`
+                : null;
   const props = { view, run, open: setSelected };
   const readings = sourceReadings(view);
   const time = new Intl.DateTimeFormat('ko-KR', {
@@ -488,7 +550,8 @@ export default function App() {
     hour12: false,
   }).format(new Date(view.scenario.displayTime));
   function decisionClick() {
-    if (failed) setTab('calls');
+    if (simulation.phase === 'awaiting_handover') setModal('close');
+    else if (failed) setTab('calls');
     else if (view.plan && !view.plan.confirmed) setModal('confirm');
     else if (view.scenario.mode === 'watch') void run('plan');
     else if (view.reassignments.some((p) => p.status === 'pending'))
@@ -504,38 +567,56 @@ export default function App() {
           <span>한 집도 빠짐없이</span>
         </div>
         <div className="header-controls">
-          <label>
-            시연 장면
-            <select
-              aria-label="시연 장면"
-              value={view.scenario.id}
-              onChange={(e) => void run('scenario', { id: e.target.value })}
-              disabled={pending}
-            >
-              {view.data.scenarios.map((s) => (
-                <option key={s.id} value={s.id}>
-                  {s.label}
-                </option>
-              ))}
-            </select>
-          </label>
+          <details className="static-scene-tools">
+            <summary>정적 장면 점검</summary>
+            <label>
+              시연 장면
+              <select
+                aria-label="시연 장면"
+                value={view.scenario.id}
+                onChange={(e) => void run('scenario', { id: e.target.value })}
+                disabled={pending || !available}
+              >
+                {!view.data.scenarios.some(
+                  (s) => s.id === view.scenario.id,
+                ) && (
+                  <option value={view.scenario.id} disabled>
+                    현재 연속 시연
+                  </option>
+                )}
+                {view.data.scenarios.map((s) => (
+                  <option key={s.id} value={s.id}>
+                    {s.label}
+                  </option>
+                ))}
+              </select>
+            </label>
+          </details>
           <Pill tone="soft">
-            {client.connected ? '서버 연결' : '브라우저 단독 mock'}
+            {connection.offline
+              ? '브라우저 단독 mock'
+              : connection.connected
+                ? '서버 연결'
+                : '서버 연결 대기'}
           </Pill>
-          <button
-            className="text-button"
-            onClick={() =>
-              void client
-                .connect()
-                .then((v) => {
-                  setView(v);
-                  setMessage('서버 연결됨');
-                })
-                .catch(() => setMessage('mock 서버를 실행하세요: npm run dev'))
-            }
-          >
-            서버 연결
-          </button>
+          {!connection.offline && !connection.connected && (
+            <button
+              className="text-button"
+              onClick={() =>
+                void client
+                  .connect()
+                  .then((v) => {
+                    setView(v);
+                    setMessage('서버 연결됨');
+                  })
+                  .catch(() =>
+                    setMessage('mock 서버를 실행하세요: npm run dev'),
+                  )
+              }
+            >
+              연결 다시 확인
+            </button>
+          )}
           <time>{time} KST</time>
         </div>
       </header>
@@ -584,40 +665,167 @@ export default function App() {
         </div>
       </aside>
       <div className="situation" aria-live="polite">
-        <strong>{modes[view.scenario.mode]}</strong>
-        {view.scenario.mode === 'idle' ? (
-          <span>
-            48가구 · 방문 확인 대상 {c.visit} · 확인 필요 {notChecked}
+        <section
+          className="cycle-console"
+          aria-label="화재 발생부터 대피 종료까지 시연"
+        >
+          <div className="cycle-main-control">
+            <label className="cycle-story-select">
+              메인 시연
+              <select
+                aria-label="메인 시연"
+                value={demoStory}
+                disabled={
+                  pending ||
+                  simulation.phase === 'running' ||
+                  simulation.phase === 'review' ||
+                  simulation.phase === 'awaiting_handover'
+                }
+                onChange={(e) =>
+                  setDemoStory(e.target.value as 'grandfather' | 'squad')
+                }
+              >
+                <option value="grandfather">반영환 할아버지 · 구급차</option>
+                <option value="squad">박미숙 할머니 · 5분대기조</option>
+              </select>
+            </label>
+            <button
+              className="cycle-start"
+              data-testid="cycle-start"
+              disabled={
+                pending ||
+                !available ||
+                ['review', 'running', 'awaiting_handover'].includes(
+                  simulation.phase,
+                )
+              }
+              onClick={() =>
+                void command('cycle-start', {
+                  revision: view.revision,
+                  demoStory,
+                }).then((next) => {
+                  if (next) {
+                    setModal('confirm');
+                    setTab('map');
+                    setMobile('canvas');
+                    setFocusRequest({
+                      id:
+                        next.demonstration?.residentId ??
+                        (demoStory === 'grandfather' ? 'H012' : 'H009'),
+                      sequence: performance.now(),
+                      fit: true,
+                    });
+                  }
+                })
+              }
+            >
+              화재 발생·대피 시연 시작
+            </button>
+          </div>
+          <span
+            className={`cycle-phase phase-${simulation.phase}`}
+            data-testid="cycle-phase"
+            data-phase={simulation.phase}
+          >
+            {cyclePhases[simulation.phase]}
           </span>
-        ) : view.scenario.mode === 'watch' ? (
-          <span>
-            합성 수신 {view.networkDown ? 0 : validReplayCount(view)}
-            /8 · 발신 없음
+          <div className="cycle-progress-wrap">
+            <output data-testid="cycle-time">
+              T+{Math.floor(view.simMinutes)}분 <small>/ 40분</small>
+            </output>
+            <progress
+              data-testid="cycle-progress"
+              aria-label="대피 시연 진행"
+              max={simulation.durationMinutes}
+              value={simulation.cycleId ? view.simMinutes : 0}
+            />
+          </div>
+          {simulation.cycleId && simulation.phase !== 'ended' && (
+            <div className="cycle-playback">
+              <button
+                disabled={
+                  pending ||
+                  !available ||
+                  simulation.phase !== 'running' ||
+                  (view.networkDown && !simulation.playing)
+                }
+                onClick={() =>
+                  void run('sim', {
+                    revision: view.revision,
+                    playing: !simulation.playing,
+                  })
+                }
+              >
+                {simulation.playing ? '시연 일시정지' : '시연 재생'}
+              </button>
+              <label>
+                배속{' '}
+                <select
+                  aria-label="시연 배속"
+                  value={simulation.speed}
+                  disabled={
+                    pending ||
+                    !available ||
+                    !['review', 'running'].includes(simulation.phase)
+                  }
+                  onChange={(e) =>
+                    void run('sim', {
+                      revision: view.revision,
+                      speed: Number(e.target.value),
+                    })
+                  }
+                >
+                  {[12, 30, 60].map((speed) => (
+                    <option key={speed} value={speed}>
+                      {speed}×
+                    </option>
+                  ))}
+                </select>
+              </label>
+            </div>
+          )}
+          {connection.error && (
+            <span className="cycle-connection-error" role="status">
+              {connection.error}
+            </span>
+          )}
+        </section>
+        <div className="situation-counts">
+          <strong>{modes[view.scenario.mode]}</strong>
+          {view.scenario.mode === 'idle' ? (
+            <span>
+              48가구 · 방문 확인 대상 {c.visit} · 확인 필요 {notChecked}
+            </span>
+          ) : view.scenario.mode === 'watch' ? (
+            <span>
+              합성 수신 {view.networkDown ? 0 : validReplayCount(view)}
+              /8 · 발신 없음
+            </span>
+          ) : (
+            <>
+              <span className="act">
+                조치 필요 <b>{c.act}</b>
+              </span>
+              <span className="prog">
+                진행 <b>{c.prog}</b>
+              </span>
+              <span className="safe">
+                안전{' '}
+                <b>
+                  {c.safe}/{c.eligible}
+                </b>
+              </span>
+            </>
+          )}
+          <span className="aux-count">
+            방문 {c.visit} · 임시 제외 {c.temporarilyExcluded}
           </span>
-        ) : (
-          <>
-            <span className="act">
-              조치 필요 <b>{c.act}</b>
-            </span>
-            <span className="prog">
-              진행 <b>{c.prog}</b>
-            </span>
-            <span className="safe">
-              안전{' '}
-              <b>
-                {c.safe}/{c.eligible}
-              </b>
-            </span>
-          </>
-        )}
-        <span className="aux-count">
-          방문 {c.visit} · 임시 제외 {c.temporarilyExcluded}
-        </span>
-        {decision && !view.frozen && (
-          <button className="decision-pill" onClick={decisionClick}>
-            {decision} →
-          </button>
-        )}
+          {decision && !view.frozen && (
+            <button className="decision-pill" onClick={decisionClick}>
+              {decision} →
+            </button>
+          )}
+        </div>
       </div>
       <section
         className={`log-panel ${mobile !== 'log' ? 'mobile-hidden' : ''}`}
@@ -631,15 +839,17 @@ export default function App() {
           <div className="phase-guide">
             <div className="eyebrow">지금 해야 할 일</div>
             <h3>
-              {view.scenario.mode === 'idle'
-                ? '명단을 먼저 확인하세요'
-                : view.scenario.mode === 'watch'
-                  ? '수신 근거를 검토하세요'
-                  : view.plan && !view.plan.confirmed
-                    ? '순서를 검토하고 확정하세요'
-                    : view.frozen
-                      ? '미해결 인수인계를 보존합니다'
-                      : '조치 필요 가구를 확인하세요'}
+              {simulation.phase === 'awaiting_handover'
+                ? '미해결을 인수인계하고 종료하세요'
+                : view.scenario.mode === 'idle'
+                  ? '명단을 먼저 확인하세요'
+                  : view.scenario.mode === 'watch'
+                    ? '수신 근거를 검토하세요'
+                    : view.plan && !view.plan.confirmed
+                      ? '순서를 검토하고 확정하세요'
+                      : view.frozen
+                        ? '미해결 인수인계를 보존합니다'
+                        : '조치 필요 가구를 확인하세요'}
             </h3>
             <p>
               {view.plan?.confirmed
@@ -647,6 +857,17 @@ export default function App() {
                 : '담당자 확정 전에는 실제·가상 발신이 없습니다.'}
             </p>
           </div>
+          {simulation.phase === 'awaiting_handover' && (
+            <Card>
+              <span className="eyebrow">시연 진행 종료 · 담당자 결정 대기</span>
+              <h3>대피 진행을 멈추고 인수인계를 기다립니다</h3>
+              <p>
+                미해결 {handover(view.data.households, view.scenario).length}
+                건을 확인한 뒤 ‘기록으로 종료’를 눌러 종료 기록을 보존하세요.
+              </p>
+              <p className="muted">{simulation.endReason}</p>
+            </Card>
+          )}
           {view.scenario.mode === 'watch' && (
             <Card>
               <span className="eyebrow">규칙 제안 · 합성 경보</span>
@@ -766,7 +987,15 @@ export default function App() {
               >
                 {view.networkDown ? '통신 복구 시연' : '통신 두절 시연'}
               </Btn>
-              <Btn kind="outline" size="sm" onClick={() => setModal('close')}>
+              <Btn
+                kind={
+                  simulation.phase === 'awaiting_handover'
+                    ? 'primary'
+                    : 'outline'
+                }
+                size="sm"
+                onClick={() => setModal('close')}
+              >
                 기록으로 종료
               </Btn>
             </>
@@ -779,6 +1008,110 @@ export default function App() {
       <main
         className={`canvas-panel ${mobile !== 'canvas' ? 'mobile-hidden' : ''}`}
       >
+        {(tab === 'map' || demonstration) && (
+          <section
+            className={`demo-story-card demo-stage-${demoStage} ${tab !== 'map' ? 'demo-story-compact' : ''}`}
+            data-testid="demo-story-card"
+            data-stage={demoStage}
+            aria-label="주연 구조 시연"
+          >
+            <div className="demo-story-heading">
+              <div>
+                <span className="eyebrow">
+                  합성 모의 ·{' '}
+                  {activeStory === 'grandfather'
+                    ? '구급차 구조 시연'
+                    : '5분대기조 구조 시연'}
+                </span>
+                <h2>
+                  {demoName} <small>{demoResidentId}</small>
+                </h2>
+              </div>
+              <button
+                data-testid="demo-house-focus"
+                onClick={() => {
+                  setTab('map');
+                  setMobile('canvas');
+                  setFocusRequest({
+                    id: demoResidentId,
+                    sequence: performance.now(),
+                  });
+                }}
+              >
+                집 위치 보기 ↗
+              </button>
+            </div>
+            <div className="demo-story-status">
+              <strong data-testid="demo-stage" data-stage={demoStage}>
+                {demoStage === 'evacuating'
+                  ? activeStory === 'squad'
+                    ? '구조 중'
+                    : '대피 중'
+                  : demoStages[demoStage]}
+              </strong>
+              <span>
+                {demoVehicle} ·{' '}
+                {demoTrip
+                  ? `현재 배차 ${demoTrip.id}`
+                  : demoStage === 'completed'
+                    ? '대피소 도착 확인'
+                    : '담당자 발령 확정 후 구조 진행'}
+              </span>
+              {activeStory === 'squad' && (
+                <span data-testid="demo-member-status">
+                  반영환 대원 · {demoTeam?.id ?? 'TW'}조 ·{' '}
+                  {demoStage === 'completed'
+                    ? '구조 완료'
+                    : ['responding', 'boarding', 'evacuating'].includes(
+                          demoStage,
+                        )
+                      ? '구조 중'
+                      : demoMemberResponse === 'ok'
+                        ? '출동 가능'
+                        : demoMemberResponse === 'no'
+                          ? '출동 불가'
+                          : '응답 대기'}
+                </span>
+              )}
+            </div>
+            {demonstration?.messages.length ? (
+              <ol
+                className="demo-story-messages"
+                aria-label="합성 모의 통화 흐름"
+              >
+                {demoMessages.map((entry) => (
+                  <li key={entry.id}>
+                    <span>
+                      {entry.speaker === 'assistant'
+                        ? 'AI 안내'
+                        : entry.speaker === 'resident'
+                          ? demoName
+                          : activeStory === 'squad'
+                            ? '반영환 대원'
+                            : '구급대원'}
+                    </span>
+                    <p>
+                      {entry.text.replace(
+                        '[합성 시연 텍스트·실모델/음성통화 아님] ',
+                        '',
+                      )}
+                    </p>
+                  </li>
+                ))}
+              </ol>
+            ) : (
+              <p className="demo-story-ready">
+                {activeStory === 'grandfather'
+                  ? '화재 알림 → 구조 요청 → 구급차 탑승 → 대피소 도착'
+                  : '화재 알림 → 지원 요청 → 반영환 대원 응답 → 5분대기조 구조'}
+                를 한 흐름으로 시연합니다.
+              </p>
+            )}
+            <small className="demo-story-disclaimer">
+              합성 주민·모의 통화 전사와 경로입니다. 실제 전화·GPS가 아닙니다.
+            </small>
+          </section>
+        )}
         <div className="tab-list" role="tablist" aria-label="상황실 탭">
           {tabs.map((t, i) => (
             <button
@@ -811,7 +1144,13 @@ export default function App() {
           tabIndex={0}
         >
           {tab === 'map' ? (
-            <MapPanel {...props} />
+            <MapPanel
+              {...props}
+              focusRequest={focusRequest}
+              featuredResidentId={demoResidentId}
+              featuredStory={activeStory}
+              plannedPosition={plannedPosition}
+            />
           ) : tab === 'calls' ? (
             <Calls {...props} />
           ) : tab === 'resources' ? (
@@ -925,7 +1264,7 @@ export default function App() {
                   (v) => {
                     if (v) {
                       setModal(null);
-                      setTab('calls');
+                      setTab(v.simulation.cycleId ? 'map' : 'calls');
                     }
                   },
                 )

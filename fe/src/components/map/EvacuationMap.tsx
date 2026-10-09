@@ -15,6 +15,7 @@ import {
   STATUS_LABELS,
 } from '../../../../shared/src/domain.ts';
 import type { PanelProps } from '../../tabs/Panels';
+import type { Point } from '../../../../shared/src/types.ts';
 import { predictionEvidence } from '../../../../shared/src/monitoring.ts';
 import {
   firePerimeter,
@@ -117,10 +118,12 @@ function MotionMarker({
   motion,
   labelOffset,
   select,
+  featured,
 }: {
   motion: MapMotion;
   labelOffset: { x: number; y: number };
   select: (id: string) => void;
+  featured?: boolean;
 }) {
   const { position, kind } = motion;
   const labelY = labelOffset.y;
@@ -173,7 +176,12 @@ function MotionMarker({
           )}
         </g>
       ) : (
-        <g transform={`rotate(${routeHeading(motion.route, motion.position)})`}>
+        <g
+          transform={`rotate(${routeHeading(motion.route, motion.position)})`}
+          data-testid={featured ? 'demo-vehicle' : undefined}
+          data-x={position.x}
+          data-y={position.y}
+        >
           <Vehicle ambulance={motion.ambulance} held={motion.held} />
         </g>
       )}
@@ -211,7 +219,20 @@ function MotionMarker({
   );
 }
 
-export function MapPanel({ view, open, run }: PanelProps) {
+export function MapPanel({
+  view,
+  open,
+  run,
+  focusRequest,
+  featuredResidentId,
+  featuredStory,
+  plannedPosition,
+}: PanelProps & {
+  focusRequest?: { id: string; sequence: number; fit?: boolean };
+  featuredResidentId?: string;
+  featuredStory?: 'grandfather' | 'squad';
+  plannedPosition?: Point;
+}) {
   const [selected, setSelected] = useState<string | null>(null);
   const [layers, setLayers] = useState<Record<Layer, boolean>>({
     people: true,
@@ -222,6 +243,7 @@ export function MapPanel({ view, open, run }: PanelProps) {
   const [playing, setPlaying] = useState(false);
   const [speed, setSpeed] = useState(30);
   const [preview, setPreview] = useState(0);
+  const [frameOffset, setFrameOffset] = useState(0);
   const [zoom, setZoom] = useState(1);
   const [center, setCenter] = useState({ x: 600, y: 380 });
   const [expanded, setExpanded] = useState(false);
@@ -229,16 +251,49 @@ export function MapPanel({ view, open, run }: PanelProps) {
     null,
   );
   const id = useId().replace(/:/g, '');
-  const { map, zones, households, shelters, teams } = view.data;
+  const {
+    map,
+    zones,
+    households: authoritativeHouseholds,
+    shelters,
+    teams,
+  } = view.data;
+  const households = useMemo(
+    () =>
+      plannedPosition
+        ? authoritativeHouseholds.map((household) =>
+            household.id === featuredResidentId
+              ? {
+                  ...household,
+                  demoPosition: plannedPosition,
+                  name:
+                    featuredStory === 'grandfather'
+                      ? '반영환 할아버지'
+                      : '박미숙 할머니',
+                }
+              : household,
+          )
+        : authoritativeHouseholds,
+    [
+      authoritativeHouseholds,
+      plannedPosition,
+      featuredResidentId,
+      featuredStory,
+    ],
+  );
   const active =
     view.scenario.mode === 'event' || view.scenario.mode === 'record';
   const windEvidence = predictionEvidence(view);
   const spreadAvailable = active && windEvidence.usable;
   const c = view.scenario.counts;
-  const time = view.simMinutes + preview;
+  const cycle = Boolean(view.simulation.cycleId);
+  const demoResidentId = view.demonstration?.residentId ?? featuredResidentId;
+  const demoVehicleId = view.demonstration?.vehicleId;
+  const renderOffset = cycle ? frameOffset : preview;
+  const time = view.simMinutes + renderOffset;
   const motions = useMemo(
-    () => (active ? mapMotions(view, preview) : []),
-    [active, view, preview],
+    () => (active ? mapMotions(view, renderOffset) : []),
+    [active, view, renderOffset],
   );
   const people = motions.filter((m) => m.kind === 'person');
   const vehicles = motions.filter((m) => m.kind === 'vehicle');
@@ -265,9 +320,33 @@ export function MapPanel({ view, open, run }: PanelProps) {
     setPreview(0);
     setPlaying(false);
     setSelected(null);
-  }, [view.scenario.id, view.simMinutes]);
+  }, [view.scenario.id]);
   useEffect(() => {
-    if (!playing || !active || view.frozen) return;
+    if (!focusRequest) return;
+    const home = households.find((h) => h.id === focusRequest.id);
+    if (!home) return;
+    setSelected(home.id);
+    if (focusRequest.fit) {
+      // The cycle overview keeps the house, vehicle origin and shelters in one
+      // viewport. Explicit house requests below retain the close view.
+      setZoom(1);
+      setCenter({ x: 600, y: 380 });
+      return;
+    }
+    setZoom(2);
+    setCenter({
+      x: Math.max(300, Math.min(900, home.demoPosition.x)),
+      y: Math.max(190, Math.min(570, home.demoPosition.y)),
+    });
+  }, [focusRequest]);
+  useEffect(() => {
+    if (!cycle) {
+      setPreview(0);
+      setPlaying(false);
+    }
+  }, [cycle, view.simMinutes]);
+  useEffect(() => {
+    if (cycle || !playing || !active || view.frozen) return;
     let last = performance.now();
     const timer = window.setInterval(() => {
       const now = performance.now();
@@ -276,7 +355,35 @@ export function MapPanel({ view, open, run }: PanelProps) {
       setPreview((t) => Math.min(15, t + delta));
     }, 80);
     return () => window.clearInterval(timer);
-  }, [playing, speed, active, view.frozen]);
+  }, [playing, speed, active, view.frozen, cycle]);
+  useEffect(() => {
+    setFrameOffset(0);
+    if (
+      !cycle ||
+      !view.simulation.playing ||
+      view.simulation.phase !== 'running' ||
+      view.frozen ||
+      view.networkDown
+    )
+      return;
+    const receivedAt = performance.now();
+    let frame = 0;
+    let lastFrame = 0;
+    const interpolate = (now: number) => {
+      if (now - lastFrame >= 1000 / 30) {
+        lastFrame = now;
+        // Rendering only: never extrapolate more than a single polling window,
+        // change a trip stage, or create an admission/reservation in the UI.
+        setFrameOffset(
+          (Math.min(250, Math.max(0, now - receivedAt)) / 60000) *
+            view.simulation.speed,
+        );
+      }
+      frame = requestAnimationFrame(interpolate);
+    };
+    frame = requestAnimationFrame(interpolate);
+    return () => cancelAnimationFrame(frame);
+  }, [cycle, view]);
   useEffect(() => {
     if (preview >= 15) setPlaying(false);
   }, [preview]);
@@ -314,7 +421,11 @@ export function MapPanel({ view, open, run }: PanelProps) {
       <div className="panel-title map-panel-title">
         <div>
           <h2>마을 대피 지도</h2>
-          <p>지형 위에서 주민의 이동과 대응 상황을 확인합니다.</p>
+          <p>
+            {plannedPosition
+              ? '집 강조는 합성 시연 예정 위치입니다. 시작 후 같은 위치에서 구조를 진행합니다.'
+              : '지형 위에서 주민의 이동과 대응 상황을 확인합니다.'}
+          </p>
         </div>
         <Pill tone="soft">합성 마을 · 48가구</Pill>
       </div>
@@ -341,7 +452,7 @@ export function MapPanel({ view, open, run }: PanelProps) {
         </button>
       </div>
       <div
-        className={`map-wrap terrain-map ${playing && !view.frozen ? 'is-playing' : 'is-paused'}`}
+        className={`map-wrap terrain-map ${(cycle ? view.simulation.playing : playing) && !view.frozen ? 'is-playing' : 'is-paused'}`}
       >
         <svg
           className={`map ${zoom > 1 ? 'map-draggable' : ''}`}
@@ -834,7 +945,10 @@ export function MapPanel({ view, open, run }: PanelProps) {
                 key={h.id}
                 role="button"
                 tabIndex={0}
-                className={`household-pin ${selected === h.id ? 'is-selected' : ''}`}
+                data-testid={
+                  demoResidentId === h.id ? 'demo-resident-marker' : undefined
+                }
+                className={`household-pin ${selected === h.id ? 'is-selected' : ''} ${demoResidentId === h.id ? 'demo-household-pin' : ''}`}
                 aria-label={`${h.id} ${h.name} ${GROUP_LABELS[group]}`}
                 onClick={() => setSelected(h.id)}
                 onKeyDown={(e) => {
@@ -844,6 +958,41 @@ export function MapPanel({ view, open, run }: PanelProps) {
                   }
                 }}
               >
+                {demoResidentId === h.id && (
+                  <g className="demo-home-highlight" pointerEvents="none">
+                    <circle
+                      cx={h.demoPosition.x}
+                      cy={h.demoPosition.y}
+                      r="32"
+                      fill="#f8d795"
+                      fillOpacity=".16"
+                      stroke="#ffe6a7"
+                      strokeWidth="3"
+                    />
+                    <rect
+                      x={h.demoPosition.x - 65}
+                      y={h.demoPosition.y + 18}
+                      width="130"
+                      height="26"
+                      rx="6"
+                      fill="#203d31"
+                      stroke="#ffe6a7"
+                    />
+                    <text
+                      x={h.demoPosition.x}
+                      y={h.demoPosition.y + 36}
+                      textAnchor="middle"
+                      fill="#fff6dc"
+                      fontSize="12"
+                      fontWeight="700"
+                    >
+                      {(view.demonstration?.story ?? featuredStory) ===
+                      'grandfather'
+                        ? '반영환 할아버지 집'
+                        : '박미숙 할머니 집'}
+                    </text>
+                  </g>
+                )}
                 <circle
                   cx={h.demoPosition.x}
                   cy={h.demoPosition.y}
@@ -887,6 +1036,9 @@ export function MapPanel({ view, open, run }: PanelProps) {
               motion={motion}
               labelOffset={labelOffsets[i]}
               select={setSelected}
+              featured={
+                motion.kind === 'vehicle' && motion.id === demoVehicleId
+              }
             />
           ))}
         </svg>
@@ -903,9 +1055,11 @@ export function MapPanel({ view, open, run }: PanelProps) {
                     : '평시 · 명단 관리'}
             </strong>
             <small>
-              {active
-                ? `기준 T+${view.simMinutes}분${preview > 0 ? ` · +${preview.toFixed(1)}분 미리보기` : ''}`
-                : '지형·건물·도로 상세 보기'}
+              {cycle
+                ? `공용 시계 T+${view.simMinutes.toFixed(1)}분 · ${view.simulation.playing ? `${view.simulation.speed}× 진행` : '정지'}`
+                : active
+                  ? `기준 T+${view.simMinutes}분${preview > 0 ? ` · +${preview.toFixed(1)}분 미리보기` : ''}`
+                  : '지형·건물·도로 상세 보기'}
             </small>
             {active && !windEvidence.usable && (
               <small className="map-evidence-warning">
@@ -987,59 +1141,71 @@ export function MapPanel({ view, open, run }: PanelProps) {
           </span>
         </div>
       </div>
-      <div className="map-playback" aria-label="이동·산불 미리보기 재생">
-        <button
-          className="map-play-button"
-          aria-label={
-            playing ? '이동·확산 미리보기 일시정지' : '이동·확산 미리보기 재생'
-          }
-          disabled={!active || view.frozen}
-          onClick={() => {
-            if (preview >= 15) setPreview(0);
-            setPlaying(!playing);
-          }}
-        >
-          {playing ? 'Ⅱ' : '▶'}
-        </button>
-        <div className="map-play-speeds" aria-label="재생 속도">
-          {[12, 30, 60].map((value) => (
-            <button
-              key={value}
-              aria-pressed={speed === value}
-              onClick={() => setSpeed(value)}
-            >
-              {value}×
-            </button>
-          ))}
+      {cycle ? (
+        <div className="map-cycle-clock" data-testid="map-cycle-clock">
+          <strong>공용 시계 T+{view.simMinutes.toFixed(1)}분</strong>
+          <span>
+            주민·차량·화선이 같은 시연 시간을 사용합니다. 재생·배속은 상단에서
+            조절하세요.
+          </span>
         </div>
-        <label className="map-time-slider">
-          <span>이동·확산 미리보기</span>
-          <input
-            aria-label="미리보기 시간"
-            type="range"
-            min="0"
-            max="15"
-            step=".1"
-            value={preview}
+      ) : (
+        <div className="map-playback" aria-label="이동·산불 미리보기 재생">
+          <button
+            className="map-play-button"
+            aria-label={
+              playing
+                ? '이동·확산 미리보기 일시정지'
+                : '이동·확산 미리보기 재생'
+            }
             disabled={!active || view.frozen}
-            onChange={(e) => {
-              setPreview(Number(e.target.value));
+            onClick={() => {
+              if (preview >= 15) setPreview(0);
+              setPlaying(!playing);
+            }}
+          >
+            {playing ? 'Ⅱ' : '▶'}
+          </button>
+          <div className="map-play-speeds" aria-label="재생 속도">
+            {[12, 30, 60].map((value) => (
+              <button
+                key={value}
+                aria-pressed={speed === value}
+                onClick={() => setSpeed(value)}
+              >
+                {value}×
+              </button>
+            ))}
+          </div>
+          <label className="map-time-slider">
+            <span>이동·확산 미리보기</span>
+            <input
+              aria-label="미리보기 시간"
+              type="range"
+              min="0"
+              max="15"
+              step=".1"
+              value={preview}
+              disabled={!active || view.frozen}
+              onChange={(e) => {
+                setPreview(Number(e.target.value));
+                setPlaying(false);
+              }}
+            />
+          </label>
+          <output data-testid="preview-time">+{preview.toFixed(1)}분</output>
+          <button
+            className="map-reset-preview"
+            aria-label="미리보기 초기화"
+            onClick={() => {
+              setPreview(0);
               setPlaying(false);
             }}
-          />
-        </label>
-        <output data-testid="preview-time">+{preview.toFixed(1)}분</output>
-        <button
-          className="map-reset-preview"
-          aria-label="미리보기 초기화"
-          onClick={() => {
-            setPreview(0);
-            setPlaying(false);
-          }}
-        >
-          ↺
-        </button>
-      </div>
+          >
+            ↺
+          </button>
+        </div>
+      )}
       <div className="map-movement-summary">
         <div>
           <span className="summary-icon people-icon">♟</span>
@@ -1091,14 +1257,16 @@ export function MapPanel({ view, open, run }: PanelProps) {
           합성 지형·경로 · 실제 GPS·위성 영상 아님 · 산불 범위는 비공식 데모
           모델
         </span>
-        <Btn
-          size="sm"
-          kind="outline"
-          disabled={!view.plan?.confirmed || view.networkDown || view.frozen}
-          onClick={() => void run('advance')}
-        >
-          모의 1분 진행
-        </Btn>
+        {!cycle && (
+          <Btn
+            size="sm"
+            kind="outline"
+            disabled={!view.plan?.confirmed || view.networkDown || view.frozen}
+            onClick={() => void run('advance')}
+          >
+            모의 1분 진행
+          </Btn>
+        )}
       </div>
       {household && status && (
         <Card>

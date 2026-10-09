@@ -143,6 +143,7 @@ export function motionLabelOffsets(motions: MapMotion[]): Point[] {
 export function mapMotions(view: View, previewMinutes: number): MapMotion[] {
   const result: MapMotion[] = [];
   const { map, households, shelters, vehicles, teams } = view.data;
+  const cycle = Boolean(view.simulation.cycleId);
   const onboard = new Set(view.trips.map((t) => t.householdId));
   for (const [i, status] of view.scenario.householdStatuses.entries()) {
     if (
@@ -160,11 +161,20 @@ export function mapMotions(view: View, previewMinutes: number): MapMotion[] {
     );
     if (!route) continue;
     // There is no GPS feed: these are explicitly labelled route illustrations.
+    const elapsed = Math.max(
+      0,
+      (Date.parse(view.scenario.displayTime) -
+        Date.parse(status.lastChangedAt)) /
+        60000,
+    );
     const fraction = Math.min(
       0.97,
-      0.07 +
-        (i % 5) * 0.08 +
-        previewMinutes / Math.max(1, route.distanceMeters / 70),
+      cycle
+        ? ((Number.isFinite(elapsed) ? elapsed : 0) + previewMinutes) /
+            Math.max(1, route.distanceMeters / 70)
+        : 0.07 +
+            (i % 5) * 0.08 +
+            previewMinutes / Math.max(1, route.distanceMeters / 70),
     );
     result.push({
       id: household.id,
@@ -204,6 +214,7 @@ export function mapMotions(view: View, previewMinutes: number): MapMotion[] {
   }
   for (const status of view.scenario.resourceStatuses) {
     if (
+      cycle ||
       !['enroute', 'transporting', 'returning'].includes(status.status) ||
       !status.householdId ||
       view.trips.some((t) => t.vehicleId === status.vehicleId)

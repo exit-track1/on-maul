@@ -154,7 +154,7 @@ a {
 .app-shell {
   display: grid;
   grid-template-columns: 240px minmax(420px, 0.9fr) minmax(640px, 1.5fr);
-  grid-template-rows: 56px 50px minmax(0, 1fr);
+  grid-template-rows: 56px auto minmax(0, 1fr);
   height: 100dvh;
   overflow: hidden;
 }
@@ -195,6 +195,26 @@ a {
 .header-controls select {
   width: 110px;
   padding: 5px;
+}
+.static-scene-tools {
+  position: relative;
+  font-size: 11px;
+}
+.static-scene-tools summary {
+  cursor: pointer;
+  color: var(--muted);
+}
+.static-scene-tools[open] > label {
+  position: absolute;
+  right: 0;
+  top: 25px;
+  padding: 12px;
+  min-width: 230px;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  background: #fff;
+  z-index: 10;
+  box-shadow: 0 4px 18px #15241818;
 }
 .sidebar {
   grid-column: 1;
@@ -267,12 +287,86 @@ a {
   grid-row: 2;
   background: #f3f5f6;
   border-bottom: 1px solid var(--line);
-  padding: 0 18px;
+  padding: 10px 18px;
+  font-size: 14px;
+  white-space: nowrap;
+}
+.situation-counts {
   display: flex;
   align-items: center;
   gap: 20px;
-  font-size: 14px;
-  white-space: nowrap;
+  min-height: 30px;
+}
+.cycle-console {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-bottom: 8px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid var(--line);
+  font-size: 12px;
+}
+.cycle-main-control,
+.cycle-playback {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.cycle-story-select,
+.cycle-playback label {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 11px;
+}
+.cycle-story-select select {
+  max-width: 180px;
+  padding: 6px;
+}
+.cycle-start {
+  background: #1c4337;
+  color: #fff;
+  border-color: #1c4337;
+  font-weight: 650;
+  padding: 8px 12px;
+}
+.cycle-start:hover:not(:disabled) {
+  background: #2c5c49;
+}
+.cycle-phase {
+  color: var(--muted);
+  font-weight: 650;
+}
+.cycle-phase.phase-running {
+  color: #227b52;
+}
+.cycle-phase.phase-awaiting_handover {
+  color: #b04e25;
+}
+.cycle-progress-wrap {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.cycle-progress-wrap output {
+  font-variant-numeric: tabular-nums;
+}
+.cycle-progress-wrap small {
+  color: var(--muted);
+}
+.cycle-progress-wrap progress {
+  width: 90px;
+  height: 7px;
+  accent-color: #388261;
+}
+.cycle-playback select {
+  padding: 5px;
+}
+.cycle-connection-error {
+  flex-basis: 100%;
+  color: #b04e25;
+  white-space: normal;
 }
 .situation > b {
   font-size: 16px;
@@ -411,6 +505,95 @@ a {
   min-height: 0;
   overflow: auto;
   padding: 18px 20px 24px;
+}
+.demo-story-card {
+  flex-shrink: 0;
+  padding: 12px 18px;
+  border-bottom: 1px solid #d6e0d8;
+  background: #f2f7f0;
+}
+.demo-story-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+.demo-story-heading h2 {
+  font-size: 17px;
+  margin: 3px 0;
+  letter-spacing: -0.04em;
+}
+.demo-story-heading h2 small {
+  color: var(--muted);
+  font-size: 11px;
+  margin-left: 5px;
+}
+.demo-story-heading button {
+  font-size: 11px;
+  flex-shrink: 0;
+}
+.demo-story-status {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px 12px;
+  font-size: 11px;
+}
+.demo-story-status strong {
+  color: #34694a;
+  font-size: 13px;
+}
+.demo-stage-requested .demo-story-status strong {
+  color: #b45129;
+}
+.demo-stage-completed {
+  background: #edf6ee;
+}
+.demo-story-messages {
+  list-style: none;
+  padding: 0;
+  margin: 8px 0 4px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+.demo-story-messages li {
+  max-width: 100%;
+  background: #fff;
+  border: 1px solid #dce5da;
+  border-radius: 6px;
+  padding: 5px 8px;
+  font-size: 11px;
+}
+.demo-story-messages li > span {
+  color: #647b64;
+  font-size: 10px;
+}
+.demo-story-messages p {
+  margin: 2px 0 0;
+  line-height: 1.5;
+}
+.demo-story-ready {
+  color: #566d59;
+  font-size: 11px;
+  margin: 6px 0 4px;
+}
+.demo-story-disclaimer {
+  display: block;
+  color: var(--muted);
+  font-size: 9px;
+}
+.demo-story-compact {
+  padding: 7px 14px;
+}
+.demo-story-compact .eyebrow,
+.demo-story-compact .demo-story-messages,
+.demo-story-compact .demo-story-ready,
+.demo-story-compact .demo-story-disclaimer {
+  display: none;
+}
+.demo-story-compact .demo-story-heading h2 {
+  font-size: 14px;
 }
 .panel-title {
   display: flex;
@@ -897,7 +1080,7 @@ dialog::backdrop {
     font-size: 10px;
   }
   .canvas-scroll {
-    padding: 15px 14px;
+    padding: 10px 14px;
   }
   .tab-list {
     padding: 0 10px;
@@ -919,7 +1102,7 @@ dialog::backdrop {
 @media (max-width: 1180px) {
   .app-shell {
     grid-template-columns: minmax(300px, 0.65fr) minmax(0, 1.35fr);
-    grid-template-rows: 56px 43px 50px minmax(0, 1fr);
+    grid-template-rows: 56px 43px auto minmax(0, 1fr);
   }
   .sidebar {
     grid-column: 1/-1;
@@ -952,6 +1135,27 @@ dialog::backdrop {
   .situation {
     grid-column: 1/-1;
     grid-row: 3;
+  }
+  .situation-counts {
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+  .cycle-console {
+    gap: 8px;
+    white-space: normal;
+  }
+  .cycle-main-control {
+    flex-basis: 100%;
+    flex-wrap: wrap;
+  }
+  .cycle-story-select select {
+    max-width: 170px;
+  }
+  .cycle-start {
+    font-size: 11px;
+  }
+  .cycle-progress-wrap progress {
+    width: 65px;
   }
   .log-panel {
     grid-column: 1;

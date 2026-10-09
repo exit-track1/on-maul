@@ -1,6 +1,18 @@
 .evacuation-map {
   min-width: 0;
 }
+.map-cycle-clock {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 0;
+  color: #536b59;
+  font-size: 11px;
+  flex-wrap: wrap;
+}
+.map-cycle-clock strong {
+  font-variant-numeric: tabular-nums;
+}
 .map-panel-title {
   margin-bottom: 15px;
 }

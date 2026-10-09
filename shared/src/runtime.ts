@@ -24,6 +24,8 @@ import {
   createSourceRecord,
 } from './sources.ts';
 import { parseHouseholdNotes } from './household-notes.ts';
+import { cycleBudget, cycleTime, initialSimulation, type Simulation } from './cycle.ts';
+import { configureDemoStory, type Demonstration, type DemoStory } from './demo-story.ts';
 export type PlanItem = ReturnType<typeof orderedHouseholds>[number];
 export interface Plan {
   id: string;
@@ -147,6 +149,8 @@ export interface View {
   leaderRequested: string[];
   firstPass: FirstPass | null;
   sourceState: SourceState;
+  simulation: Simulation;
+  demonstration: Demonstration | null;
 }
 export class DomainError extends Error {
   constructor(
@@ -165,6 +169,10 @@ export class Runtime {
   private seen = new Set<string>();
   private turn: 'resident' | 'member' = 'resident';
   private startedSequence = 0;
+  private cycleRemainder = 0;
+  private cycleBaseTime: number | null = null;
+  private cycleObservationMinute = 0;
+  private cycleLeaderDue = new Map<string, number>();
   constructor(data = DATA) {
     this.state = this.initial(data, 'idle');
   }
@@ -225,6 +233,8 @@ export class Runtime {
       leaderRequested: [],
       firstPass: null,
       sourceState: createSourceState(copy, scenario, new Date().toISOString()),
+      simulation: initialSimulation(),
+      demonstration: null,
     };
   }
   view(): View {
@@ -265,6 +275,37 @@ export class Runtime {
         tripId: null,
       }));
     this.state.firstPass ??= null;
+    this.state.simulation ??= initialSimulation();
+    this.state.demonstration ??= null;
+    this.cycleRemainder = 0;
+    this.cycleObservationMinute = Math.floor(this.state.simMinutes);
+    this.cycleBaseTime = this.state.simulation.cycleId
+      ? Date.parse(this.state.scenario.displayTime) - this.state.simMinutes * 60000
+      : null;
+    this.cycleLeaderDue.clear();
+    if (this.state.simulation.cycleId)
+      for (const status of this.state.scenario.householdStatuses.filter(
+        (status) =>
+          status.status === 'visiting' &&
+          status.note === '합성 cycle 이장 연결 중·1분 뒤 허구 연락 결과·실제 연락 없음',
+      )) {
+        // Journal order is authoritative when connection and human cancellation share a timestamp.
+        const connection = this.state.records.findLast(
+          (record) =>
+            record.householdId === status.householdId &&
+            (record.label.startsWith('합성 cycle 이장 연결 시작') ||
+              record.label.startsWith('합성 cycle 이장 허구 연락 완료') ||
+              (record.actorType === 'human' && record.label.startsWith('이장 결과·'))),
+        );
+        if (
+          connection?.label.startsWith('합성 cycle 이장 연결 시작') &&
+          this.cycleBaseTime !== null
+        )
+          this.cycleLeaderDue.set(
+            status.householdId,
+            cycleTime((Date.parse(connection.timestamp) - this.cycleBaseTime) / 60000 + 1),
+          );
+      }
     this.state.sourceState ??= createSourceState(
       this.state.data,
       this.state.scenario,
@@ -272,6 +313,7 @@ export class Runtime {
     );
     // A closed report is immutable, including across process restart.
     if (this.state.frozen) return;
+    this.state.simulation.playing = false;
     for (const t of this.state.trips)
       if (!t.legs) {
         t.heldReason = '이전 스냅샷의 경로 미검증·담당자 확인 필요';
@@ -693,6 +735,7 @@ export class Runtime {
         s.lastChangedAt = this.state.scenario.displayTime;
       }
     }
+    if (this.state.simulation.cycleId) this.syncDemonstration();
   }
   private emergency(id: string, reason: string) {
     const s = this.status(id);
@@ -761,6 +804,54 @@ export class Runtime {
     this.log(`${result.reason} (규칙·모의 전사)`, 'assistant', id);
   }
   command(action: string, input: Record<string, unknown> = {}): View {
+    if (action === 'cycle-start') {
+      this.requireRevision(input.revision);
+      requireThat(
+        !this.state.calls.some((call) => call.mode === 'telnyx' && call.phase !== 'finished'),
+        '실제 활성·결과 불명 세션을 먼저 종료·확인하세요.',
+        'live_session',
+      );
+      const revision = this.state.revision;
+      const story = input.demoStory ?? 'grandfather';
+      requireThat(
+        story === 'grandfather' || story === 'squad',
+        '시연 이야기는 grandfather 또는 squad입니다.',
+        'invalid_story',
+      );
+      this.state = this.initial(DATA, 'idle');
+      this.state.demonstration = configureDemoStory(this.state.data, story as DemoStory);
+      this.state.revision = revision;
+      this.state.simulation = {
+        ...initialSimulation(),
+        cycleId: `CYCLE-${revision + 1}`,
+        phase: 'review',
+      };
+      this.state.scenario.id = `CYCLE-${revision + 1}`;
+      this.state.scenario.label = '화재 발생 → 대피 종료 (합성 사이클)';
+      this.seen.clear();
+      this.startedSequence = 0;
+      this.turn = 'resident';
+      this.cycleRemainder = 0;
+      this.cycleObservationMinute = 0;
+      this.cycleLeaderDue.clear();
+      this.cycleBaseTime = Date.parse(this.state.scenario.displayTime);
+      this.collectSources();
+      this.makePlan();
+      const hero = this.state.demonstration.residentId;
+      this.state.plan!.order = [
+        ...this.state.plan!.order.filter((item) => item.householdId === hero),
+        ...this.state.plan!.order.filter((item) => item.householdId !== hero),
+      ].map((item, index) => ({ ...item, rank: index + 1 }));
+      this.log('합성 cycle 화재 발생·48가구 원점·사람의 발령 확정 전 전화 0', 'human');
+      this.log(
+        `합성 ${story} 이야기·시연 화점 (900,50)·${story === 'grandfather' ? 'H012 합성 픽업 (430,280)·통제 ROAD1 대신 열린 ROAD5 연결' : 'H009 원 좌표·5분 대기조의 안전한 합성 화점 조건'}·원본 fixture 파일 변경 없음`,
+      );
+      this.log(
+        '합성 주연 수송 후보 우선·대기 중 주연 차량/인력은 배경 자동 후보에서 제외·허구 예약 없음',
+      );
+      this.bump();
+      return this.view();
+    }
     if (action === 'scenario') {
       const id = String(input.id);
       requireThat(
@@ -775,6 +866,10 @@ export class Runtime {
       this.state = this.initial(DATA, id);
       this.state.revision = revision;
       this.seen.clear();
+      this.cycleRemainder = 0;
+      this.cycleObservationMinute = 0;
+      this.cycleLeaderDue.clear();
+      this.cycleBaseTime = null;
       if (['active', 'late'].includes(id)) {
         this.makePlan();
         this.state.plan!.confirmed = true;
@@ -785,7 +880,40 @@ export class Runtime {
       return this.view();
     }
     this.open();
-    if (action === 'watch') {
+    if (action === 'sim') {
+      this.requireRevision(input.revision);
+      const simulation = this.state.simulation;
+      requireThat(
+        simulation.cycleId && ['review', 'running'].includes(simulation.phase),
+        '검토·진행 중인 합성 사이클만 재생 설정을 변경할 수 있습니다.',
+        'cycle_guard',
+      );
+      requireThat(
+        input.playing !== undefined || input.speed !== undefined,
+        '재생 또는 속도를 선택하세요.',
+      );
+      requireThat(
+        input.playing === undefined || typeof input.playing === 'boolean',
+        '재생 입력 오류',
+      );
+      requireThat(
+        input.speed === undefined ||
+          ([12, 30, 60].includes(Number(input.speed)) && typeof input.speed === 'number'),
+        '속도는 12·30·60배입니다.',
+      );
+      if (input.playing === true)
+        requireThat(
+          simulation.phase === 'running' && this.state.plan?.confirmed && !this.state.networkDown,
+          '사람의 최신 발령 확정·통신 복구 후 재생하세요.',
+          'cycle_guard',
+        );
+      if (input.speed !== undefined) simulation.speed = input.speed as Simulation['speed'];
+      if (input.playing !== undefined) simulation.playing = input.playing as boolean;
+      this.log(
+        `합성 cycle ${simulation.playing ? '재생' : '일시 정지'}·${simulation.speed}배`,
+        'human',
+      );
+    } else if (action === 'watch') {
       requireThat(this.state.scenario.mode === 'idle', '평시에서 감시를 시작하세요.');
       this.state.scenario.mode = 'watch';
       this.collectSources();
@@ -820,6 +948,10 @@ export class Runtime {
       p.confirmed = true;
       p.confirmedAt = this.state.scenario.displayTime;
       p.snapshotRevision = this.state.revision + 1;
+      if (this.state.simulation.cycleId && this.state.simulation.phase === 'review') {
+        this.state.simulation.phase = 'running';
+        this.state.simulation.playing = true;
+      }
       for (const x of p.order) {
         this.status(x.householdId).status = 'queued';
         this.state.calls.push({
@@ -844,7 +976,11 @@ export class Runtime {
           attempt: 1,
           phase: 'queued',
           providerId: null,
-          nextAt: null,
+          nextAt:
+            this.state.demonstration?.story === 'squad' &&
+            m.id === this.state.demonstration.memberId
+              ? 5
+              : null,
           text: '',
           mode: 'mock',
           purpose: 'initial',
@@ -856,6 +992,7 @@ export class Runtime {
       this.pump();
     } else if (action === 'comms') {
       this.state.networkDown = input.down === true;
+      if (this.state.networkDown) this.state.simulation.playing = false;
       this.log(
         this.state.networkDown
           ? '통신 두절 시연·신규 실행 보류·기존 세션 유지'
@@ -1052,6 +1189,7 @@ export class Runtime {
     } else if (action === 'advance') {
       requireThat(this.state.plan?.confirmed, '확정 후 모의 결과를 재생하세요.');
       requireThat(!this.state.networkDown, '통신 두절 중 신규 모의 결과 재생을 보류합니다.');
+      if (this.state.simulation.cycleId) return this.tickCycle(1);
       this.state.simMinutes++;
       this.state.scenario.displayTime = new Date(
         Date.parse(this.state.scenario.displayTime) + 60000,
@@ -1155,6 +1293,7 @@ export class Runtime {
         ['이동 확인', '방문 필요', '연락 불가'].includes(String(input.result)),
         '결과를 선택하세요.',
       );
+      this.cycleLeaderDue.delete(id);
       s.status = input.result === '이동 확인' ? 'moving' : 'visiting';
       this.cancelQueuedCalls(id);
       if (s.status === 'moving') this.queueFollowup(undefined, id, 'arrival_check', 15);
@@ -1303,6 +1442,9 @@ export class Runtime {
       );
       this.state.frozen = true;
       this.state.scenario.mode = 'record';
+      this.state.simulation.phase = 'ended';
+      this.state.simulation.playing = false;
+      this.state.simulation.endReason ??= '담당자 미해결 인수인계 확인 후 종료';
     } else if (action === 'assistant') {
       this.assistant(String(input.text ?? ''), input.revision);
       return this.view();
@@ -1311,6 +1453,433 @@ export class Runtime {
     this.bump();
     this.summarizeFirstPass();
     return this.view();
+  }
+  /** Delta is synthetic minutes, already scaled by the caller's monotonic clock. No timer or dial. */
+  tickCycle(deltaMinutes: number): View {
+    requireThat(
+      Number.isFinite(deltaMinutes) && deltaMinutes >= 0,
+      '경과 시간은 유한한 0 이상 분이어야 합니다.',
+      'invalid_sim_time',
+    );
+    const simulation = this.state.simulation;
+    if (
+      !simulation.cycleId ||
+      simulation.phase !== 'running' ||
+      !simulation.playing ||
+      !this.state.plan?.confirmed ||
+      this.state.networkDown ||
+      this.state.frozen ||
+      deltaMinutes === 0
+    )
+      return this.view();
+    const budget = cycleBudget(this.state.simMinutes, deltaMinutes, this.cycleRemainder);
+    this.cycleRemainder = budget.remainder;
+    if (budget.target === this.state.simMinutes) return this.view();
+    this.cycleBaseTime ??=
+      Date.parse(this.state.scenario.displayTime) - this.state.simMinutes * 60000;
+    this.cycleEventsAndRevision();
+    while (this.state.simMinutes < budget.target && simulation.phase === 'running') {
+      const next = Math.min(budget.target, this.nextCycleBoundary());
+      this.state.simMinutes = cycleTime(next);
+      this.state.scenario.displayTime = new Date(
+        this.cycleBaseTime + this.state.simMinutes * 60000,
+      ).toISOString();
+      this.cycleEventsAndRevision();
+    }
+    return this.view();
+  }
+  private nextCycleBoundary() {
+    const now = this.state.simMinutes;
+    const candidates = [Math.floor(now) + 1, 40];
+    for (const call of this.state.calls) {
+      if (call.mode !== 'mock') continue;
+      if (call.phase === 'calling') candidates.push((call.startedSim ?? now) + 1);
+      if (
+        call.phase === 'calling' &&
+        call.targetId === this.state.demonstration?.residentId &&
+        this.state.demonstration.stage === 'dialing'
+      )
+        candidates.push((call.startedSim ?? now) + 0.25);
+      if (call.phase === 'queued' && call.nextAt !== null) candidates.push(call.nextAt);
+    }
+    candidates.push(...this.cycleLeaderDue.values());
+    for (const status of this.state.scenario.householdStatuses.filter(
+      (status) => status.status === 'help',
+    )) {
+      const safety = dispatchSafety(this.state, status.householdId);
+      if (safety.targetEta !== null && safety.zoneEta !== null)
+        candidates.push(
+          cycleTime(now + Math.min(safety.targetEta, safety.zoneEta) - 15) + 0.000001,
+        );
+    }
+    for (const trip of this.state.trips) {
+      if (trip.heldReason) continue;
+      const next = {
+        depart: trip.arriveSim,
+        arrive: trip.boardSim,
+        boarded: trip.shelterSim,
+        shelter: trip.returnSim,
+        return: Infinity,
+      }[trip.stage];
+      // Round upward so the existing exact route-time guard is satisfied at this boundary.
+      candidates.push(Math.ceil(next * 1_000_000) / 1_000_000);
+      if (['depart', 'arrive'].includes(trip.stage)) {
+        const vehicle = this.state.data.vehicles.find((vehicle) => vehicle.id === trip.vehicleId)!;
+        const safety = dispatchSafety(this.state, trip.householdId);
+        if (vehicle.kind !== 'ambulance' && safety.targetEta !== null && safety.zoneEta !== null)
+          candidates.push(
+            cycleTime(now + Math.min(safety.targetEta, safety.zoneEta) - 15) + 0.000001,
+          );
+      }
+    }
+    return Math.min(...candidates.map(cycleTime).filter((time) => time > now));
+  }
+  private cycleEventStamp() {
+    return JSON.stringify({
+      records: this.state.records.length,
+      sources: this.state.sourceState.records.length,
+      calls: this.state.calls,
+      trips: this.state.trips,
+      completed: this.state.completedTrips,
+      statuses: this.state.scenario.householdStatuses,
+      simulation: this.state.simulation,
+      firstPass: this.state.firstPass,
+      demonstration: this.state.demonstration,
+    });
+  }
+  private cycleEventsAndRevision() {
+    const before = this.cycleEventStamp();
+    const minute = Math.floor(this.state.simMinutes);
+    if (minute > this.cycleObservationMinute) {
+      this.collectSources();
+      this.cycleObservationMinute = minute;
+    }
+    for (const status of this.state.scenario.householdStatuses)
+      if (
+        status.callbackAtSim != null &&
+        status.callbackAtSim <= this.state.simMinutes &&
+        !status.temporaryExclusion &&
+        !['safe', 'rescued', 'e119'].includes(status.status)
+      )
+        status.recheckOverdue = true;
+    for (const call of this.state.calls.filter(
+      (call) =>
+        call.mode === 'mock' &&
+        call.phase === 'calling' &&
+        (call.startedSim ?? this.state.simMinutes) + 1 <= this.state.simMinutes,
+    ))
+      this.finishCycleCall(call);
+    this.advanceTrips();
+    this.proposeUnavailableTeams();
+    this.cycleLeaderContacts();
+    this.dispatchCycleCandidates();
+    this.summarizeFirstPass();
+    this.pump();
+    const runnable =
+      this.state.calls.some(
+        (call) => call.mode === 'mock' && ['calling', 'queued'].includes(call.phase),
+      ) ||
+      this.state.trips.some((trip) => !trip.heldReason) ||
+      this.cycleLeaderDue.size > 0;
+    if (this.state.simMinutes >= 40 || !runnable) {
+      this.state.simulation.phase = 'awaiting_handover';
+      this.state.simulation.playing = false;
+      this.state.simulation.endReason =
+        this.state.simMinutes >= 40
+          ? '합성 40분 도달·미해결·방문·보류 임무의 담당자 인수인계 필요'
+          : '자동 합성 업무 정리·미해결·방문의 담당자 인수인계 필요';
+      this.cycleRemainder = 0;
+      this.log(`합성 cycle 정지·${this.state.simulation.endReason}`);
+    }
+    if (before !== this.cycleEventStamp()) this.bump();
+  }
+  private finishCycleCall(call: Call) {
+    call.phase = 'finished';
+    call.finishedSim = this.state.simMinutes;
+    if (call.targetType === 'member') {
+      const member = this.state.data.teams
+        .flatMap((team) => team.members)
+        .find((member) => member.id === call.targetId)!;
+      this.finishMember(
+        call,
+        call.mockOutcome ?? (member.availability === '가능' ? 'available' : 'unavailable'),
+      );
+      if (call.targetId === this.state.demonstration?.memberId) {
+        call.text = '[합성 cycle 허구 대원 발화] 네, 가능합니다. 구조 요청 확인했습니다.';
+        this.demoMessage(
+          'member',
+          this.state.memberResponses[call.targetId] === 'ok'
+            ? '네, 가능합니다. 구조 요청 확인했습니다.'
+            : '현재 출동할 수 없습니다. 다른 검토가 필요합니다.',
+        );
+      }
+      return;
+    }
+    const household = this.household(call.targetId),
+      status = this.status(call.targetId);
+    if (!household.callEligible || status.temporaryExclusion) {
+      call.outcome = 'excluded';
+      return;
+    }
+    const n = Number(call.targetId.slice(1));
+    if (call.targetId === this.state.demonstration?.residentId) {
+      if (this.state.trips.some((trip) => trip.householdId === household.id)) {
+        call.text = '[합성 cycle 허구 발화] 차량 수송 중·대피소 도착은 아직 미확인';
+        call.outcome = 'answered';
+        return;
+      }
+      const text = '다리가 아파서 움직일 수 없어요. 차량으로 데리러 와 주세요';
+      call.text = `[합성 cycle 허구 발화] ${text}`;
+      call.outcome = 'answered';
+      this.applyClassification(
+        household.id,
+        classify(
+          call.text,
+          this.state.data.shelters.map((shelter) => shelter.name),
+        ),
+      );
+      this.state.demonstration.stage = 'requested';
+      this.demoMessage('resident', text);
+      this.demoMessage(
+        'assistant',
+        '구조 요청을 확인했습니다. 장비·대원·차량·경로를 검증하고 연결하겠습니다.',
+      );
+      return;
+    }
+    if (n % 7 === 0) {
+      call.outcome = 'noanswer';
+      call.text = '[합성 cycle 허구 응답] 무응답';
+      status.status = 'noanswer';
+      status.note = '합성 cycle 무응답·안전 미확인·재발신/이장 방문 검토';
+      const retries = call.retryCount ?? 0;
+      if (retries < 8)
+        this.queueFollowup(
+          call,
+          call.targetId,
+          'redial',
+          retries === 0 ? 0 : retries === 1 ? 1 : retries === 2 ? 2 : 3,
+          'resident',
+          retries + 1,
+        );
+      else {
+        status.note = '합성 cycle 추가 8회 종료·안전 미확인·이장/방문 인수인계';
+        this.log('합성 cycle 재발신 상한·담당자 방문/이장 검토 필요', 'system', household.id);
+      }
+      this.log(`합성 cycle 무응답 ${call.attempt}회 (실제 발신 없음)`, 'system', household.id);
+      return;
+    }
+    const shelter = this.state.data.shelters.find((shelter) => shelter.id === household.shelterId)!;
+    const text =
+      call.purpose === 'arrival_check'
+        ? `${shelter.name}에 도착했어요`
+        : call.purpose === 'clarification'
+          ? household.mobility === '자력' && household.devices.length === 0
+            ? '지금 이동 중이에요'
+            : '차량으로 데리러 와 주세요'
+          : n === 12
+            ? '숨쉬기 힘들어요'
+            : n % 11 === 0
+              ? '집을 지킬 거예요. 안 나가요'
+              : n % 9 === 0 || household.mobility !== '자력' || household.devices.length > 0
+                ? '차량으로 데리러 와 주세요'
+                : n % 5 === 0
+                  ? '네'
+                  : '지금 이동 중이에요';
+    call.text = `[합성 cycle 허구 발화] ${text}`;
+    call.outcome = 'answered';
+    this.applyClassification(
+      household.id,
+      classify(
+        call.text,
+        this.state.data.shelters.map((shelter) => shelter.name),
+      ),
+    );
+    this.log(
+      `합성 cycle ${call.purpose ?? 'initial'} 현재 발화 근거 · ${text}`,
+      'system',
+      household.id,
+    );
+  }
+  private dispatchCycleCandidates() {
+    const targets = this.state.scenario.householdStatuses
+      .filter(
+        (status) =>
+          ['help', 'e119'].includes(status.status) &&
+          !status.temporaryExclusion &&
+          !this.state.trips.some((trip) => trip.householdId === status.householdId),
+      )
+      .sort(
+        (a, b) =>
+          Number(b.householdId === this.state.demonstration?.residentId) -
+            Number(a.householdId === this.state.demonstration?.residentId) ||
+          Number(b.status === 'e119') - Number(a.status === 'e119') ||
+          a.householdId.localeCompare(b.householdId),
+      );
+    for (const status of targets) {
+      const household = this.household(status.householdId),
+        safety = dispatchSafety(this.state, household.id);
+      const demonstration = this.state.demonstration,
+        hero = household.id === demonstration?.residentId;
+      const heroWaiting =
+        demonstration && ['ready', 'dialing', 'talking', 'requested'].includes(demonstration.stage);
+      const protectedCrew = new Set(
+        heroWaiting
+          ? demonstration.story === 'squad'
+            ? this.state.data.teams
+                .find((team) => team.id === 'TW')!
+                .members.map((member) => member.id)
+            : [
+                this.state.data.vehicles.find((vehicle) => vehicle.id === demonstration.vehicleId)!
+                  .driverRef,
+              ]
+          : [],
+      );
+      if (
+        !safety.emergency &&
+        this.state.reassignments.some((proposal) => proposal.householdId === household.id)
+      )
+        continue;
+      if (safety.emergency && status.status !== 'e119')
+        this.emergency(
+          household.id,
+          '합성 cycle 구역/대상 ETA 15분 미만·119 모의 인계·일반 조 대체 금지',
+        );
+      const candidates = this.state.data.vehicles.filter(
+        (vehicle) =>
+          vehicle.availableForTransport &&
+          (hero
+            ? vehicle.id === demonstration!.vehicleId
+            : (!heroWaiting || vehicle.id !== demonstration!.vehicleId) &&
+              (safety.emergency
+                ? vehicle.kind === 'ambulance'
+                : vehicle.kind !== 'ambulance' &&
+                  (!vehicle.teamId || vehicle.teamId === household.teamId))),
+      );
+      const checks = candidates.map((vehicle) => ({
+        vehicle,
+        check: evaluateDispatch(this.state, household.id, vehicle.id),
+      }));
+      const valid = checks.find(
+        ({ check }) =>
+          check.ok && (hero || !check.trip.crewMemberIds.some((id) => protectedCrew.has(id))),
+      );
+      if (valid) {
+        this.dispatch(household.id, valid.vehicle.id);
+        if (hero) {
+          demonstration!.stage = 'responding';
+          this.demoMessage(
+            'assistant',
+            demonstration!.story === 'grandfather'
+              ? '검증된 구급차를 보내드리겠습니다. 구조 요청 통화를 종료합니다.'
+              : '반영환 대원의 가능 응답과 수송 조건을 확인했습니다. 5분 대기조를 보내드리겠습니다.',
+          );
+        }
+      } else {
+        const failure = checks.find(({ check }) => !check.ok)?.check;
+        const reason = `합성 cycle 배차 보류 · ${failure && !failure.ok ? failure.reason : '조건을 만족하는 수송 자원 없음'}`;
+        if (status.dispatchHold !== reason) {
+          status.dispatchHold = reason;
+          this.log(reason, 'system', household.id);
+        }
+      }
+    }
+  }
+  private demoMessage(speaker: 'assistant' | 'resident' | 'member', text: string) {
+    const demonstration = this.state.demonstration;
+    if (
+      !demonstration ||
+      demonstration.messages.some(
+        (message) =>
+          message.speaker === speaker &&
+          message.text === `[합성 시연 텍스트·실모델/음성통화 아님] ${text}`,
+      )
+    )
+      return;
+    demonstration.messages.push({
+      id: `${this.state.simulation.cycleId}-MESSAGE-${demonstration.messages.length + 1}`,
+      speaker,
+      text: `[합성 시연 텍스트·실모델/음성통화 아님] ${text}`,
+      atSim: this.state.simMinutes,
+    });
+    this.log(`합성 cycle ${speaker} 발화 · ${text}`, 'system', demonstration.residentId);
+  }
+  private syncDemonstration() {
+    const demonstration = this.state.demonstration;
+    if (!demonstration) return;
+    const call = this.state.calls.find(
+      (call) =>
+        call.mode === 'mock' &&
+        call.targetId === demonstration.residentId &&
+        call.phase === 'calling',
+    );
+    if (call && demonstration.stage === 'ready') demonstration.stage = 'dialing';
+    if (
+      call &&
+      demonstration.stage === 'dialing' &&
+      this.state.simMinutes >= (call.startedSim ?? this.state.simMinutes) + 0.25
+    ) {
+      demonstration.stage = 'talking';
+      this.demoMessage(
+        'assistant',
+        `${this.household(demonstration.residentId).name}님, 합성 화재 대피 안내입니다. 이동할 수 있으세요?`,
+      );
+    }
+    const memberCall = this.state.calls.find(
+      (call) =>
+        call.mode === 'mock' &&
+        call.targetId === demonstration.memberId &&
+        call.phase === 'calling',
+    );
+    if (demonstration.story === 'squad' && memberCall)
+      this.demoMessage(
+        'assistant',
+        '반영환 대원, 박미숙 할머니 구조 요청입니다. 5분 대기조 출동이 가능하세요?',
+      );
+  }
+  private cycleLeaderContacts() {
+    for (const status of this.state.scenario.householdStatuses) {
+      if (status.temporaryExclusion) continue;
+      if (
+        this.state.calls.some(
+          (call) =>
+            call.targetId === status.householdId &&
+            call.mode === 'telnyx' &&
+            call.phase !== 'finished',
+        )
+      )
+        continue;
+      const last = this.state.calls.findLast((call) => call.targetId === status.householdId);
+      if (
+        status.status === 'refuse' &&
+        last?.mode === 'mock' &&
+        !this.state.leaderRequested.includes(status.householdId)
+      ) {
+        this.state.leaderRequested.push(status.householdId);
+        this.cycleLeaderDue.set(status.householdId, cycleTime(this.state.simMinutes + 1));
+        status.status = 'visiting';
+        status.note = '합성 cycle 이장 연결 중·1분 뒤 허구 연락 결과·실제 연락 없음';
+        this.log(
+          '합성 cycle 이장 연결 시작·1분 뒤 허구 완료 예약·실제 연락 없음',
+          'system',
+          status.householdId,
+        );
+      }
+      const due = this.cycleLeaderDue.get(status.householdId);
+      if (due !== undefined && due <= this.state.simMinutes) {
+        this.cycleLeaderDue.delete(status.householdId);
+        if (status.temporaryExclusion || ['safe', 'rescued', 'e119'].includes(status.status))
+          continue;
+        status.status = 'moving';
+        status.note = '합성 cycle 이장 허구 연락 완료·지금 이동 중 발화·도착 미확인';
+        this.cancelQueuedCalls(status.householdId);
+        this.queueFollowup(undefined, status.householdId, 'arrival_check', 15);
+        this.log(
+          '합성 cycle 이장 허구 연락 완료·이동 발화·15분 뒤 도착 재확인·실제 이장 연락 없음',
+          'system',
+          status.householdId,
+        );
+      }
+    }
   }
   private reconcile() {
     for (const c of this.state.calls)
@@ -1360,7 +1929,24 @@ export class Runtime {
       const failed = state.records.findLast(
         (r) => r.sourceId === source.id && r.mode === 'live' && !r.ok,
       );
-      const record = createReplaySourceRecord(source, {
+      const cycleId = this.state.simulation.cycleId;
+      const sample = cycleId
+        ? {
+            ...source,
+            demoPayload: {
+              ...source.demoPayload,
+              observedAt: this.state.scenario.displayTime,
+              summary: `합성 cycle 관측 · ${source.demoPayload.summary}`,
+              ...(source.id === 'SRC05'
+                ? {
+                    windDirection: this.state.data.map.wind.direction,
+                    windSpeedMps: this.state.data.map.wind.speedMps,
+                  }
+                : {}),
+            },
+          }
+        : source;
+      const record = createReplaySourceRecord(sample, {
         recordId: `SOURCE-${this.state.scenario.id}-${state.records.length + 1}`,
         scenarioId: this.state.scenario.id,
         datasetId: DEMO_DATASET,
@@ -1368,6 +1954,9 @@ export class Runtime {
         fetchedAtWall: state.wallNow,
         fetchedAtReplay: this.state.scenario.displayTime,
         jurisdictions: [DEMO_JURISDICTION],
+        ...(cycleId
+          ? { sampleId: `${cycleId}:합성 cycle 관측:${this.state.simMinutes}:${source.id}` }
+          : {}),
         ...(failed ? { fallbackForRecordId: failed.recordId } : {}),
       });
       state.records = appendSourceAttempt(state.records, record);
@@ -1610,6 +2199,22 @@ export class Runtime {
       s.dispatchHold = null;
       s.recheckOverdue = false;
       s.note = '현재 모의 임무·검증된 경로의 대피소 도착 보고 근거';
+    }
+    if (this.state.demonstration?.residentId === h.id) {
+      if (stage === 'arrive') this.state.demonstration.stage = 'boarding';
+      if (stage === 'boarded') this.state.demonstration.stage = 'evacuating';
+      if (
+        stage === 'shelter' &&
+        this.state.shelterAdmissions.some(
+          (admission) => admission.householdId === h.id && admission.tripId === t.id,
+        )
+      ) {
+        this.state.demonstration.stage = 'completed';
+        this.demoMessage(
+          'assistant',
+          '검증된 합성 임무의 대피소 도착 보고를 확인했습니다. 주민 대피·대원 구조 완료입니다. 차량 복귀는 계속됩니다.',
+        );
+      }
     }
     t.stage = stage as Trip['stage'];
     const resource = this.state.scenario.resourceStatuses.find((x) => x.vehicleId === t.vehicleId);

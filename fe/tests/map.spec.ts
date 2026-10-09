@@ -1,6 +1,14 @@
 import { expect, test } from '@playwright/test';
+import type { Page } from '@playwright/test';
 
 const demo = '/index.html?demo=1';
+
+async function chooseScene(page: Page, id: string) {
+  const tools = page.locator('details.static-scene-tools');
+  if ((await tools.getAttribute('open')) === null)
+    await tools.getByText('정적 장면 점검', { exact: true }).click();
+  await page.getByLabel('시연 장면', { exact: true }).selectOption(id);
+}
 
 test('terrain, moving residents and vehicles are local and preview does not alter operational counts', async ({
   page,
@@ -12,7 +20,7 @@ test('terrain, moving residents and vehicles are local and preview does not alte
       external.push(request.url());
   });
   await page.goto(demo);
-  await page.getByLabel('시연 장면', { exact: true }).selectOption('active');
+  await chooseScene(page, 'active');
   await expect(page.locator('.map-movement-summary')).toContainText('10가구');
   await expect(page.getByTestId('moving-vehicle')).toHaveCount(2);
   await expect(page.getByTestId('movement-route')).toHaveCount(12);
@@ -59,7 +67,7 @@ test('playback, layer switches, zoom and keyboard house selection remain indepen
   page,
 }) => {
   await page.goto(demo);
-  await page.getByLabel('시연 장면', { exact: true }).selectOption('active');
+  await chooseScene(page, 'active');
   await page
     .getByRole('button', { name: '이동·확산 미리보기 재생', exact: true })
     .click();
@@ -114,12 +122,12 @@ test('stale wind hides fire prediction and frozen records disable playback', asy
   page,
 }) => {
   await page.goto(demo);
-  await page.getByLabel('시연 장면', { exact: true }).selectOption('late');
+  await chooseScene(page, 'late');
   await expect(page.locator('.map-hud')).toContainText('바람 근거 불명/낡음');
   await expect(page.getByTestId('fire-layer')).toHaveCount(0);
   await expect(page.getByTestId('fire-forecast')).toHaveCount(0);
   await expect(page.locator('svg.map')).toContainText('ETA 불명');
-  await page.getByLabel('시연 장면', { exact: true }).selectOption('active');
+  await chooseScene(page, 'active');
   await page
     .getByRole('button', { name: '기록으로 종료', exact: true })
     .click();

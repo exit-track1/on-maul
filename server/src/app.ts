@@ -21,6 +21,7 @@ import {
 } from '../../shared/src/runtime.ts';
 import { canonicalJson } from '../../shared/src/sources.ts';
 import { AgentGraphs } from './agents.ts';
+import { SimulationClock, type SimulationClockOptions } from './simulation.ts';
 import {
   Telephony,
   config,
@@ -31,6 +32,16 @@ import {
 const Envelope = z
   .object({ action: z.string().max(40), input: z.record(z.string(), z.unknown()).default({}) })
   .strict();
+const SimulationInput = z
+  .object({
+    revision: z.number().int(),
+    playing: z.boolean().optional(),
+    speed: z.union([z.literal(12), z.literal(30), z.literal(60)]).optional(),
+  })
+  .strict()
+  .refine((input) => input.playing !== undefined || input.speed !== undefined, {
+    message: '재생 상태 또는 속도를 지정하세요.',
+  });
 const Webhook = z.object({
   data: z.object({
     id: z.string().max(200),
@@ -39,13 +50,23 @@ const Webhook = z.object({
   }),
 });
 export async function createApp(
-  options: { settings?: TelephonyConfig; port?: TelnyxPort; journal?: string } = {},
+  options: {
+    settings?: TelephonyConfig;
+    port?: TelnyxPort;
+    journal?: string;
+    simulation?: SimulationClockOptions;
+  } = {},
 ) {
   const settings = options.settings ?? config(),
     telephony = options.port ?? new Telephony(settings),
     runtime = new Runtime(),
     agents = new AgentGraphs();
   const app = Fastify({ logger: false, bodyLimit: 65536 });
+  const instanceId = randomUUID();
+  app.addHook('onSend', async (_req, reply, payload) => {
+    reply.header('x-onmaul-instance', instanceId);
+    return payload;
+  });
   let planThread: { id: string; planId: string; planRevision: number; signature: string } | null =
     null;
   let queue = Promise.resolve();
@@ -150,6 +171,7 @@ export async function createApp(
       'http://127.0.0.1:8090',
     ],
     methods: ['GET', 'POST'],
+    exposedHeaders: ['x-onmaul-instance'],
   });
   app.addHook('preHandler', async (req, reply) => {
     if (
@@ -173,6 +195,7 @@ export async function createApp(
       code: e instanceof DomainError ? e.code : 'invalid_request',
     });
   });
+  let journalRevision: number | null = null;
   const journal = () => {
     if (!options.journal) return;
     mkdirSync(options.journal, { recursive: true, mode: 0o700 });
@@ -182,17 +205,44 @@ export async function createApp(
     writeFileSync(`${options.journal}/webhooks.json`, JSON.stringify([...delivered]), {
       mode: 0o600,
     });
-    appendFileSync(
-      `${options.journal}/events.jsonl`,
-      JSON.stringify({
-        revision: view.revision,
-        at: view.scenario.displayTime,
-        counts: view.scenario.counts,
-        lastRecord: view.records.at(-1),
-      }) + '\n',
-      { mode: 0o600 },
-    );
+    // Persist fractional progress in the snapshot, but add an audit event only
+    // when a meaningful runtime change advances the revision.
+    if (journalRevision !== view.revision) {
+      appendFileSync(
+        `${options.journal}/events.jsonl`,
+        JSON.stringify({
+          revision: view.revision,
+          at: view.scenario.displayTime,
+          counts: view.scenario.counts,
+          simulation: view.simulation,
+          simMinutes: view.simMinutes,
+          lastRecord: view.records.at(-1),
+        }) + '\n',
+        { mode: 0o600 },
+      );
+      journalRevision = view.revision;
+    }
   };
+  const publish = async () => {
+    await ensurePlanCheckpoint();
+    // Automatic member failures publish the same human review checkpoints as manual proposals.
+    for (const proposal of runtime.view().reassignments.filter((p) => p.status === 'pending')) {
+      const runId = `REASSIGN-GRAPH-${proposal.id}`;
+      if (!runtime.view().graphRuns.some((g) => g.id === runId && g.waiting))
+        runtime.addGraph(await agents.proposeReassignment(runId, proposal));
+    }
+    journal();
+  };
+  const simulation = new SimulationClock(
+    () => runtime.view(),
+    async (deltaMinutes) => {
+      runtime.tickCycle(deltaMinutes);
+      await publish();
+    },
+    serialized,
+    options.simulation,
+    (error) => app.log.error(error, 'Simulation clock stopped'),
+  );
   app.get('/api/health', () => ({
     ok: true,
     service: '온 마을 React mock API',
@@ -201,15 +251,20 @@ export async function createApp(
     inference: 'rules',
     externalInferenceCalls: 0,
   }));
-  app.get('/api/state', () => runtime.view());
+  app.get('/api/state', () => serialized(async () => runtime.view()));
   app.get('/api/export.json', async (_req, reply) => {
     reply.header('Content-Disposition', 'attachment; filename="onmaul-mock-report.json"');
-    return runtime.view();
+    return serialized(async () => runtime.view());
   });
-  app.post('/api/command', async (req) =>
-    serialized(async () => {
-      const { action, input } = Envelope.parse(read(req.body));
-      if (action === 'plan') {
+  const command = async (action: string, input: Record<string, unknown>) => {
+    await simulation.settle();
+    try {
+      if (action === 'cycle-start' || action === 'scenario') {
+        runtime.command(action, input);
+        // Reset scenarios discard their prior plan snapshot. A prior graph thread can
+        // never approve a new cycle, even if its target order happens to be identical.
+        planThread = null;
+      } else if (action === 'plan') {
         const before = runtime.view();
         if (before.scenario.mode !== 'watch')
           throw new DomainError('mode', '감시 단계에서 시작하세요.');
@@ -325,16 +380,20 @@ export async function createApp(
             ),
           );
       } else runtime.command(action, input);
-      await ensurePlanCheckpoint();
-      // Automatic member failures publish the same human review checkpoints as manual proposals.
-      for (const proposal of runtime.view().reassignments.filter((p) => p.status === 'pending')) {
-        const runId = `REASSIGN-GRAPH-${proposal.id}`;
-        if (!runtime.view().graphRuns.some((g) => g.id === runId && g.waiting))
-          runtime.addGraph(await agents.proposeReassignment(runId, proposal));
-      }
-      journal();
+      await publish();
       return runtime.view();
+    } finally {
+      simulation.synchronize();
+    }
+  };
+  app.post('/api/command', async (req) =>
+    serialized(async () => {
+      const { action, input } = Envelope.parse(read(req.body));
+      return command(action, input);
     }),
+  );
+  app.post('/api/sim', async (req) =>
+    serialized(async () => command('sim', SimulationInput.parse(read(req.body)))),
   );
   app.post('/api/telephony/dial', async (req) =>
     serialized(async () => {
@@ -518,7 +577,9 @@ export async function createApp(
       return reply.sendFile('index.html');
     });
   }
-  app.addHook('onClose', () => {
+  app.addHook('onClose', async () => {
+    simulation.close();
+    await queue;
     for (const t of timers.values()) clearTimeout(t);
   });
   return { app, runtime, agents };
