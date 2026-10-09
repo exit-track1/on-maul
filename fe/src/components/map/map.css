@@ -64,6 +64,20 @@
 .layer-fire {
   background: #d47549;
 }
+.layer-smoke {
+  background: #9baba6;
+}
+.terrain-label.smoke-label {
+  fill: #f2f0e5;
+  stroke: #45574a;
+  font-weight: 500;
+}
+.terrain-legend .legend-smoke i {
+  width: 12px;
+  height: 7px;
+  border-radius: 50%;
+  background: #bbc0b4;
+}
 .layer-forecast {
   background: transparent;
   border: 1px dashed #bf8752;
@@ -516,12 +530,12 @@
 @keyframes smoke-drift {
   0%,
   100% {
-    opacity: 0.45;
+    opacity: 0.6;
     transform: translate(0, 0);
   }
   50% {
     opacity: 0.9;
-    transform: translate(12px, 2px);
+    transform: translate(var(--smoke-dx, 38px), var(--smoke-dy, 7px));
   }
 }
 @keyframes walk {
@@ -545,7 +559,8 @@
   animation: flame-flicker 1.3s ease-in-out infinite;
 }
 .map-smoke {
-  animation: smoke-drift 7s ease-in-out infinite;
+  animation: smoke-drift 6s ease-in-out infinite;
+  pointer-events: none;
 }
 .person-legs,
 .person-arms {

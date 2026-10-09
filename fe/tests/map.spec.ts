@@ -26,9 +26,8 @@ test('terrain, moving residents and vehicles are local and preview does not alte
   await expect(page.getByTestId('movement-route')).toHaveCount(12);
   await expect(page.getByTestId('fire-layer')).toBeVisible();
   await expect(page.getByTestId('fire-forecast')).toBeVisible();
-  const before = await page
-    .getByTestId('fire-perimeter')
-    .getAttribute('points');
+  await expect(page.getByTestId('smoke-layer')).toBeVisible();
+  const before = await page.getByTestId('fire-perimeter').getAttribute('d');
   const counts = await page.locator('.situation').innerText();
   const vehicle = await page
     .getByTestId('moving-vehicle')
@@ -36,9 +35,9 @@ test('terrain, moving residents and vehicles are local and preview does not alte
     .getAttribute('transform');
   await page.getByLabel('미리보기 시간', { exact: true }).fill('7');
   await expect(page.getByTestId('preview-time')).toHaveText('+7.0분');
-  expect(
-    await page.getByTestId('fire-perimeter').getAttribute('points'),
-  ).not.toBe(before);
+  expect(await page.getByTestId('fire-perimeter').getAttribute('d')).not.toBe(
+    before,
+  );
   expect(
     await page.getByTestId('moving-vehicle').first().getAttribute('transform'),
   ).not.toBe(vehicle);
@@ -50,7 +49,7 @@ test('terrain, moving residents and vehicles are local and preview does not alte
     .getByRole('button', { name: '미리보기 초기화', exact: true })
     .click();
   await expect(page.getByTestId('fire-perimeter')).toHaveAttribute(
-    'points',
+    'd',
     before!,
   );
   const loaded = await page.locator('.map image').evaluate(async (image) => {
@@ -76,9 +75,7 @@ test('playback, layer switches, zoom and keyboard house selection remain indepen
     .getByRole('button', { name: '이동·확산 미리보기 일시정지', exact: true })
     .click();
   await expect(page.locator('.terrain-map')).toHaveClass(/is-paused/);
-  const paused = await page
-    .getByTestId('fire-perimeter')
-    .getAttribute('points');
+  const paused = await page.getByTestId('fire-perimeter').getAttribute('d');
   await page.getByRole('button', { name: '주민 이동', exact: true }).click();
   await expect(page.getByTestId('moving-person')).toHaveCount(0);
   await expect(page.getByTestId('moving-vehicle')).toHaveCount(2);
@@ -86,12 +83,18 @@ test('playback, layer switches, zoom and keyboard house selection remain indepen
   await expect(page.getByTestId('moving-vehicle')).toHaveCount(0);
   await page.getByRole('button', { name: '산불 확산', exact: true }).click();
   await expect(page.getByTestId('fire-layer')).toHaveCount(0);
+  await expect(page.getByTestId('smoke-layer')).toBeVisible();
+  await page.getByRole('button', { name: '연기 흐름', exact: true }).click();
+  await expect(page.getByTestId('smoke-layer')).toHaveCount(0);
+  await expect(page.getByTestId('fire-forecast')).toBeVisible();
+  await page.getByRole('button', { name: '연기 흐름', exact: true }).click();
+  await expect(page.getByTestId('smoke-layer')).toBeVisible();
   await expect(page.getByTestId('fire-forecast')).toBeVisible();
   await page.getByRole('button', { name: '10분 후', exact: true }).click();
   await expect(page.getByTestId('fire-forecast')).toHaveCount(0);
   await page.getByRole('button', { name: '산불 확산', exact: true }).click();
   await expect(page.getByTestId('fire-perimeter')).toHaveAttribute(
-    'points',
+    'd',
     paused!,
   );
   await page.getByRole('button', { name: '지도 확대', exact: true }).click();
@@ -127,6 +130,7 @@ test('stale wind hides fire prediction and frozen records disable playback', asy
   await expect(page.getByTestId('fire-layer')).toHaveCount(0);
   await expect(page.getByTestId('fire-forecast')).toHaveCount(0);
   await expect(page.locator('svg.map')).toContainText('ETA 불명');
+  await expect(page.getByTestId('smoke-layer')).toHaveCount(0);
   await chooseScene(page, 'active');
   await page
     .getByRole('button', { name: '기록으로 종료', exact: true })

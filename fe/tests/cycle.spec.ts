@@ -63,9 +63,7 @@ test('offline fire cycle waits for human decisions, shares playback clock and fr
     .click();
   const pausedTime = await page.getByTestId('cycle-time').innerText();
   const pausedCounts = await page.locator('.situation-counts').innerText();
-  const pausedFire = await page
-    .getByTestId('fire-perimeter')
-    .getAttribute('points');
+  const pausedFire = await page.getByTestId('fire-perimeter').getAttribute('d');
   await page.clock.runFor(3000);
   await expect(page.getByTestId('cycle-time')).toHaveText(pausedTime, {
     useInnerText: true,
@@ -74,7 +72,7 @@ test('offline fire cycle waits for human decisions, shares playback clock and fr
     useInnerText: true,
   });
   await expect(page.getByTestId('fire-perimeter')).toHaveAttribute(
-    'points',
+    'd',
     pausedFire!,
   );
   await page.getByLabel('시연 배속', { exact: true }).selectOption('12');

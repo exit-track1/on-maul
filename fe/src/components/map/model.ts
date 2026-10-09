@@ -1,4 +1,3 @@
-import { eta } from '../../../../shared/src/domain.ts';
 import {
   findDemoRoute,
   routePosition,
@@ -6,7 +5,7 @@ import {
 } from '../../../../shared/src/routing.ts';
 import { tripPosition } from '../../../../shared/src/dispatch.ts';
 import type { View } from '../../../../shared/src/runtime.ts';
-import type { Fixtures, Point } from '../../../../shared/src/types.ts';
+import type { Point } from '../../../../shared/src/types.ts';
 
 export const MAP_COLORS = {
   act: '#e36c45',
@@ -18,29 +17,6 @@ export const MAP_COLORS = {
 };
 export const pathPoints = (points: Point[]) =>
   points.map((p) => `${p.x},${p.y}`).join(' ');
-
-// Keep the perimeter tied to the shared directional ETA model. The texture
-// belongs to the fire overlay, not to the geometry used to calculate arrival.
-export function firePerimeter(map: Fixtures['map'], minutes: number): Point[] {
-  return Array.from({ length: 120 }, (_, i) => {
-    const angle = (i * Math.PI) / 60;
-    const unit = {
-      x: map.ignition.x + Math.cos(angle),
-      y: map.ignition.y + Math.sin(angle),
-    };
-    const arrival = eta(
-      unit,
-      map.ignition,
-      map.wind.direction,
-      map.wind.speedMps,
-    );
-    const radius = arrival && minutes > 0 ? minutes / arrival : 0;
-    return {
-      x: map.ignition.x + Math.cos(angle) * radius,
-      y: map.ignition.y + Math.sin(angle) * radius,
-    };
-  });
-}
 
 export interface MapMotion {
   id: string;

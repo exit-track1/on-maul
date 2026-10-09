@@ -99,6 +99,27 @@ plots += [s["demoLocation"] for s in data["shelters"]]
 for p in plots:
     forest[np.hypot(xx - p["x"], yy - p["y"]) < 19] = False
 
+# Export the same tree cover used by the aerial texture. Fire can travel only
+# between adjacent wooded cells; roads, water and cleared household plots break
+# the fuel network. A conservative cell threshold keeps flames off bare edges.
+cell_size = 4
+fuel_pixels = forest & (clearance >= 12) & (river_clearance >= 20)
+block = cell_size * SCALE
+fuel_grid = fuel_pixels.reshape(H // cell_size, block, W // cell_size, block).mean(axis=(1, 3)) >= .95
+fuel_runs = []
+for row in fuel_grid:
+    runs = []
+    start = None
+    for x, wooded in enumerate(np.append(row, False)):
+        if wooded and start is None:
+            start = x
+        elif not wooded and start is not None:
+            runs.extend([start, x - start])
+            start = None
+    fuel_runs.append(runs)
+fuel_output = ROOT / "fe/src/components/map/forest-fuel.json"
+fuel_output.write_text(json.dumps({"width": W, "height": H, "cellSize": cell_size, "rows": fuel_runs}, separators=(",", ":")) + "\n")
+
 # Mottled canopy sprites have irregular silhouettes, directional light and
 # branch-scale shading, avoiding the flat circles of a diagrammatic map.
 trees = Image.new("RGBA", terrain.size)

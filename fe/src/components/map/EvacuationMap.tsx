@@ -8,7 +8,6 @@ import {
 } from 'react';
 import { Btn, Card, Pill } from '../index';
 import {
-  eta,
   GROUP_LABELS,
   groupOf,
   nextAction,
@@ -18,7 +17,6 @@ import type { PanelProps } from '../../tabs/Panels';
 import type { Point } from '../../../../shared/src/types.ts';
 import { predictionEvidence } from '../../../../shared/src/monitoring.ts';
 import {
-  firePerimeter,
   MAP_COLORS,
   mapMotions,
   clusterMotions,
@@ -28,13 +26,21 @@ import {
   type MapMotion,
 } from './model';
 import './map.css';
+import {
+  forestPropagation,
+  forestFrame,
+  smokePlume,
+  forestZoneLabel,
+} from './forest';
+import { ForestLayers } from './ForestLayers';
 
-type Layer = 'people' | 'vehicles' | 'fire' | 'forecast';
+type Layer = 'people' | 'vehicles' | 'fire' | 'forecast' | 'smoke';
 const layerNames: Record<Layer, string> = {
   people: '주민 이동',
   vehicles: '차량 이동',
   fire: '산불 확산',
   forecast: '10분 후',
+  smoke: '연기 흐름',
 };
 
 function Person({ color = '#8fdbff' }: { color?: string }) {
@@ -239,6 +245,7 @@ export function MapPanel({
     vehicles: true,
     fire: true,
     forecast: true,
+    smoke: true,
   });
   const [playing, setPlaying] = useState(false);
   const [speed, setSpeed] = useState(30);
@@ -297,8 +304,24 @@ export function MapPanel({
   );
   const people = motions.filter((m) => m.kind === 'person');
   const vehicles = motions.filter((m) => m.kind === 'vehicle');
-  const fire = useMemo(() => firePerimeter(map, time), [map, time]);
-  const future = useMemo(() => firePerimeter(map, time + 10), [map, time]);
+  const forest = useMemo(
+    () => forestPropagation(map, plannedPosition ? [plannedPosition] : []),
+    [
+      map.ignition.x,
+      map.ignition.y,
+      map.wind.direction,
+      map.wind.speedMps,
+      map.metersPerPixel,
+      plannedPosition?.x,
+      plannedPosition?.y,
+    ],
+  );
+  const fire = useMemo(() => forestFrame(forest, time), [forest, time]);
+  const future = useMemo(() => forestFrame(forest, time + 10), [forest, time]);
+  const smoke = useMemo(
+    () => smokePlume(map, fire, time),
+    [map.wind.direction, map.wind.speedMps, fire, time],
+  );
   const visibleMotions = motions.filter(
     (m) => layers[m.kind === 'person' ? 'people' : 'vehicles'],
   );
@@ -483,10 +506,6 @@ export function MapPanel({
               <stop stopColor="#2c2117" stopOpacity=".88" />
               <stop offset=".65" stopColor="#6c3522" stopOpacity=".72" />
               <stop offset="1" stopColor="#d96331" stopOpacity=".30" />
-            </radialGradient>
-            <radialGradient id={`${id}-smoke`}>
-              <stop stopColor="#c4bdb2" stopOpacity=".6" />
-              <stop offset="1" stopColor="#c4bdb2" stopOpacity="0" />
             </radialGradient>
             <filter
               id={`${id}-fire-texture`}
@@ -761,115 +780,24 @@ export function MapPanel({
               <rect x="5" y="-6" width="4" height="3" fill="#c4d1cb" />
             </g>
           ))}
-          {spreadAvailable && layers.fire && (
-            <g
-              data-testid="fire-layer"
-              aria-label={`모의 산불 확산 T+${time.toFixed(1)}분`}
-            >
-              <polygon
-                data-testid="fire-perimeter"
-                points={pathPoints(fire)}
-                fill={`url(#${id}-burn)`}
-                filter={`url(#${id}-fire-texture)`}
-              />
-              <polygon
-                points={pathPoints(fire)}
-                fill="none"
-                stroke="#ef843f"
-                strokeWidth="8"
-                opacity=".7"
-                filter={`url(#${id}-glow)`}
-              />
-              <polygon
-                points={pathPoints(fire)}
-                fill="none"
-                stroke="#ffb354"
-                strokeWidth="2.5"
-                filter={`url(#${id}-fire-texture)`}
-              />
-              {time > 0 &&
-                fire
-                  .filter((_, i) => i % 3 === 0)
-                  .map((p, i) => (
-                    <g key={i} transform={`translate(${p.x} ${p.y})`}>
-                      <path
-                        className="map-flame"
-                        style={{ animationDelay: `${-i * 0.17}s` }}
-                        d="M-4 5Q-8-1-3-6Q-3-1 0-11Q8-3 5 3Q2 9-4 5Z"
-                        fill="#f69337"
-                      />
-                      <path d="M-2 4Q-3 0 1-4Q5 4-2 4" fill="#ffe5a1" />
-                    </g>
-                  ))}
-              {time > 0 &&
-                Array.from({ length: 7 }, (_, i) => (
-                  <ellipse
-                    className="map-smoke"
-                    key={i}
-                    cx={map.ignition.x + 30 + i * 27 + time * 3}
-                    cy={map.ignition.y - 17 + i * 4}
-                    rx={27 + i * 4}
-                    ry={15 + i * 3}
-                    fill={`url(#${id}-smoke)`}
-                    style={{ animationDelay: `${-i}s` }}
-                  />
-                ))}
-              <circle
-                cx={map.ignition.x}
-                cy={map.ignition.y}
-                r="8"
-                fill="#fff0c4"
-                stroke="#e45e30"
-                strokeWidth="4"
-              />
-              <text
-                x={map.ignition.x + 15}
-                y={map.ignition.y + 6}
-                className="terrain-label fire-label"
-                fontSize="13"
-              >
-                발화점
-              </text>
-            </g>
-          )}
-          {spreadAvailable && layers.forecast && (
-            <g data-testid="fire-forecast">
-              <polygon
-                points={pathPoints(future)}
-                fill="#f4a049"
-                fillOpacity=".06"
-                stroke="#ffd09a"
-                strokeWidth="2"
-                strokeDasharray="8 7"
-              />
-              <text
-                x={future[5].x + 10}
-                y={Math.max(38, future[5].y)}
-                className="terrain-label"
-                fontSize="12"
-                fill="#ffe0ad"
-              >
-                +10분 예상 화선
-              </text>
-            </g>
+          {spreadAvailable && (
+            <ForestLayers
+              id={id}
+              map={map}
+              spread={forest}
+              fire={fire}
+              future={future}
+              smoke={smoke}
+              time={time}
+              showFire={layers.fire}
+              showForecast={layers.forecast}
+              showSmoke={layers.smoke}
+            />
           )}
           {zones.map((zone) => {
-            const estimates = households
-              .filter((h) => h.zoneId === zone.id)
-              .map((h) =>
-                eta(
-                  h.demoPosition,
-                  map.ignition,
-                  map.wind.direction,
-                  map.wind.speedMps,
-                  time,
-                ),
-              )
-              .filter((t): t is number => t !== null);
-            const remaining =
-              spreadAvailable && estimates.length
-                ? Math.round(Math.min(...estimates))
-                : null;
+            const zoneLabel = spreadAvailable
+              ? forestZoneLabel(zone, fire, smoke)
+              : 'ETA 불명';
             return (
               <g
                 key={zone.id}
@@ -888,9 +816,7 @@ export function MapPanel({
                 />
                 <text fontSize="14" fill="#edf2df" fontWeight="650" y="4">
                   {zone.label}
-                  {active
-                    ? ` · ${remaining === null ? 'ETA 불명' : remaining === 0 ? '영향권' : `약 ${remaining}분`}`
-                    : ` · ${zone.householdCount}`}
+                  {active ? ` · ${zoneLabel}` : ` · ${zone.householdCount}`}
                 </text>
               </g>
             );
@@ -1133,11 +1059,15 @@ export function MapPanel({
           ))}
           <span className="legend-fire">
             <i />
-            {preview > 0 ? '미리보기 화선' : '현재 화선'}
+            {preview > 0 ? '숲 화선 미리보기' : '숲 화선'}
           </span>
           <span className="legend-forecast">
             <i />
             10분 후
+          </span>
+          <span className="legend-smoke">
+            <i />
+            연기 흐름
           </span>
         </div>
       </div>
@@ -1248,7 +1178,7 @@ export function MapPanel({
             ? '파란 동선은 주민, 노란 동선은 차량입니다.'
             : '발생 대응 장면에서 이동·확산을 확인할 수 있습니다.'}
           <small>
-            이동 위치는 모의 경로 시각화이며, 도착 완료는 별도 확인합니다.
+            불은 연결된 숲을 따라 번지고, 연기는 바람을 따라 마을 위로 흐릅니다.
           </small>
         </div>
       </div>
