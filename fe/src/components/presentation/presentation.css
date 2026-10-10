@@ -1,0 +1,134 @@
+.presentation-shell {
+  height: 100dvh;
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr) auto;
+  background: #fff;
+}
+.presentation-header,
+.presentation-footer {
+  padding: 18px 28px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+}
+.presentation-header {
+  border-bottom: 1px solid var(--line);
+}
+.presentation-brand {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.presentation-brand > span {
+  background: var(--fire-red);
+  color: #fff;
+  border-radius: 13px;
+  font-size: 25px;
+  font-weight: 750;
+  width: 44px;
+  height: 44px;
+  display: grid;
+  place-items: center;
+}
+.presentation-brand h1 {
+  font-size: 20px;
+  margin: 0;
+}
+.presentation-brand small {
+  display: block;
+  font-weight: 400;
+  font-size: 12px;
+  margin-top: 2px;
+  color: var(--muted);
+}
+.presentation-page-count {
+  font-size: 16px;
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+}
+.presentation-stage {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  min-height: 0;
+  min-width: 0;
+}
+.presentation-stage figure {
+  margin: 0;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+.presentation-stage img {
+  display: block;
+  max-width: 100%;
+  max-height: 100%;
+  width: auto;
+  height: auto;
+  object-fit: contain;
+}
+.presentation-loading {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  padding: 20px;
+  background: #fff;
+  text-align: center;
+}
+.presentation-footer {
+  border-top: 1px solid var(--line);
+}
+.presentation-hint {
+  font-size: 12px;
+  color: var(--muted);
+}
+.presentation-footer nav {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.presentation-footer button {
+  min-height: 44px;
+  padding: 10px 20px;
+  white-space: nowrap;
+}
+.presentation-footer .presentation-next {
+  color: #fff;
+  border-color: var(--fire-red);
+  background: var(--fire-red);
+}
+.presentation-footer .presentation-next:hover:not(:disabled) {
+  background: #6e0611;
+}
+.presentation-sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: pre-wrap;
+  border: 0;
+}
+@media (max-width: 600px) {
+  .presentation-header,
+  .presentation-footer {
+    padding: 14px 16px;
+  }
+  .presentation-stage {
+    padding: 12px;
+  }
+  .presentation-hint {
+    display: none;
+  }
+  .presentation-footer {
+    justify-content: center;
+  }
+}

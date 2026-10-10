@@ -1,4 +1,5 @@
 import { expect, test } from '@playwright/test';
+import { enterSimulation } from './helpers/presentation';
 
 test('deployed-style dashboard uses only its own state endpoints with no token or phone API', async ({
   page,
@@ -9,13 +10,17 @@ test('deployed-style dashboard uses only its own state endpoints with no token o
   page.on('request', (req) => requests.push(req.url()));
   page.on('pageerror', (error) => errors.push(error.message));
   await page.goto('/');
+  await enterSimulation(page);
   await expect(
     page.getByText('시뮬레이션 서버 연결', { exact: true }),
   ).toBeVisible();
   await expect(page.getByTestId('resident-phone')).toContainText(
     '반영환 할아버지',
   );
-  await expect(page.getByTestId('rescuer-phone')).toContainText(
+  await expect(page.getByTestId('demo-resident-marker')).toContainText(
+    '반영환 할아버지',
+  );
+  await expect(page.getByRole('img', { name: /48가구/ })).toContainText(
     '박미숙 할머니',
   );
   await expect(

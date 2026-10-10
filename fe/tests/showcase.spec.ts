@@ -1,5 +1,6 @@
 import { expect, test } from '@playwright/test';
 import { ShowcaseRuntime } from '../../shared/src/showcase.ts';
+import { enterSimulation } from './helpers/presentation';
 
 test('both phone agents, all residents and local map are visible without external requests', async ({
   page,
@@ -13,6 +14,7 @@ test('both phone agents, all residents and local map are visible without externa
   });
   page.on('pageerror', (error) => errors.push(error.message));
   await page.goto('/?demo=1');
+  await enterSimulation(page);
   await expect(page.getByTestId('resident-phone')).toBeVisible();
   await expect(page.getByTestId('rescuer-phone')).toBeVisible();
   expect(
@@ -64,6 +66,7 @@ test('visitors can only watch the automatic replay, without pause, speed, repeat
   page,
 }) => {
   await page.goto('/?demo=1');
+  await enterSimulation(page);
   await expect(page.getByTestId('resident-transcript')).toContainText(
     '다리가 아파서',
     { timeout: 8000 },
@@ -94,6 +97,7 @@ test('fire contact chars buildings black, smoke alone does not, and a fresh roun
     route.fulfill({ json: runtime.view() }),
   );
   await page.goto('/');
+  await enterSimulation(page);
   const charred = page.locator(
     '[data-testid="house-building"][data-burned="true"]',
   );
@@ -127,6 +131,7 @@ test('mobile layout keeps both agent panels usable without horizontal page overf
 }) => {
   await page.setViewportSize({ width: 390, height: 844 });
   await page.goto('/?demo=1');
+  await enterSimulation(page);
   await expect(page.getByTestId('resident-phone')).toBeVisible();
   await expect(page.getByTestId('rescuer-phone')).toBeVisible();
   expect(

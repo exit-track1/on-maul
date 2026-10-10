@@ -3,9 +3,19 @@ import { Client } from './mock/client';
 import { CallHistory } from './components/phone/CallHistory';
 import { MapPanel } from './components/map/EvacuationMap';
 import { STATUS_LABELS } from '../../shared/src/domain.ts';
+import { Presentation } from './components/presentation/Presentation';
 import './styles/showcase.css';
 
 export default function App() {
+  const [showDemo, setShowDemo] = useState(false);
+  return showDemo ? (
+    <SimulationDashboard />
+  ) : (
+    <Presentation onFinish={() => setShowDemo(true)} />
+  );
+}
+
+function SimulationDashboard() {
   const [client] = useState(() => new Client());
   const [snapshot, setSnapshot] = useState(() => client.snapshot());
   const [tab, setTab] = useState<'map' | 'households' | 'cases' | 'logs'>(
