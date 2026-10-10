@@ -37,8 +37,8 @@ export function ForestLayers({
           <path d={spread.fuelPath} />
         </clipPath>
         <radialGradient id={`${id}-smoke-cloud`}>
-          <stop stopColor="#FFF4D6" stopOpacity=".9" />
-          <stop offset=".45" stopColor="#A19E93" stopOpacity=".6" />
+          <stop stopColor="#4C4A44" stopOpacity=".95" />
+          <stop offset=".5" stopColor="#A19E93" stopOpacity=".8" />
           <stop offset="1" stopColor="#A19E93" stopOpacity="0" />
         </radialGradient>
         <filter
@@ -162,8 +162,8 @@ export function ForestLayers({
               <path
                 key={`wisp-${lane}`}
                 d={`M${[...upper, ...lower].join('L')}Z`}
-                fill="#A19E93"
-                opacity=".18"
+                fill="#4C4A44"
+                opacity=".3"
                 filter={`url(#${id}-smoke-wisp)`}
               />
             );
@@ -174,8 +174,8 @@ export function ForestLayers({
               key={i}
               style={
                 {
-                  '--smoke-dx': `${ux * 38}px`,
-                  '--smoke-dy': `${uy * 38}px`,
+                  '--smoke-dx': `${ux * 80}px`,
+                  '--smoke-dy': `${uy * 80}px`,
                   animationDelay: `${-i * 0.41}s`,
                 } as CSSProperties
               }

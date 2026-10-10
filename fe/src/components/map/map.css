@@ -528,14 +528,17 @@
   }
 }
 @keyframes smoke-drift {
-  0%,
-  100% {
-    opacity: 0.6;
+  0% {
+    opacity: 0;
     transform: translate(0, 0);
   }
-  50% {
-    opacity: 0.9;
-    transform: translate(var(--smoke-dx, 38px), var(--smoke-dy, 7px));
+  20%,
+  70% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+    transform: translate(var(--smoke-dx, 80px), var(--smoke-dy, 14px));
   }
 }
 @keyframes walk {
@@ -559,7 +562,7 @@
   animation: flame-flicker 1.3s ease-in-out infinite;
 }
 .map-smoke {
-  animation: smoke-drift 6s ease-in-out infinite;
+  animation: smoke-drift 6s linear infinite;
   pointer-events: none;
 }
 .person-legs,

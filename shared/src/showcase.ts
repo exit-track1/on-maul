@@ -97,7 +97,6 @@ export class ShowcaseRuntime extends Runtime {
   private rescueIndex = 0;
   private loop = 1;
   private seed: number;
-  private repeatAt: number | null = null;
   private serial = 0;
   constructor(seed = Date.now() >>> 0) {
     super(DATA);
@@ -167,7 +166,6 @@ export class ShowcaseRuntime extends Runtime {
     this.state.revision = revision;
     this.state.records = [];
     this.state.simMinutes = 0;
-    this.repeatAt = null;
     this.serial = 0;
     this.state.simulation = {
       ...this.state.simulation,
@@ -538,18 +536,12 @@ export class ShowcaseRuntime extends Runtime {
           throw new Error('사례 누락 없이 반복해야 합니다.');
         this.replay.stage = 'completed';
         this.replay.completedAt = this.state.simMinutes;
-        this.repeatAt = this.state.simMinutes + 6;
         this.state.simulation.durationMinutes = this.state.simMinutes;
-        if (!this.replay.autoRepeat) this.state.simulation.playing = false;
         this.replayLog(`48가구 대피 완료 · ${SHOWCASE_CASES.length}개 사례 완료 · 다음 회차 준비`);
-      }
-      if (
-        this.repeatAt !== null &&
-        this.state.simMinutes >= this.repeatAt &&
-        this.replay.autoRepeat
-      ) {
-        this.loop++;
-        this.initialize(true);
+        if (this.replay.autoRepeat) {
+          this.loop++;
+          this.initialize(true);
+        } else this.state.simulation.playing = false;
       }
       if (!this.state.simulation.playing) break;
     }
@@ -565,7 +557,12 @@ export class ShowcaseRuntime extends Runtime {
       }
       if (typeof input.playing === 'boolean') this.state.simulation.playing = input.playing;
       if (typeof input.autoRepeat === 'boolean') this.replay.autoRepeat = input.autoRepeat;
-      if (this.state.simulation.playing) this.startCalls();
+      if (this.state.simulation.playing) {
+        if (this.replay.stage === 'completed') {
+          this.loop++;
+          this.initialize(true);
+        } else this.startCalls();
+      }
     } else if (action === 'demo-reset' || action === 'showcase-restart') {
       this.loop = 1;
       this.seed = (this.seed + 1) >>> 0;

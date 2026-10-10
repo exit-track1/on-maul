@@ -240,7 +240,7 @@ export function smokePlume(
   // Smoke comes from the burning woodland, including the smouldering edge
   // beside the fields. Its movement always follows the supplied wind vector.
   const sources = [downwind, villageEdge, southernEdge];
-  const length = Math.min(1100, 180 + map.wind.speedMps * 30 + minutes * 18);
+  const length = Math.min(1200, 260 + map.wind.speedMps * 36 + minutes * 20);
   return sources.flatMap((source, lane) =>
     Array.from({ length: 14 }, (_, i) => {
       const fraction = (i + 1) / 14;
@@ -249,9 +249,9 @@ export function smokePlume(
       return {
         x: source.x + ux * distance - uy * drift,
         y: source.y + uy * distance + ux * drift,
-        rx: 24 + fraction * 57,
-        ry: 12 + fraction * 36,
-        opacity: (0.56 + lane * 0.025) * (1 - fraction * 0.55),
+        rx: 38 + fraction * 90,
+        ry: 22 + fraction * 56,
+        opacity: (0.82 + lane * 0.025) * (1 - fraction * 0.4),
       };
     }),
   );

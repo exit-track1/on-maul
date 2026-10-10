@@ -105,24 +105,44 @@ test('pause freezes calls and map; reset clears past calls and stays at start un
   assert.ok(reset.showcase!.actors.every((a) => !a.moved));
   assert.equal(runtime.command('sim', { playing: true }).showcase!.calls.length, 2);
 });
-test('automatic repeat starts a fresh shuffled round only after every household and vehicle is done', () => {
+test('automatic repeat resets immediately after every household and vehicle is done, then repeats again', () => {
+  const reference = new ShowcaseRuntime(99);
+  reference.command('sim', { autoRepeat: false });
+  let completed = reference.view();
+  for (let i = 0; i < 500 && completed.showcase!.stage !== 'completed'; i++)
+    completed = reference.tickCycle(0.5);
+  assert.equal(completed.showcase!.stage, 'completed');
+  assert.equal(completed.showcase!.seenCases.length, 28);
+  assert.equal(completed.scenario.counts.safe, 48);
+  assert.ok(completed.showcase!.actors.every((a) => a.phase === 'completed'));
+  const completedAt = completed.showcase!.completedAt!;
   const runtime = new ShowcaseRuntime(99);
   let view = runtime.view();
   const before = view.showcase!.actors.map((a) => a.caseId);
-  while (view.showcase!.stage !== 'completed') view = runtime.tickCycle(0.5);
-  assert.equal(view.showcase!.seenCases.length, 28);
-  assert.equal(view.scenario.counts.safe, 48);
-  const completedAt = view.showcase!.completedAt!;
-  view = runtime.tickCycle(1);
+  view = runtime.tickCycle(completedAt - 0.05);
   assert.equal(view.showcase!.loop, 1);
-  view = runtime.tickCycle(6);
+  view = runtime.tickCycle(0.05);
   assert.equal(view.showcase!.loop, 2);
-  assert.ok(view.simMinutes < completedAt);
+  assert.equal(view.simMinutes, 0);
+  assert.equal(view.showcase!.stage, 'running');
+  assert.equal(view.showcase!.completedAt, null);
+  assert.equal(view.showcase!.seenCases.length, 0);
+  assert.equal(view.scenario.counts.safe, 0);
+  assert.equal(view.shelterAdmissions.length, 0);
+  assert.ok(view.showcase!.actors.every((a) => !a.moved));
+  assert.equal(view.showcase!.calls.length, 2);
+  assert.equal(view.simulation.playing, true);
   assert.notDeepEqual(
     view.showcase!.actors.map((a) => a.caseId),
     before,
   );
   assert.ok(view.showcase!.calls.every((c) => c.id.startsWith('call-2-')));
+  for (let i = 0; i < 500 && view.showcase!.loop === 2; i++) view = runtime.tickCycle(0.5);
+  assert.equal(view.showcase!.loop, 3);
+  assert.ok(view.simMinutes < 0.5);
+  const resumed = reference.command('sim', { autoRepeat: true, playing: true });
+  assert.equal(resumed.showcase!.loop, 2);
+  assert.equal(resumed.simMinutes, 0);
 });
 test('old dialing, real transcript and arbitrary scenario actions cannot enter the simulation', () => {
   const runtime = new ShowcaseRuntime();
