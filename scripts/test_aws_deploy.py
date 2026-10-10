@@ -17,7 +17,7 @@ class ReleaseSafetyTest(unittest.TestCase):
         self.temporary = tempfile.TemporaryDirectory()
         self.addCleanup(self.temporary.cleanup)
         self.root = Path(self.temporary.name)
-        for name in ('package.json', 'package-lock.json', 'fe/package.json', 'server/package.json', 'server/src/main.ts', 'src/runtime-env.ts', 'src/config.ts', 'public/index.html', 'fixtures/bundle.json', 'fe/dist/index.html', 'shared/src/data.ts'):
+        for name in ('package.json', 'package-lock.json', 'fe/package.json', 'server/package.json', 'server/src/main.ts', 'fixtures/bundle.json', 'fe/dist/index.html', 'shared/src/data.ts'):
             file = self.root / name
             file.parent.mkdir(parents=True, exist_ok=True)
             file.write_text('{}')
@@ -34,9 +34,9 @@ class ReleaseSafetyTest(unittest.TestCase):
         self.assertNotIn('.env', files)
         self.assertNotIn('.deploy/aws.json', files)
         self.assertNotIn('fixtures/real-residents.json', files)
-        self.assertIn('src/runtime-env.ts', files)
-        self.assertIn('public/index.html', files)
-        self.assertEqual(len(files), 11)
+        self.assertNotIn('src/runtime-env.ts', files)
+        self.assertNotIn('public/index.html', files)
+        self.assertEqual(len(files), 8)
 
     def test_private_file_inside_source_is_rejected(self):
         (self.root / 'server/src/private.key').write_text('DO_NOT_DEPLOY')
@@ -92,19 +92,17 @@ class ReleaseSafetyTest(unittest.TestCase):
         path, content, mode = uploaded[0]
         self.assertEqual(mode, 0o600)
         self.assertFalse(path.exists())
-        self.assertIn('OPENAI_API_KEY=private-test-marker', content)
-        self.assertIn('PUBLIC_BASE_URL=https://app.example.com', content)
-        self.assertIn('ON_JOURNAL_DIR=/var/lib/onmaul/app-data/journal', content)
+        self.assertNotIn('OPENAI_API_KEY', content)
+        self.assertNotIn('PUBLIC_BASE_URL', content)
+        self.assertEqual(content, 'NODE_ENV=production\nON_PORT=8090\n')
 
-    def test_runtime_sync_rejects_aws_credentials(self):
-        (self.root / '.env').write_text('AWS_ACCESS_KEY_ID=not-an-actual-key\n')
-        def git_check(arguments, **_kwargs):
-            return SimpleNamespace(returncode=0 if 'check-ignore' in arguments else 1)
+    def test_runtime_sync_does_not_load_any_legacy_env_or_credentials(self):
+        (self.root / '.env').write_text('AWS_ACCESS_KEY_ID=not-an-actual-key\nTELNYX_API_KEY=retired-key\n')
         with patch.object(deployment, 'ROOT', self.root), patch.object(deployment, 'LOCAL', self.root), \
-             patch.object(deployment.subprocess, 'run', side_effect=git_check), patch.object(deployment, 'aws') as aws:
-            with self.assertRaisesRegex(RuntimeError, 'AWS CLI credentials'):
-                deployment.sync_runtime_env({'domain': 'app.example.com', 'outputs': {'RuntimeSecretArn': 'test-secret'}})
-            aws.assert_not_called()
+             patch.object(deployment.subprocess, 'run') as shell, patch.object(deployment, 'aws') as aws:
+            deployment.sync_runtime_env({'outputs': {'RuntimeSecretArn': 'test-secret'}})
+            shell.assert_not_called()
+            aws.assert_called_once()
 
 
 if __name__ == '__main__':

@@ -8,8 +8,16 @@
     "allowImportingTsExtensions": true,
     "erasableSyntaxOnly": true,
     "skipLibCheck": true,
-    "types": ["node"],
-    "lib": ["ES2023", "DOM"]
+    "types": [
+      "node"
+    ],
+    "lib": [
+      "ES2023",
+      "DOM"
+    ]
   },
-  "include": ["src/**/*.ts", "tests/**/*.ts", "scripts/check-*.ts"]
+  "include": [
+    "shared/src/**/*.ts",
+    "server/src/**/*.ts"
+  ]
 }

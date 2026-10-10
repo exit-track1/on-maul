@@ -1,4 +1,5 @@
 import { DATA } from './data.ts';
+import type { ShowcaseState } from './showcase.ts';
 import { classify, type Classification } from './classification.ts';
 import { eta, groupOf, handover, orderedHouseholds, tally, vulnerability } from './domain.ts';
 import type { Fixtures, HouseholdStatus, Scenario, RecordItem } from './types.ts';
@@ -145,6 +146,7 @@ export interface GraphRun {
   supersededBy?: string;
 }
 export interface View {
+  showcase?: ShowcaseState;
   data: Fixtures;
   scenario: Scenario;
   revision: number;

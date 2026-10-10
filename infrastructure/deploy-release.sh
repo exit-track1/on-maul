@@ -28,7 +28,7 @@ runuser -u onmaul -- bash -c 'cd "$1" && /usr/bin/npm-24 ci --ignore-scripts --n
 
 if [[ "$mode" == check ]]; then
   # Verify Linux dependencies and loopback HTTP without activating the public application.
-  runuser -u onmaul -- bash -c 'cd "$1" && exec env ON_EXECUTION_MODE=demo ON_PORT=18090 ON_JOURNAL_DIR=/var/lib/onmaul/check-journal /usr/bin/node-24 --import=tsx server/src/main.ts' bash "$release_dir" > /var/lib/onmaul/check-server.log 2>&1 &
+  runuser -u onmaul -- bash -c 'cd "$1" && exec env ON_PORT=18090 /usr/bin/node-24 --import=tsx server/src/main.ts' bash "$release_dir" > /var/lib/onmaul/check-server.log 2>&1 &
   checker=$!
   finish_check() {
     kill "$checker" 2>/dev/null || true
@@ -39,7 +39,7 @@ if [[ "$mode" == check ]]; then
   ready=no
   for attempt in {1..30}; do
     if curl --fail --silent --max-time 2 http://127.0.0.1:18090/api/health > /var/lib/onmaul/check-health.json; then
-      if /usr/bin/node-24 -e 'const f=require("node:fs"); const v=JSON.parse(f.readFileSync("/var/lib/onmaul/check-health.json","utf8")); if(v.ok!==true || v.executionMode!=="demo") process.exit(1)'; then
+      if /usr/bin/node-24 -e 'const f=require("node:fs"); const v=JSON.parse(f.readFileSync("/var/lib/onmaul/check-health.json","utf8")); if(v.ok!==true || v.mode!=="demo" || v.externalCalls!==false) process.exit(1)'; then
         ready=yes
         break
       fi
@@ -57,17 +57,12 @@ fi
 # Secret values are read on EC2 and redirected to a private file, never sent in SSM commands.
 new_env=$(mktemp /etc/onmaul/runtime.env.XXXXXX)
 trap 'rm -f "$new_env"' EXIT
-if [[ "$use_secret" == yes ]]; then
-  aws secretsmanager get-secret-value --region "$region" --secret-id "$secret_arn" \
-    --query SecretString --output text > "$new_env"
-else
-  : > "$new_env"
-fi
+# AI/telephone secrets are retired; never download legacy runtime credentials.
+: > "$new_env"
 cat >> "$new_env" <<'ENV'
 
 # Deployment settings. Server binds only to loopback; Nginx provides HTTPS.
 ON_PORT=8090
-ON_JOURNAL_DIR=/var/lib/onmaul/journal
 ENV
 chown onmaul:onmaul "$new_env"
 chmod 0600 "$new_env"

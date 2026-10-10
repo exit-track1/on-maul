@@ -6,12 +6,10 @@ COPY server/package.json ./server/package.json
 RUN npm ci --ignore-scripts --no-audit --no-fund && npm cache clean --force
 COPY server/src ./server/src
 COPY shared/src ./shared/src
-COPY src ./src
-COPY public ./public
 COPY fixtures/bundle.json ./fixtures/bundle.json
 COPY fe/dist ./fe/dist
 # SSM extracts the private archive with umask 077; runtime UID differs from root.
-RUN chmod -R a+rX server shared src public fixtures fe/dist
+RUN chmod -R a+rX server shared fixtures fe/dist
 ENV NODE_ENV=production
 USER node
 EXPOSE 8090

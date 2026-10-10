@@ -38,19 +38,11 @@ cleanup() {
   rm -rf "$check_state"
 }
 trap cleanup EXIT
-if [[ "$use_secret" == yes ]]; then
-  aws secretsmanager get-secret-value --region "$region" --secret-id "$secret_arn" \
-    --query SecretString --output text > "$new_env"
-else
-  printf 'ON_EXECUTION_MODE=demo\nON_PHONE_ENABLED=no\n' > "$new_env"
-fi
+# AI/telephone secrets are retired; never download legacy runtime credentials.
+: > "$new_env"
 cat >> "$new_env" <<'ENV'
 NODE_ENV=production
 ON_PORT=8090
-ON_PHONE_ENV=deployment
-ON_JOURNAL_DIR=/var/lib/onmaul/app-data/journal
-ON_LOCAL_DATA_DIR=/var/lib/onmaul/app-data/phone-settings
-ON_PHONE_DATA_DIR=/var/lib/onmaul/app-data/phone-history
 ENV
 chown onmaul:onmaul "$new_env" "$check_state"
 chmod 0600 "$new_env"
@@ -64,7 +56,7 @@ docker run -d --init --name "$checker" --network host --user "$app_uid:$app_gid"
   --memory 768m --memory-swap 768m --cpus 1.5 --tmpfs /tmp:rw,noexec,nosuid,size=64m \
   --mount "type=bind,src=$new_env,dst=/run/onmaul/runtime.env,readonly" \
   --mount "type=bind,src=$check_state,dst=/var/lib/onmaul/app-data" \
-  -e ON_EXECUTION_MODE=demo -e ON_PHONE_ENABLED=no -e ON_PORT=18090 "$image" >/dev/null
+  -e ON_PORT=18090 "$image" >/dev/null
 wait_for_api() {
   local port=$1
   for attempt in {1..60}; do

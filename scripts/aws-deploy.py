@@ -103,7 +103,7 @@ def remote(state, script, arguments, timeout=1200):
 
 
 def package_files(root):
-    required = ('package.json', 'package-lock.json', 'fe/package.json', 'server/package.json', 'server/src/main.ts', 'src/runtime-env.ts', 'src/config.ts', 'public/index.html', 'fixtures/bundle.json', 'fe/dist/index.html')
+    required = ('package.json', 'package-lock.json', 'fe/package.json', 'server/package.json', 'server/src/main.ts', 'fixtures/bundle.json', 'fe/dist/index.html')
     for name in required:
         if not (root / name).is_file():
             raise RuntimeError(f'Missing release file: {name}')
@@ -111,7 +111,7 @@ def package_files(root):
     if fixture.get('metadata', {}).get('synthetic') is not True:
         raise RuntimeError('Release fixtures must be marked as synthetic demo data.')
     files = {root / name for name in required}
-    for name in ('server/src', 'shared/src', 'src', 'public', 'fe/dist'):
+    for name in ('server/src', 'shared/src', 'fe/dist'):
         files.update(path for path in (root / name).rglob('*') if path.is_file() or path.is_symlink())
     for path in files:
         relative = path.relative_to(root)
@@ -128,19 +128,6 @@ def build_release(source_root=ROOT):
     source_revision = subprocess.check_output(['git', 'rev-parse', 'HEAD'], cwd=source_root, text=True).strip()
     subprocess.run(['npm', 'run', 'build'], cwd=source_root, check=True)
     files = package_files(source_root)
-    private_values = []
-    if (ROOT / '.env').is_file():
-        # Parse dotenv in memory; neither the values nor command arguments contain secrets.
-        parsed = subprocess.check_output(['node', '--input-type=module', '-e',
-            'import{readFileSync}from"node:fs";import{parseEnv}from"node:util";process.stdout.write(JSON.stringify(parseEnv(readFileSync(process.argv[1],"utf8"))))',
-            str(ROOT / '.env')], text=True)
-        private_values = [value.encode() for key, value in json.loads(parsed).items()
-            if re.search(r'KEY|TOKEN|CALLER_NUMBER|TEST_PHONE|REAL_.*E164', key) and len(value) >= 8]
-    docker_inputs = [ROOT / 'infrastructure' / 'Dockerfile', ROOT / 'infrastructure' / 'docker.contextignore']
-    for candidate in [*files, *docker_inputs]:
-        data = candidate.read_bytes()
-        if any(value in data for value in private_values):
-            raise RuntimeError(f'Private environment value detected in release input: {candidate.name}')
     LOCAL.mkdir(mode=0o700, parents=True, exist_ok=True)
     LOCAL.chmod(0o700)
     temporary = LOCAL / 'release.pending.tar.gz'
@@ -162,24 +149,9 @@ def build_release(source_root=ROOT):
 
 
 def sync_runtime_env(state):
-    source = ROOT / '.env'
-    if not source.is_file():
-        raise RuntimeError('Fill the Git-ignored root .env before deployment.')
-    if subprocess.run(['git', 'check-ignore', '--quiet', str(source)], cwd=ROOT).returncode:
-        raise RuntimeError('Root .env must be ignored by Git.')
-    if not subprocess.run(['git', 'ls-files', '--error-unmatch', str(source)], cwd=ROOT, capture_output=True).returncode:
-        raise RuntimeError('Root .env must not be tracked by Git.')
-    content = source.read_text()
-    if re.search(r'^\s*(?:export\s+)?AWS_(?:ACCESS_KEY_ID|SECRET_ACCESS_KEY|SESSION_TOKEN)\s*=', content, re.MULTILINE):
-        raise RuntimeError('AWS CLI credentials must not be stored in application dotenv.')
-    # Preserve local values; only the private deployment copy gets these overrides.
-    content += '\n# EC2 runtime settings\n' + '\n'.join([
-        'NODE_ENV=production', f"PUBLIC_BASE_URL=https://{state['domain']}",
-        'ON_PORT=8090', 'ON_PHONE_ENV=deployment',
-        'ON_JOURNAL_DIR=/var/lib/onmaul/app-data/journal',
-        'ON_LOCAL_DATA_DIR=/var/lib/onmaul/app-data/phone-settings',
-        'ON_PHONE_DATA_DIR=/var/lib/onmaul/app-data/phone-history',
-    ]) + '\n'
+    # Demo releases never read or upload the previous AI/telephone environment.
+    LOCAL.mkdir(mode=0o700, parents=True, exist_ok=True)
+    content = 'NODE_ENV=production\nON_PORT=8090\n'
     with tempfile.NamedTemporaryFile(mode='w', suffix='.env', dir=LOCAL) as stream:
         os.chmod(stream.name, 0o600)
         stream.write(content)
