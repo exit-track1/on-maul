@@ -2,7 +2,6 @@ import { expect, test } from '@playwright/test';
 import {
   forestPropagation,
   forestFrame,
-  smokePlume,
   houseBurned,
 } from '../src/components/map/forest';
 import cover from '../src/components/map/forest-fuel.json' with { type: 'json' };
@@ -48,28 +47,8 @@ test('only houses touched by the current fire fringe char, and time zero restore
   ).toBe(true);
 });
 
-test('cleared homes never become fuel and smoke crosses open land downwind toward the village', () => {
+test('cleared homes never become fuel', () => {
   const spread = forestPropagation(map, [{ x: 120, y: 60 }]);
   expect(spread.fuel[cellAt(120, 60)]).toBe(0);
   expect(forestFrame(spread, 80).cells).toEqual([]);
-  const connected = forestPropagation(map);
-  const smoke = smokePlume(map, forestFrame(connected, 18), 18);
-  expect(smoke.length).toBeGreaterThan(0);
-  expect(
-    smoke.some((p) => p.x > 300 && p.x < 1000 && p.y > 200 && p.y < 650),
-  ).toBe(true);
-  expect(
-    smoke.some(
-      (p) =>
-        p.x >= 0 &&
-        p.x < cover.width &&
-        p.y >= 0 &&
-        p.y < cover.height &&
-        !connected.fuel[cellAt(p.x, p.y)],
-    ),
-  ).toBe(true);
-  const firstLane = smoke.slice(0, 14);
-  expect(firstLane.at(-1)!.x).toBeGreaterThan(firstLane[0].x);
-  expect(firstLane.at(-1)!.y).toBeGreaterThan(firstLane[0].y);
-  expect(smokePlume(map, forestFrame(connected, 0), 0)).toEqual([]);
 });

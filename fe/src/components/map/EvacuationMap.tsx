@@ -29,19 +29,17 @@ import './map.css';
 import {
   forestPropagation,
   forestFrame,
-  smokePlume,
   forestZoneLabel,
   houseBurned,
 } from './forest';
 import { ForestLayers } from './ForestLayers';
 
-type Layer = 'people' | 'vehicles' | 'fire' | 'forecast' | 'smoke';
+type Layer = 'people' | 'vehicles' | 'fire' | 'forecast';
 const layerNames: Record<Layer, string> = {
   people: '주민 이동',
   vehicles: '차량 이동',
   fire: '산불 확산',
   forecast: '10분 후',
-  smoke: '연기 흐름',
 };
 
 function Person({ color = '#FA4616' }: { color?: string }) {
@@ -245,7 +243,6 @@ export function MapPanel({
     vehicles: true,
     fire: true,
     forecast: true,
-    smoke: true,
   });
   const [playing, setPlaying] = useState(false);
   const [speed, setSpeed] = useState(30);
@@ -319,10 +316,6 @@ export function MapPanel({
   );
   const fire = useMemo(() => forestFrame(forest, time), [forest, time]);
   const future = useMemo(() => forestFrame(forest, time + 10), [forest, time]);
-  const smoke = useMemo(
-    () => smokePlume(map, fire, time),
-    [map.wind.direction, map.wind.speedMps, fire, time],
-  );
   const visibleMotions = motions.filter(
     (m) => layers[m.kind === 'person' ? 'people' : 'vehicles'],
   );
@@ -745,16 +738,14 @@ export function MapPanel({
               spread={forest}
               fire={fire}
               future={future}
-              smoke={smoke}
               time={time}
               showFire={layers.fire}
               showForecast={layers.forecast}
-              showSmoke={layers.smoke}
             />
           )}
           {zones.map((zone) => {
             const zoneLabel = spreadAvailable
-              ? forestZoneLabel(zone, fire, smoke)
+              ? forestZoneLabel(zone, fire)
               : 'ETA 불명';
             return (
               <g
@@ -1026,7 +1017,7 @@ export function MapPanel({
             </strong>
             <small>
               {cycle
-                ? `공용 시계 T+${view.simMinutes.toFixed(1)}분 · ${view.simulation.playing ? `${view.simulation.speed}× 진행` : '정지'}`
+                ? `시연 시계 T+${view.simMinutes.toFixed(1)}분 · ${view.simulation.playing ? `${view.simulation.speed}× 진행` : '정지'}`
                 : active
                   ? `기준 T+${view.simMinutes}분${preview > 0 ? ` · +${preview.toFixed(1)}분 미리보기` : ''}`
                   : '지형·건물·도로 상세 보기'}
@@ -1113,15 +1104,11 @@ export function MapPanel({
             <i />
             10분 후
           </span>
-          <span className="legend-smoke">
-            <i />
-            연기 흐름
-          </span>
         </div>
       </div>
       {cycle ? (
         <div className="map-cycle-clock" data-testid="map-cycle-clock">
-          <strong>공용 시계 T+{view.simMinutes.toFixed(1)}분</strong>
+          <strong>시연 시계 T+{view.simMinutes.toFixed(1)}분</strong>
           <span>
             주민·차량·화선이 같은 시연 시간을 사용하며 자동으로 반복 재생됩니다.
           </span>
@@ -1225,7 +1212,8 @@ export function MapPanel({
             ? '주황 동선은 주민, 노란 동선은 차량입니다.'
             : '발생 대응 장면에서 이동·확산을 확인할 수 있습니다.'}
           <small>
-            불은 연결된 숲을 따라 번지고, 연기는 바람을 따라 마을 위로 흐릅니다.
+            불은 연결된 숲을 따라 번지며, 불길이 닿은 집은 검게 탄 모습으로
+            표시됩니다.
           </small>
         </div>
       </div>

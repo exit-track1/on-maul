@@ -47,7 +47,7 @@ function SimulationDashboard() {
     (a) => a.vehicleId && a.phase !== 'completed',
   ).length;
   return (
-    <main className="showcase-shell">
+    <main className="showcase-shell" data-session-id={snapshot.sessionId}>
       <header className="showcase-header">
         <div className="showcase-brand">
           <span>온</span>
@@ -58,13 +58,7 @@ function SimulationDashboard() {
         </div>
         <div className="showcase-header-meta">
           <span className="replay-badge">외부 호출 0 · 로컬 모의</span>
-          <span>
-            {snapshot.offline
-              ? '브라우저 재생'
-              : snapshot.connected
-                ? '시뮬레이션 서버 연결'
-                : '서버 연결 중'}
-          </span>
+          <span>개별 세션 재생</span>
         </div>
       </header>
       <section className="showcase-control" aria-label="시뮬레이션 재생 현황">
@@ -130,11 +124,6 @@ function SimulationDashboard() {
           </strong>
         </button>
       </section>
-      {snapshot.error && (
-        <div className="showcase-error" role="alert">
-          {snapshot.error}
-        </div>
-      )}
       <div className="showcase-workspace">
         <aside className="showcase-calls">
           <CallHistory view={view} role="resident" focus={focus} />

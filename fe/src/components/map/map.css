@@ -64,20 +64,6 @@
 .layer-fire {
   background: var(--fire-orange);
 }
-.layer-smoke {
-  background: var(--fire-silver);
-}
-.terrain-label.smoke-label {
-  fill: var(--paper);
-  stroke: var(--ink);
-  font-weight: 500;
-}
-.terrain-legend .legend-smoke i {
-  width: 12px;
-  height: 7px;
-  border-radius: 50%;
-  background: var(--fire-silver);
-}
 .layer-forecast {
   background: transparent;
   border: 1px dashed var(--fire-yellow);
@@ -527,20 +513,6 @@
     transform: scale(1.15);
   }
 }
-@keyframes smoke-drift {
-  0% {
-    opacity: 0;
-    transform: translate(0, 0);
-  }
-  20%,
-  70% {
-    opacity: 1;
-  }
-  100% {
-    opacity: 0;
-    transform: translate(var(--smoke-dx, 80px), var(--smoke-dy, 14px));
-  }
-}
 @keyframes walk {
   0%,
   100% {
@@ -561,10 +533,6 @@
 .map-flame {
   animation: flame-flicker 1.3s ease-in-out infinite;
 }
-.map-smoke {
-  animation: smoke-drift 6s linear infinite;
-  pointer-events: none;
-}
 .person-legs,
 .person-arms {
   animation: walk 0.7s ease-in-out infinite;
@@ -574,7 +542,6 @@
 }
 .is-paused .motion-route,
 .is-paused .map-flame,
-.is-paused .map-smoke,
 .is-paused .person-legs,
 .is-paused .person-arms,
 .is-paused .vehicle-beacon {
@@ -713,7 +680,6 @@
 @media (prefers-reduced-motion: reduce) {
   .motion-route,
   .map-flame,
-  .map-smoke,
   .person-legs,
   .person-arms,
   .vehicle-beacon {

@@ -1,6 +1,5 @@
 import { expect, test } from '@playwright/test';
-import { ShowcaseRuntime } from '../../shared/src/showcase.ts';
-import { enterSimulation } from './helpers/presentation';
+import { enterSimulation, prepareSimulation } from './helpers/presentation';
 
 test('both phone agents, all residents and local map are visible without external requests', async ({
   page,
@@ -89,21 +88,22 @@ test('visitors can only watch the automatic replay, without pause, speed, repeat
   const at = await page.getByTestId('simulation-time').textContent();
   await expect(page.getByTestId('simulation-time')).not.toHaveText(at!);
 });
-test('fire contact chars buildings black, smoke alone does not, and a fresh round restores them', async ({
+test('fire still chars buildings without smoke and a fresh session restores them', async ({
   page,
 }) => {
-  const runtime = new ShowcaseRuntime(99);
-  await page.route('**/api/state', (route) =>
-    route.fulfill({ json: runtime.view() }),
-  );
+  await page.clock.install({ time: new Date('2026-01-01') });
   await page.goto('/');
-  await enterSimulation(page);
+  await prepareSimulation(page);
+  await page.clock.pauseAt(new Date('2030-01-01'));
+  await page
+    .getByRole('button', { name: '시뮬레이션 보기 →', exact: true })
+    .click();
   const charred = page.locator(
     '[data-testid="house-building"][data-burned="true"]',
   );
   await expect(page.getByTestId('house-building')).toHaveCount(48);
   await expect(charred).toHaveCount(0);
-  runtime.tickCycle(18);
+  await page.clock.fastForward(36000);
   const northern = page.locator(
     '[data-testid="house-building"][data-household="H011"]',
   );
@@ -115,11 +115,16 @@ test('fire contact chars buildings black, smoke alone does not, and a fresh roun
   await expect(
     page.locator('[data-testid="house-building"][data-household="H009"]'),
   ).toHaveAttribute('data-burned', 'false');
-  runtime.tickCycle(20);
+  await page.clock.fastForward(40000);
   await expect(northern).toHaveAttribute('data-burned', 'true');
-  for (let i = 0; i < 500 && runtime.view().showcase!.loop === 1; i++)
-    runtime.tickCycle(0.5);
-  expect(runtime.view().showcase!.loop).toBe(2);
+  await expect(page.getByTestId('smoke-layer')).toHaveCount(0);
+  await expect(page.getByTestId('smoke-puff')).toHaveCount(0);
+  await expect(
+    page.getByRole('button', { name: '연기 흐름', exact: true }),
+  ).toHaveCount(0);
+  await expect(page.locator('.legend-smoke')).toHaveCount(0);
+  await page.reload();
+  await enterSimulation(page);
   await expect(charred).toHaveCount(0);
   await expect(northern.getByTestId('house-roof')).toHaveAttribute(
     'fill',

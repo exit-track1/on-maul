@@ -21,11 +21,6 @@ export interface ForestFrame {
   cells: number[];
   flames: Point[];
 }
-export interface SmokePuff extends Point {
-  rx: number;
-  ry: number;
-  opacity: number;
-}
 
 function point(index: number): Point {
   return {
@@ -234,52 +229,7 @@ export function houseBurned(
   return false;
 }
 
-/** Smoke is advected downwind from the burning forest and may pass over cleared land. */
-export function smokePlume(
-  map: Fixtures['map'],
-  frame: ForestFrame,
-  minutes: number,
-): SmokePuff[] {
-  if (minutes <= 0 || !frame.cells.length) return [];
-  const theta = ((map.wind.direction + 180) * Math.PI) / 180;
-  const ux = Math.sin(theta),
-    uy = -Math.cos(theta);
-  const candidates = frame.cells.filter((_, i) => i % 8 === 0).map(point);
-  if (!candidates.length) candidates.push(point(frame.cells[0]));
-  const downwind = candidates.reduce((a, b) =>
-    a.x * ux + a.y * uy > b.x * ux + b.y * uy ? a : b,
-  );
-  const villageDistance = (p: Point) =>
-    Math.hypot(p.x - map.width / 2, p.y - map.height / 2);
-  const villageEdge = candidates.reduce((a, b) =>
-    villageDistance(a) < villageDistance(b) ? a : b,
-  );
-  const southernEdge = candidates.reduce((a, b) => (a.y > b.y ? a : b));
-  // Smoke comes from the burning woodland, including the smouldering edge
-  // beside the fields. Its movement always follows the supplied wind vector.
-  const sources = [downwind, villageEdge, southernEdge];
-  const length = Math.min(1200, 260 + map.wind.speedMps * 36 + minutes * 20);
-  return sources.flatMap((source, lane) =>
-    Array.from({ length: 14 }, (_, i) => {
-      const fraction = (i + 1) / 14;
-      const distance = fraction * length;
-      const drift = Math.sin(i * 1.8 + lane) * (7 + fraction * 25);
-      return {
-        x: source.x + ux * distance - uy * drift,
-        y: source.y + uy * distance + ux * drift,
-        rx: 38 + fraction * 90,
-        ry: 22 + fraction * 56,
-        opacity: (0.82 + lane * 0.025) * (1 - fraction * 0.4),
-      };
-    }),
-  );
-}
-
-export function forestZoneLabel(
-  zone: Zone,
-  frame: ForestFrame,
-  smoke: SmokePuff[],
-): string {
+export function forestZoneLabel(zone: Zone, frame: ForestFrame): string {
   const { x1, y1, x2, y2 } = zone.demoBounds;
   if (
     frame.cells.some((i) => {
@@ -288,15 +238,5 @@ export function forestZoneLabel(
     })
   )
     return '숲 화재';
-  if (
-    smoke.some(
-      (p) =>
-        p.x + p.rx >= x1 &&
-        p.x - p.rx <= x2 &&
-        p.y + p.ry >= y1 &&
-        p.y - p.ry <= y2,
-    )
-  )
-    return '연기 흐름';
   return '대피 확인';
 }
