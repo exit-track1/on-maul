@@ -168,7 +168,7 @@ function MotionMarker({
       />
       {kind === 'person' ? (
         <g>
-          {(motion.members?.length ?? 0) > 1 ? (
+          {(motion.members?.length ?? 0) > 1 || (motion.passengers ?? 0) > 1 ? (
             <>
               <g transform="translate(-5 -3)">
                 <Person color="#FA4616" />

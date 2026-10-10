@@ -30,6 +30,7 @@ export interface ReplayCall {
 }
 export interface EvacuationActor {
   householdId: string;
+  passengers: number;
   caseId: string;
   mode: EvacuationMode;
   phase:
@@ -81,6 +82,7 @@ export interface ShowcaseMotion {
   ambulance?: boolean;
   tripId?: string;
   stage: string;
+  passengers: number;
 }
 const TURN_MINUTES = 0.55;
 const RESIDENT_CASES = SHOWCASE_CASES.filter((c) => c.role === 'resident');
@@ -202,6 +204,8 @@ export class ShowcaseRuntime extends Runtime {
       calls: [],
       actors: order.map((h, i) => ({
         householdId: h.id,
+        passengers:
+          i > 1 && ['wheelchair', 'guardian'].includes(deck[(i - 2) % deck.length]) ? 2 : 1,
         caseId: i === 0 ? 'immobile' : i === 1 ? 'need-car' : deck[(i - 2) % deck.length],
         mode:
           i === 0 ? 'ambulance' : i === 1 ? 'team' : CASES.get(deck[(i - 2) % deck.length])!.mode,
@@ -302,7 +306,7 @@ export class ShowcaseRuntime extends Runtime {
       .flatMap((t) => t.members)
       .find((m) => m.canDrive && !occupied.has(m.id) && !excluded.includes(m.id));
   }
-  private freeVehicle(mode: EvacuationMode) {
+  private freeVehicle(mode: EvacuationMode, passengers: number, wheelchair: boolean) {
     const occupied = new Set(
       this.replay.actors
         .filter((a) => a.vehicleId && a.phase !== 'completed')
@@ -312,6 +316,8 @@ export class ShowcaseRuntime extends Runtime {
       (v) =>
         v.availableForTransport &&
         !occupied.has(v.id) &&
+        v.capacity >= passengers + 1 &&
+        (!wheelchair || mode === 'ambulance' || v.equipment.includes('휠체어')) &&
         (mode === 'ambulance' ? v.kind === 'ambulance' : v.kind !== 'ambulance'),
     );
   }
@@ -325,7 +331,11 @@ export class ShowcaseRuntime extends Runtime {
     for (const actor of this.replay.actors.filter((a) => a.phase === 'requested')) {
       const effectiveMode =
         actor.mode === 'ambulance' || script.mode === 'ambulance' ? 'ambulance' : actor.mode;
-      const vehicle = this.freeVehicle(effectiveMode);
+      const wheelchair =
+        actor.caseId === 'wheelchair' ||
+        script.id === 'shelter' ||
+        this.home(actor.householdId).devices.includes('휠체어');
+      const vehicle = this.freeVehicle(effectiveMode, actor.passengers, wheelchair);
       const member =
         actor.householdId === 'H009' && this.rescueIndex === 0
           ? this.state.data.teams.flatMap((t) => t.members).find((m) => m.id === 'M01')
@@ -336,11 +346,7 @@ export class ShowcaseRuntime extends Runtime {
       actor.mode = effectiveMode;
       actor.vehicleId = vehicle.id;
       actor.rescuerId = member.id;
-      if (
-        actor.mode === 'ambulance' ||
-        this.home(actor.householdId).devices.includes('휠체어') ||
-        script.id === 'shelter'
-      )
+      if (actor.mode === 'ambulance' || wheelchair || script.id === 'shelter')
         this.home(actor.householdId).shelterId = 'S2';
       this.rescueIndex++;
       this.makeCall('rescuer', actor, script, member.id);
@@ -493,7 +499,7 @@ export class ShowcaseRuntime extends Runtime {
     this.state.shelterAdmissions.push({
       householdId: h.id,
       shelterId: h.shelterId,
-      passengerCount: 1,
+      passengerCount: actor.passengers,
       tripId: actor.vehicleId ? `mock-${this.loop}-${h.id}` : null,
     });
     this.replayLog(`${h.name} 대피 완료`, h.id);
@@ -631,6 +637,7 @@ export function showcaseMotions(view: View, preview = 0): ShowcaseMotion[] {
         ambulance: actor.mode === 'ambulance',
         tripId: actor.vehicleId ? `mock-${view.showcase!.loop}-${actor.householdId}` : undefined,
         stage: actor.phase,
+        passengers: actor.phase === 'evacuating' ? actor.passengers : 0,
       },
     ];
   });

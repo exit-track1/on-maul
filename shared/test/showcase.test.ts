@@ -16,6 +16,12 @@ for (const seed of [1, 42, 777, 20261010]) {
       const booked = actors.filter((a) => a.vehicleId && a.phase !== 'completed');
       assert.equal(new Set(booked.map((a) => a.vehicleId)).size, booked.length);
       assert.equal(new Set(booked.map((a) => a.rescuerId)).size, booked.length);
+      for (const actor of booked) {
+        const vehicle = view.data.vehicles.find((v) => v.id === actor.vehicleId)!;
+        assert.ok(vehicle.capacity >= actor.passengers + 1);
+        if (actor.caseId === 'wheelchair' && actor.mode !== 'ambulance')
+          assert.ok(vehicle.equipment.includes('휠체어'));
+      }
       for (const motion of showcaseMotions(view)) {
         assert.ok(routeIsOpen(view.data.map, motion.route), motion.householdId);
         if (motion.stage === 'evacuating') moved.add(motion.householdId);
@@ -25,6 +31,13 @@ for (const seed of [1, 42, 777, 20261010]) {
     assert.equal(view.simulation.playing, false);
     assert.equal(view.scenario.counts.safe, 48);
     assert.equal(view.shelterAdmissions.length, 48);
+    for (const actor of view.showcase!.actors.filter((a) =>
+      ['wheelchair', 'guardian'].includes(a.caseId),
+    ))
+      assert.equal(
+        view.shelterAdmissions.find((a) => a.householdId === actor.householdId)!.passengerCount,
+        2,
+      );
     assert.equal(moved.size, 48);
     assert.ok(view.showcase!.actors.every((a) => a.phase === 'completed' && a.moved));
     assert.deepEqual([...view.showcase!.seenCases].sort(), SHOWCASE_CASES.map((c) => c.id).sort());
