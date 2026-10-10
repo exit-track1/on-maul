@@ -18,13 +18,11 @@ test('deployed-style dashboard uses only its own state endpoints with no token o
   await expect(page.getByTestId('rescuer-phone')).toContainText(
     '박미숙 할머니',
   );
-  await page.getByRole('button', { name: 'Ⅱ 일시정지', exact: true }).click();
-  await page
-    .getByRole('button', { name: '처음 상태로 초기화', exact: true })
-    .click();
-  await page.getByRole('button', { name: '초기화하기', exact: true }).click();
-  await expect(page.getByTestId('simulation-time')).toHaveText('T+0.0분');
-  await page.getByRole('button', { name: '▶ 재생', exact: true }).click();
+  await expect(
+    page.getByLabel('시뮬레이션 재생 현황').locator('button, input, select'),
+  ).toHaveCount(0);
+  const at = await page.getByTestId('simulation-time').textContent();
+  await expect(page.getByTestId('simulation-time')).not.toHaveText(at!);
   await expect(page.getByTestId('trip-vehicle').first()).toBeVisible({
     timeout: 15000,
   });
@@ -37,4 +35,7 @@ test('deployed-style dashboard uses only its own state endpoints with no token o
     ),
   ).toBe(false);
   expect(errors).toEqual([]);
+  expect(requests.some((url) => new URL(url).pathname === '/api/command')).toBe(
+    false,
+  );
 });

@@ -49,41 +49,37 @@ test('legacy keys and hybrid settings cannot cause any external request or expos
   assert.equal(runtime.view().scenario.counts.safe, 48);
   assert.equal(attempts, 0);
 });
-test('unauthenticated simulation controls pause, resume and clear all old results', async (t) => {
+test('visitors cannot mutate playback, and rejected commands never stop the shared clock', async (t) => {
   let milliseconds = 0;
-  const { app, runtime } = await createApp({
+  const { app, runtime, simulation } = await createApp({
     seed: 10,
     simulation: { now: () => milliseconds, timer },
   });
   t.after(() => app.close());
   milliseconds = 6000;
-  let response = await app.inject({
-    method: 'POST',
-    url: '/api/command',
-    payload: { action: 'sim', input: { playing: false } },
-  });
-  assert.equal(response.statusCode, 200);
-  assert.equal(response.json().simMinutes, 3);
-  assert.ok(response.json().showcase.calls.some((c: { turns: unknown[] }) => c.turns.length > 1));
+  const before = runtime.view();
+  for (const payload of [
+    { action: 'sim', input: { playing: false } },
+    { action: 'sim', input: { speed: 60 } },
+    { action: 'sim', input: { autoRepeat: false } },
+    { action: 'demo-reset' },
+    { action: 'showcase-restart' },
+    { action: 'showcase-play', input: { playing: false } },
+    { action: 'showcase-focus', input: { role: 'resident', callId: null } },
+    { action: 'dial' },
+  ]) {
+    const response = await app.inject({ method: 'POST', url: '/api/command', payload });
+    assert.equal(response.statusCode, 403, payload.action);
+    assert.equal(response.json().code, 'read_only_playback');
+    assert.deepEqual(runtime.view(), before);
+  }
+  await simulation.pulse();
+  assert.equal(runtime.view().simMinutes, 3);
   milliseconds += 60000;
-  response = await app.inject({
-    method: 'POST',
-    url: '/api/command',
-    payload: { action: 'demo-reset' },
-  });
-  assert.equal(response.json().simMinutes, 0);
-  assert.deepEqual(response.json().showcase.calls, []);
-  assert.equal(runtime.view().simulation.playing, false);
-  response = await app.inject({
-    method: 'POST',
-    url: '/api/command',
-    payload: { action: 'sim', input: { playing: true, speed: 60 } },
-  });
-  assert.equal(response.json().showcase.calls.length, 2);
-  response = await app.inject({
-    method: 'POST',
-    url: '/api/command',
-    payload: { action: 'dial', input: {} },
-  });
-  assert.equal(response.statusCode, 400);
+  await simulation.pulse();
+  const view = (await app.inject('/api/state')).json();
+  assert.equal(view.simMinutes, 33);
+  assert.equal(view.simulation.playing, true);
+  assert.equal(view.simulation.speed, 30);
+  assert.equal(view.showcase.autoRepeat, true);
 });

@@ -7,9 +7,9 @@ export interface ClientSnapshot {
   offline: boolean;
   error: string | null;
 }
-/** The only HTTP destinations are this dashboard's own state/command endpoints. */
+/** Visitors only read the dashboard's own state endpoint. Playback runs automatically. */
 export class Client {
-  readonly local = new ShowcaseRuntime();
+  private readonly local = new ShowcaseRuntime();
   readonly offline = new URLSearchParams(location.search).get('demo') === '1';
   connected = false;
   private current = this.local.view();
@@ -146,32 +146,5 @@ export class Client {
     } finally {
       if (this.inFlight === request) this.inFlight = null;
     }
-  }
-  async command(
-    action: string,
-    input: Record<string, unknown> = {},
-  ): Promise<View> {
-    if (this.offline) {
-      this.advanceLocal();
-      this.current = this.local.command(action, input);
-      this.lastTick = performance.now();
-      this.publish();
-      return this.current;
-    }
-    if (!this.connected) throw new Error('서버 연결을 확인해 주세요.');
-    const sequence = ++this.sequence;
-    const response = await fetch('/api/command', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ action, input }),
-    });
-    const body = await response.json();
-    if (!response.ok) throw new Error(body.error ?? '재생 변경 실패');
-    return this.accept(
-      body as View,
-      sequence,
-      response.headers.get('x-onmaul-instance'),
-      false,
-    );
   }
 }

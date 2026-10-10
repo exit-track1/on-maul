@@ -216,6 +216,24 @@ export function forestFrame(
   };
 }
 
+/** A building chars once burning fuel reaches its footprint or the adjacent flame fringe. */
+export function houseBurned(
+  spread: ForestSpread,
+  position: Point,
+  minutes: number,
+): boolean {
+  if (minutes <= 0) return false;
+  // Match the map's 26×18 building glyph and allow the 8px flames along the fire edge.
+  const left = Math.max(0, Math.floor((position.x - 13 - 8) / SIZE));
+  const right = Math.min(COLS, Math.ceil((position.x + 13 + 8) / SIZE));
+  const top = Math.max(0, Math.floor((position.y - 10 - 8) / SIZE));
+  const bottom = Math.min(ROWS, Math.ceil((position.y + 8 + 8) / SIZE));
+  for (let y = top; y < bottom; y++)
+    for (let x = left; x < right; x++)
+      if (spread.arrival[y * COLS + x] <= minutes) return true;
+  return false;
+}
+
 /** Smoke is advected downwind from the burning forest and may pass over cleared land. */
 export function smokePlume(
   map: Fixtures['map'],

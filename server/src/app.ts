@@ -57,18 +57,10 @@ export async function createApp(
   }));
   app.get('/api/state', async () => runtime.view());
   app.get('/api/export', async () => runtime.view());
-  app.post('/api/command', async (request) =>
-    serialized(async () => {
-      await simulation.settle();
-      try {
-        const body = z
-          .object({ action: z.string(), input: z.record(z.string(), z.unknown()).default({}) })
-          .strict()
-          .parse(request.body);
-        return runtime.command(body.action, body.input);
-      } finally {
-        simulation.synchronize();
-      }
+  app.post('/api/command', async (_request, reply) =>
+    reply.code(403).send({
+      code: 'read_only_playback',
+      error: '관람 전용 시뮬레이션입니다. 재생 상태를 변경할 수 없습니다.',
     }),
   );
   // Old deployments must not accidentally expose live dialing, token bootstrap or audio sockets.

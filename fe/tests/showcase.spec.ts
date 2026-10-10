@@ -1,4 +1,5 @@
 import { expect, test } from '@playwright/test';
+import { ShowcaseRuntime } from '../../shared/src/showcase.ts';
 
 test('both phone agents, all residents and local map are visible without external requests', async ({
   page,
@@ -46,10 +47,8 @@ test('both phone agents, all residents and local map are visible without externa
       page.getByTestId('trip-vehicle').first().getAttribute('transform'),
     )
     .not.toBe(position);
-  await page.getByRole('button', { name: 'Ⅱ 일시정지', exact: true }).click();
   const at = await page.getByTestId('simulation-time').textContent();
-  await page.waitForTimeout(450);
-  await expect(page.getByTestId('simulation-time')).toHaveText(at!);
+  await expect(page.getByTestId('simulation-time')).not.toHaveText(at!);
   await page.getByRole('button', { name: '전체 가구', exact: true }).click();
   await expect(page.locator('tbody tr')).toHaveCount(48);
   await page
@@ -61,7 +60,7 @@ test('both phone agents, all residents and local map are visible without externa
   expect(external).toEqual([]);
   expect(errors).toEqual([]);
 });
-test('reset waits at the first frame with no old call history and can restart', async ({
+test('visitors can only watch the automatic replay, without pause, speed, repeat or reset controls', async ({
   page,
 }) => {
   await page.goto('/?demo=1');
@@ -69,18 +68,59 @@ test('reset waits at the first frame with no old call history and can restart', 
     '다리가 아파서',
     { timeout: 8000 },
   );
-  await page
-    .getByRole('button', { name: '처음 상태로 초기화', exact: true })
-    .click();
-  await page.getByRole('button', { name: '초기화하기', exact: true }).click();
-  await expect(page.getByTestId('simulation-time')).toHaveText('T+0.0분');
-  await expect(page.getByTestId('case-coverage')).toHaveText('0/28');
-  await expect(page.locator('.replay-turn')).toHaveCount(0);
-  await page.getByRole('button', { name: '▶ 재생', exact: true }).click();
-  await expect(page.getByTestId('resident-phone')).toContainText(
-    '반영환 할아버지',
+  await expect(
+    page.getByLabel('시뮬레이션 재생 현황').locator('button, input, select'),
+  ).toHaveCount(0);
+  await expect(
+    page.getByRole('button', {
+      name: /일시정지|처음 상태로 초기화|초기화하기|▶ 재생/,
+    }),
+  ).toHaveCount(0);
+  await expect(page.getByLabel('재생 속도', { exact: true })).toHaveCount(0);
+  await expect(
+    page.getByRole('checkbox', { name: '자동 반복', exact: true }),
+  ).toHaveCount(0);
+  await expect(page.getByTestId('playback-status')).toHaveText(
+    '30배속 · 자동 반복 재생',
   );
-  await expect(page.getByTestId('rescuer-phone')).toContainText('반영환 대원');
+  const at = await page.getByTestId('simulation-time').textContent();
+  await expect(page.getByTestId('simulation-time')).not.toHaveText(at!);
+});
+test('fire contact chars buildings black, smoke alone does not, and a fresh round restores them', async ({
+  page,
+}) => {
+  const runtime = new ShowcaseRuntime(99);
+  await page.route('**/api/state', (route) =>
+    route.fulfill({ json: runtime.view() }),
+  );
+  await page.goto('/');
+  const charred = page.locator(
+    '[data-testid="house-building"][data-burned="true"]',
+  );
+  await expect(page.getByTestId('house-building')).toHaveCount(48);
+  await expect(charred).toHaveCount(0);
+  runtime.tickCycle(18);
+  const northern = page.locator(
+    '[data-testid="house-building"][data-household="H011"]',
+  );
+  await expect(northern).toHaveAttribute('data-burned', 'true');
+  await expect(northern.getByTestId('house-roof')).toHaveAttribute(
+    'fill',
+    '#030303',
+  );
+  await expect(
+    page.locator('[data-testid="house-building"][data-household="H009"]'),
+  ).toHaveAttribute('data-burned', 'false');
+  runtime.tickCycle(20);
+  await expect(northern).toHaveAttribute('data-burned', 'true');
+  for (let i = 0; i < 500 && runtime.view().showcase!.loop === 1; i++)
+    runtime.tickCycle(0.5);
+  expect(runtime.view().showcase!.loop).toBe(2);
+  await expect(charred).toHaveCount(0);
+  await expect(northern.getByTestId('house-roof')).toHaveAttribute(
+    'fill',
+    '#a59379',
+  );
 });
 test('mobile layout keeps both agent panels usable without horizontal page overflow', async ({
   page,

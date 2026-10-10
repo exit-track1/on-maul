@@ -3,6 +3,7 @@ import {
   forestPropagation,
   forestFrame,
   smokePlume,
+  houseBurned,
 } from '../src/components/map/forest';
 import cover from '../src/components/map/forest-fuel.json' with { type: 'json' };
 import bundle from '../../fixtures/bundle.json' with { type: 'json' };
@@ -31,6 +32,20 @@ test('forest fire stays on connected fuel, stops at cleared land, and cannot jum
   expect(early.cells.every((i) => laterCells.has(i))).toBe(true);
   expect(long.cells.every((i) => spread.fuel[i] === 1)).toBe(true);
   expect(forestFrame(spread, 0).cells).toEqual([]);
+});
+
+test('only houses touched by the current fire fringe char, and time zero restores every building', () => {
+  const spread = forestPropagation(map);
+  const north = bundle.households.find((h) => h.id === 'H011')!.demoPosition;
+  const south = bundle.households.find((h) => h.id === 'H009')!.demoPosition;
+  expect(houseBurned(spread, north, 0)).toBe(false);
+  expect(houseBurned(spread, north, 8)).toBe(false);
+  expect(houseBurned(spread, north, 18)).toBe(true);
+  expect(houseBurned(spread, north, 80)).toBe(true);
+  expect(houseBurned(spread, south, 80)).toBe(false);
+  expect(
+    bundle.households.every((h) => !houseBurned(spread, h.demoPosition, 0)),
+  ).toBe(true);
 });
 
 test('cleared homes never become fuel and smoke crosses open land downwind toward the village', () => {

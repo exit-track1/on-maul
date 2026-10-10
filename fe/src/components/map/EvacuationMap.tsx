@@ -31,6 +31,7 @@ import {
   forestFrame,
   smokePlume,
   forestZoneLabel,
+  houseBurned,
 } from './forest';
 import { ForestLayers } from './ForestLayers';
 
@@ -228,12 +229,11 @@ function MotionMarker({
 export function MapPanel({
   view,
   open,
-  run,
   focusRequest,
   featuredResidentId,
   featuredStory,
   plannedPosition,
-}: PanelProps & {
+}: Pick<PanelProps, 'view' | 'open'> & {
   focusRequest?: { id: string; sequence: number; fit?: boolean };
   featuredResidentId?: string;
   featuredStory?: 'grandfather' | 'squad';
@@ -738,49 +738,6 @@ export function MapPanel({
               </text>
             </g>
           ))}
-          {households.map((h) => (
-            <g
-              key={`building-${h.id}`}
-              transform={`translate(${h.demoPosition.x} ${h.demoPosition.y})`}
-            >
-              <rect
-                x="-10"
-                y="-6"
-                width="24"
-                height="18"
-                rx="1"
-                fill="#1c2920"
-                opacity=".6"
-                transform="translate(4 5)"
-              />
-              <rect
-                x="-12"
-                y="-9"
-                width="24"
-                height="17"
-                fill={h.zoneId === 'N' ? '#b6a98b' : '#d2cbb7'}
-                stroke="#777b6d"
-              />
-              <path
-                d="M-13-10h26v9h-26Z"
-                fill={
-                  h.zoneId === 'N'
-                    ? '#a59379'
-                    : h.zoneId === 'E'
-                      ? '#7f9a99'
-                      : '#9b9e8d'
-                }
-                stroke="#d6cfb9"
-                strokeWidth=".8"
-              />
-              <path
-                d="M-13-1h26v9h-26Z"
-                fill={h.zoneId === 'E' ? '#536d71' : '#73796b'}
-              />
-              <path d="M-13-1h26" stroke="#d1c8ac" />
-              <rect x="5" y="-6" width="4" height="3" fill="#c4d1cb" />
-            </g>
-          ))}
           {spreadAvailable && (
             <ForestLayers
               id={id}
@@ -862,6 +819,89 @@ export function MapPanel({
               )}
             </g>
           ))}
+          {households.map((h) => {
+            const burned =
+              spreadAvailable && houseBurned(forest, h.demoPosition, time);
+            return (
+              <g
+                key={`building-${h.id}`}
+                data-testid="house-building"
+                data-household={h.id}
+                data-burned={burned}
+                aria-label={`${h.id} ${h.name} 집${burned ? ' · 전소' : ''}`}
+                transform={`translate(${h.demoPosition.x} ${h.demoPosition.y})`}
+                pointerEvents="none"
+              >
+                {burned && (
+                  <ellipse cy="3" rx="20" ry="15" fill="#151515" opacity=".8" />
+                )}
+                <rect
+                  x="-10"
+                  y="-6"
+                  width="24"
+                  height="18"
+                  rx="1"
+                  fill={burned ? '#000000' : '#1c2920'}
+                  opacity=".6"
+                  transform="translate(4 5)"
+                />
+                <rect
+                  x="-12"
+                  y="-9"
+                  width="24"
+                  height="17"
+                  fill={
+                    burned
+                      ? '#080808'
+                      : h.zoneId === 'N'
+                        ? '#b6a98b'
+                        : '#d2cbb7'
+                  }
+                  stroke={burned ? '#000000' : '#777b6d'}
+                />
+                <path
+                  data-testid="house-roof"
+                  d="M-13-10h26v9h-26Z"
+                  fill={
+                    burned
+                      ? '#030303'
+                      : h.zoneId === 'N'
+                        ? '#a59379'
+                        : h.zoneId === 'E'
+                          ? '#7f9a99'
+                          : '#9b9e8d'
+                  }
+                  stroke={burned ? '#000000' : '#d6cfb9'}
+                  strokeWidth=".8"
+                />
+                <path
+                  d="M-13-1h26v9h-26Z"
+                  fill={
+                    burned
+                      ? '#080808'
+                      : h.zoneId === 'E'
+                        ? '#536d71'
+                        : '#73796b'
+                  }
+                />
+                <path d="M-13-1h26" stroke={burned ? '#222222' : '#d1c8ac'} />
+                <rect
+                  x="5"
+                  y="-6"
+                  width="4"
+                  height="3"
+                  fill={burned ? '#000000' : '#c4d1cb'}
+                />
+                {burned && (
+                  <path
+                    d="M-8-8l5 4-3 4 7 6M6-9L3-4l6 5"
+                    fill="none"
+                    stroke="#353535"
+                  />
+                )}
+              </g>
+            );
+          })}
           {households.map((h) => {
             const st = view.scenario.householdStatuses.find(
               (s) => s.householdId === h.id,
@@ -1083,8 +1123,7 @@ export function MapPanel({
         <div className="map-cycle-clock" data-testid="map-cycle-clock">
           <strong>공용 시계 T+{view.simMinutes.toFixed(1)}분</strong>
           <span>
-            주민·차량·화선이 같은 시연 시간을 사용합니다. 재생·배속은 상단에서
-            조절하세요.
+            주민·차량·화선이 같은 시연 시간을 사용하며 자동으로 반복 재생됩니다.
           </span>
         </div>
       ) : (
@@ -1195,16 +1234,6 @@ export function MapPanel({
           합성 지형·경로 · 실제 GPS·위성 영상 아님 · 산불 범위는 비공식 데모
           모델
         </span>
-        {!cycle && (
-          <Btn
-            size="sm"
-            kind="outline"
-            disabled={!view.plan?.confirmed || view.networkDown || view.frozen}
-            onClick={() => void run('advance')}
-          >
-            모의 1분 진행
-          </Btn>
-        )}
       </div>
       {household && status && (
         <Card>

@@ -8,8 +8,6 @@ import './styles/showcase.css';
 export default function App() {
   const [client] = useState(() => new Client());
   const [snapshot, setSnapshot] = useState(() => client.snapshot());
-  const [pending, setPending] = useState(false);
-  const [error, setError] = useState<string | null>(null);
   const [tab, setTab] = useState<'map' | 'households' | 'cases' | 'logs'>(
     'map',
   );
@@ -18,22 +16,9 @@ export default function App() {
     sequence: number;
     fit?: boolean;
   }>();
-  const [resetOpen, setResetOpen] = useState(false);
   useEffect(() => client.subscribe(setSnapshot), [client]);
   const { view } = snapshot,
     replay = view.showcase!;
-  const enabled = snapshot.offline || snapshot.connected;
-  const run = async (action: string, input: Record<string, unknown> = {}) => {
-    setPending(true);
-    setError(null);
-    try {
-      await client.command(action, input);
-    } catch (e) {
-      setError(e instanceof Error ? e.message : '재생 변경 실패');
-    } finally {
-      setPending(false);
-    }
-  };
   const focus = (id: string) => {
     setTab('map');
     setFocus({ id, sequence: Date.now(), fit: true });
@@ -72,7 +57,7 @@ export default function App() {
           </span>
         </div>
       </header>
-      <section className="showcase-control" aria-label="시뮬레이션 재생 설정">
+      <section className="showcase-control" aria-label="시뮬레이션 재생 현황">
         <div className="showcase-cycle">
           <span className="replay-kicker">AUTOMATIC REPLAY</span>
           <strong>
@@ -85,41 +70,9 @@ export default function App() {
         <span className="showcase-time" data-testid="simulation-time">
           T+{view.simMinutes.toFixed(1)}분
         </span>
-        <button
-          className="showcase-primary"
-          disabled={!enabled || pending}
-          onClick={() => void run('sim', { playing: !view.simulation.playing })}
-        >
-          {view.simulation.playing ? 'Ⅱ 일시정지' : '▶ 재생'}
-        </button>
-        <label className="showcase-speed">
-          재생 속도
-          <select
-            aria-label="재생 속도"
-            value={view.simulation.speed}
-            disabled={!enabled || pending}
-            onChange={(e) => void run('sim', { speed: Number(e.target.value) })}
-          >
-            <option value={12}>느리게 · 12배</option>
-            <option value={30}>기본 · 30배</option>
-            <option value={60}>빠르게 · 60배</option>
-          </select>
-        </label>
-        <label className="showcase-repeat">
-          <input
-            type="checkbox"
-            checked={replay.autoRepeat}
-            disabled={!enabled || pending}
-            onChange={(e) => void run('sim', { autoRepeat: e.target.checked })}
-          />
-          자동 반복
-        </label>
-        <button
-          disabled={!enabled || pending}
-          onClick={() => setResetOpen(true)}
-        >
-          처음 상태로 초기화
-        </button>
+        <span className="replay-badge" data-testid="playback-status">
+          {view.simulation.speed}배속 · 자동 반복 재생
+        </span>
       </section>
       <section className="showcase-stats" aria-label="대피 진행 현황">
         <div>
@@ -167,9 +120,9 @@ export default function App() {
           </strong>
         </button>
       </section>
-      {(error || snapshot.error) && (
+      {snapshot.error && (
         <div className="showcase-error" role="alert">
-          {error ?? snapshot.error}
+          {snapshot.error}
         </div>
       )}
       <div className="showcase-workspace">
@@ -200,7 +153,6 @@ export default function App() {
             {tab === 'map' && (
               <MapPanel
                 view={view}
-                run={run}
                 open={focus}
                 focusRequest={focusRequest}
                 featuredResidentId="H012"
@@ -329,35 +281,6 @@ export default function App() {
         합성 통화·주민·지도 위치를 재생합니다. 각 가구의 대피 완료와 구조 차량
         복귀 후 다음 회차를 시작합니다.
       </footer>
-      {resetOpen && (
-        <div className="showcase-modal-backdrop">
-          <section
-            role="dialog"
-            aria-modal="true"
-            aria-labelledby="reset-title"
-            className="showcase-modal"
-          >
-            <h2 id="reset-title">처음 상태로 초기화</h2>
-            <p>
-              통화 내역, 구조 이동, 상황 로그를 지우고 1회차 시작 시점에서
-              멈춥니다. 재생 버튼으로 다시 시작할 수 있습니다.
-            </p>
-            <div>
-              <button onClick={() => setResetOpen(false)}>취소</button>
-              <button
-                className="showcase-primary"
-                disabled={pending}
-                onClick={async () => {
-                  await run('demo-reset');
-                  setResetOpen(false);
-                }}
-              >
-                초기화하기
-              </button>
-            </div>
-          </section>
-        </div>
-      )}
     </main>
   );
 }
