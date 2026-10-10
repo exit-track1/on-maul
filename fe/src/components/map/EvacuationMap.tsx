@@ -291,7 +291,8 @@ export function MapPanel({
   const active =
     view.scenario.mode === 'event' || view.scenario.mode === 'record';
   const windEvidence = predictionEvidence(view);
-  const spreadAvailable = active && windEvidence.usable;
+  const spreadAvailable =
+    active && (Boolean(view.showcase) || windEvidence.usable);
   const c = view.scenario.counts;
   const cycle = Boolean(view.simulation.cycleId);
   const demoResidentId = view.demonstration?.residentId ?? featuredResidentId;
@@ -480,7 +481,7 @@ export function MapPanel({
         <svg
           className={`map ${zoom > 1 ? 'map-draggable' : ''}`}
           viewBox={`${center.x - width / 2} ${center.y - height / 2} ${width} ${height}`}
-          aria-label="48가구, 6개 도로, 3개 대피소와 주민·차량 이동 및 산불 확산의 합성 지도"
+          aria-label={`48가구, ${map.roads.length}개 도로, 3개 대피소와 주민·차량 이동 및 산불 확산의 합성 지도`}
           onPointerDown={startDrag}
           onPointerMove={moveDrag}
           onPointerUp={() => {
@@ -823,7 +824,7 @@ export function MapPanel({
           })}
           {visibleMotions.map((m) => (
             <g key={`route-${m.id}`}>
-              {m.tripId ? (
+              {m.tripId && !view.showcase ? (
                 Object.entries(
                   view.trips.find((t) => t.id === m.tripId)!.legs,
                 ).map(([leg, route]) => (
@@ -884,7 +885,8 @@ export function MapPanel({
                   }
                 }}
               >
-                {demoResidentId === h.id && (
+                {(demoResidentId === h.id ||
+                  (view.showcase && h.id === 'H009')) && (
                   <g className="demo-home-highlight" pointerEvents="none">
                     <circle
                       cx={h.demoPosition.x}
@@ -912,10 +914,12 @@ export function MapPanel({
                       fontSize="12"
                       fontWeight="700"
                     >
-                      {(view.demonstration?.story ?? featuredStory) ===
-                      'grandfather'
-                        ? '반영환 할아버지 집'
-                        : '박미숙 할머니 집'}
+                      {view.showcase
+                        ? `${h.name} 집`
+                        : (view.demonstration?.story ?? featuredStory) ===
+                            'grandfather'
+                          ? '반영환 할아버지 집'
+                          : '박미숙 할머니 집'}
                     </text>
                   </g>
                 )}
@@ -987,7 +991,7 @@ export function MapPanel({
                   ? `기준 T+${view.simMinutes}분${preview > 0 ? ` · +${preview.toFixed(1)}분 미리보기` : ''}`
                   : '지형·건물·도로 상세 보기'}
             </small>
-            {active && !windEvidence.usable && (
+            {active && !view.showcase && !windEvidence.usable && (
               <small className="map-evidence-warning">
                 바람 근거 불명/낡음 · 확산 표시 보류
               </small>
@@ -1006,11 +1010,15 @@ export function MapPanel({
             </span>
           </div>
           <strong>
-            {active && !windEvidence.usable ? '불명' : map.wind.speedMps}{' '}
-            <small>{active && !windEvidence.usable ? '' : 'm/s'}</small>
+            {active && !view.showcase && !windEvidence.usable
+              ? '불명'
+              : map.wind.speedMps}{' '}
+            <small>
+              {active && !view.showcase && !windEvidence.usable ? '' : 'm/s'}
+            </small>
           </strong>
           <span>
-            {active && !windEvidence.usable
+            {active && !view.showcase && !windEvidence.usable
               ? '관측 확인 필요'
               : `풍향 ${map.wind.direction}°`}
           </span>
@@ -1175,7 +1183,7 @@ export function MapPanel({
         </div>
         <div className="map-summary-note">
           {active
-            ? '파란 동선은 주민, 노란 동선은 차량입니다.'
+            ? '주황 동선은 주민, 노란 동선은 차량입니다.'
             : '발생 대응 장면에서 이동·확산을 확인할 수 있습니다.'}
           <small>
             불은 연결된 숲을 따라 번지고, 연기는 바람을 따라 마을 위로 흐릅니다.

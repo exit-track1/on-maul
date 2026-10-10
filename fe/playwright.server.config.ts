@@ -9,7 +9,7 @@ const journal = mkdtempSync(join(tmpdir(), 'onmaul-cycle-http-'));
 
 export default defineConfig({
   testDir: './tests',
-  testMatch: '**/cycle-server.spec.ts',
+  testMatch: '**/showcase-server.spec.ts',
   fullyParallel: false,
   workers: 1,
   retries: 0,
@@ -27,7 +27,11 @@ export default defineConfig({
     cwd: root,
     env: {
       ON_PORT: '8092',
-      ON_EXECUTION_MODE: 'demo',
+      ON_EXECUTION_MODE: 'hybrid',
+      ON_PHONE_ENABLED: 'yes',
+      OPENAI_API_KEY: 'unused-key',
+      TELNYX_API_KEY: 'unused-key',
+      ON_OPERATOR_TOKEN: 'unused-token',
       ON_JOURNAL_DIR: journal,
     },
     url: 'http://127.0.0.1:8092/api/health',

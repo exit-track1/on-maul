@@ -6,6 +6,7 @@ import {
 import { tripPosition } from '../../../../shared/src/dispatch.ts';
 import type { View } from '../../../../shared/src/runtime.ts';
 import type { Point } from '../../../../shared/src/types.ts';
+import { showcaseMotions } from '../../../../shared/src/showcase.ts';
 
 export const MAP_COLORS = {
   act: '#8A0715',
@@ -117,6 +118,7 @@ export function motionLabelOffsets(motions: MapMotion[]): Point[] {
 }
 
 export function mapMotions(view: View, previewMinutes: number): MapMotion[] {
+  if (view.showcase) return showcaseMotions(view, previewMinutes);
   const result: MapMotion[] = [];
   const { map, households, shelters, vehicles, teams } = view.data;
   const cycle = Boolean(view.simulation.cycleId);
